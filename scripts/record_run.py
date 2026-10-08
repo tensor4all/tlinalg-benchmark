@@ -18,6 +18,7 @@ Order matters and is enforced here:
    recorded commit must resolve in the checkout it names.
 """
 import argparse
+import csv
 import datetime
 import fcntl
 import hashlib
