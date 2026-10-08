@@ -58,7 +58,7 @@ FEATURES="${BENCH_FEATURES:-tlinalg-bench/link-openblas-static}"
 # that dispatcher still selects COOPERLAKE, and the manifest records the kernel it dispatched to.
 VENDOR_BUILD_ENV="OPENBLAS_DYNAMIC_ARCH=1"
 RUSTC_WRAPPER= CARGO_TARGET_DIR="$target" \
-    env OPENBLAS_DYNAMIC_ARCH=1 -u OPENBLAS_NUM_THREADS -u OMP_NUM_THREADS -u RAYON_NUM_THREADS \
+    env -u OPENBLAS_NUM_THREADS -u OMP_NUM_THREADS -u RAYON_NUM_THREADS OPENBLAS_DYNAMIC_ARCH=1 \
     cargo build --manifest-path "$MANIFEST" "${profile_flag[@]}" \
     -p tlinalg-bench --features "$FEATURES" "${bin_args[@]}" >&2
 
