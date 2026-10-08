@@ -2,6 +2,39 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-08 — the linked-LAPACK gate was red, and the cause was the cache's provenance
+
+Before any cell could be recorded, `tlinalg-rs`'s own linked-LAPACK gate was failing: `tlinalg-blas
+--test alloc_counts` died with SIGILL, reproducibly. The first guess was the from-source OpenBLAS
+build target, which is undeclared (`getarch` guesses from the build host; here `COOPERLAKE`), and
+`DYNAMIC_ARCH=1` was declared for it — which did not fix it. A diagnostic step added to the CI job
+(on failure: print the runner's CPU and the linked OpenBLAS configuration) then said what was
+actually happening:
+
+- the runner was an **AMD EPYC 7763 (Milan, Zen 3, no AVX-512)**, and the linked library was a
+  **`CORE=SAPPHIRERAPIDS`** build;
+- the job's log contained **no OpenBLAS build at all**: `Swatinem/rust-cache` had restored a
+  `target/` built on a Sapphire Rapids runner and this host executed it.
+
+A vendor library belongs to the machine that built it, which is the same reason the harness is
+built out of the measured checkout. The fix is a cache key scoped to the runner's CPU model, plus
+`DYNAMIC_ARCH=1` so a fresh build dispatches on CPUID with the required features checked per core.
+Merged as `tensor4all/tlinalg-rs#26`; the gate is green.
+
+Two things this changes here: every measurement this campaign publishes has to state the kernel
+the vendor runtime *dispatched to*, not the target that was configured — which `run.yaml` already
+does — and the same class of mistake (a build from another host) is why `build_for_tlinalg_rev.sh`
+keys its target directory by revision and records the build environment.
+
+## 2026-10-08 — issue #13 is fixed upstream
+
+`tlinalg-rs#13` (a spurious singular value and inaccurate factors from faer's divide-and-conquer
+SVD on a rank-deficient matrix with clustered singular values) is closed by
+`tensor4all/tlinalg-rs#14`, which checks the factors against the input by the Frobenius residual and
+repeats with the QR algorithm when the check fails, at a measured cost of 6-25% of a decomposition.
+This matters to the campaign in two ways: the SVD rows this suite declares are now measuring fixed
+code, and the `verify` gate of `tlbench` is exactly the kind of check that would have caught it.
+
 ## 2026-10-08 — the campaign repository is created
 
 **Scope.** A campaign for `tlinalg-rs` on the model of `tprims-benchmark`: the
