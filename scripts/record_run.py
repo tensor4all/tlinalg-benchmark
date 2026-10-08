@@ -157,6 +157,9 @@ def main():
     ap.add_argument("--aa", type=int, default=1, help="number of complete set repeats (>=2 gives A/A)")
     ap.add_argument("--prime-ms", type=int, default=500)
     ap.add_argument("--regimes", default=None, help="override, comma separated")
+    ap.add_argument("--families", default=None,
+                    help="override: measure only these families (comma separated). The run records the "
+                         "subset it covered, so a partial population is visible rather than implied.")
     ap.add_argument("--threads", default=None, help="override, comma separated")
     ap.add_argument("--dtypes", default=None)
     ap.add_argument("--engines", default=None)
@@ -171,6 +174,14 @@ def main():
     if args.regimes:
         wanted = set(args.regimes.split(","))
         covered = [p for p in declared if p["regime"] in wanted]
+    if args.families:
+        wanted = set(args.families.split(","))
+        declared_families = {f for p in declared for f in p["families"]}
+        unknown = wanted - declared_families
+        if unknown:
+            sys.exit(f"ERROR: {sorted(unknown)} are not declared by this suite")
+        covered = [dict(p, families=[f for f in p["families"] if f in wanted]) for p in covered]
+        covered = [p for p in covered if p["families"]]
     threads = [int(t) for t in args.threads.split(",")] if args.threads else spec["threads"]
     dtypes = args.dtypes.split(",") if args.dtypes else spec["dtypes"]
     engines = args.engines.split(",") if args.engines else spec["engines"]
