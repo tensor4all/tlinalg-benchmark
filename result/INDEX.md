@@ -14,7 +14,7 @@ The newest full-coverage page for each cell, and whether it is current.
 
 | suite | profile | revision | version | date | coverage | status | page |
 |---|---|---|---|---|---|---|---|
-| `tlinalg-kernels` | `zen5-cpu` | - | - | - | - | missing | - |
+| `tlinalg-kernels` | `zen5-cpu` (optional) | - | - | - | - | missing | - |
 
 `missing` is a normal cell, not an error: the campaign is not run on every
 profile for every commit. It becomes an error only for a profile a suite lists
