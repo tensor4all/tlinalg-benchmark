@@ -137,6 +137,13 @@
             "integer",
             "null"
           ]
+        },
+        "build_env": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "description": "The build-time environment the campaign declares for the vendor library, for example `OPENBLAS_DYNAMIC_ARCH=1`. It is recorded because it decides what was linked: without it a from-source OpenBLAS guesses a target from the build host, which is not a build a measurement should depend on."
         }
       }
     },

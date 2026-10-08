@@ -114,7 +114,7 @@ def providers_for(engines, vendor):
     return out
 
 
-def vendor_block(vendor):
+def vendor_block(vendor, build_env):
     """The structured vendor identity, or None when no vendor arm was declared."""
     if not vendor.get("vendor.name") or vendor["vendor.name"] == "none":
         return None
@@ -126,6 +126,7 @@ def vendor_block(vendor):
         "corename": vendor.get("vendor.corename") or None,
         "parallel": vendor.get("vendor.parallel") or None,
         "procs": int(vendor["vendor.procs"]) if vendor.get("vendor.procs") else None,
+        "build_env": build_env or None,
     }
 
 
@@ -290,7 +291,7 @@ def main():
             "measured_path": pin["TLINALG_DIR"],
             "version": None,
         },
-        "vendor": vendor_block(vendor),
+        "vendor": vendor_block(vendor, pin.get("BUILD_ENV")),
         "harness": {
             "commit": git(ROOT, "rev-parse", "HEAD"),
             "dirty": bool(git(ROOT, "status", "--porcelain", "--untracked-files=no")),

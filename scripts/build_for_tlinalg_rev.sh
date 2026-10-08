@@ -5,7 +5,7 @@
 #   build_for_tlinalg_rev.sh <tlinalg-rs-dir> <out-var-file> [bin...]
 #
 # Writes shell assignments to <out-var-file>:
-#   TLINALG_REV, TLINALG_DIRTY, TLINALG_DIR, BIN_DIR, BUILD_FEATURES
+#   TLINALG_REV, TLINALG_DIRTY, TLINALG_DIR, BIN_DIR, BUILD_FEATURES, BUILD_ENV
 #
 # Three things this deliberately does *not* do.
 #
@@ -24,7 +24,8 @@
 # lets the recorder execute the binary directly instead of arranging a loader
 # search path; `OPENBLAS_NUM_THREADS` is dropped because `openblas-src` folds it
 # into the built library, and the thread budget belongs to the measurement, not
-# to the build.
+# to the build. `OPENBLAS_DYNAMIC_ARCH` is *set* below, because that is the declaration of how
+# the vendor was built.
 set -euo pipefail
 PROJECT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 TLINALG_DIR="$(cd "${1:?tlinalg-rs checkout required}" && pwd -P)"
@@ -49,8 +50,15 @@ profile_flag=(); subdir=debug
 if [[ "$profile" == release ]]; then profile_flag=(--release); subdir=release; fi
 
 FEATURES="${BENCH_FEATURES:-tlinalg-bench/link-openblas-static}"
+# Declared, not inherited. `openblas-src` reads `OPENBLAS_DYNAMIC_ARCH` at build time; without it
+# the from-source OpenBLAS guesses a target from the build host (here `COOPERLAKE`, an Intel
+# AVX-512 target), and a guessed target is not one the run-time CPU is obliged to execute -- the
+# library's own linked tests died with SIGILL on CI exactly that way. `DYNAMIC_ARCH=1` compiles
+# several cores and dispatches on CPUID with the required features checked per core; on this host
+# that dispatcher still selects COOPERLAKE, and the manifest records the kernel it dispatched to.
+VENDOR_BUILD_ENV="OPENBLAS_DYNAMIC_ARCH=1"
 RUSTC_WRAPPER= CARGO_TARGET_DIR="$target" \
-    env -u OPENBLAS_NUM_THREADS -u OMP_NUM_THREADS -u RAYON_NUM_THREADS \
+    env OPENBLAS_DYNAMIC_ARCH=1 -u OPENBLAS_NUM_THREADS -u OMP_NUM_THREADS -u RAYON_NUM_THREADS \
     cargo build --manifest-path "$MANIFEST" "${profile_flag[@]}" \
     -p tlinalg-bench --features "$FEATURES" "${bin_args[@]}" >&2
 
@@ -61,5 +69,6 @@ bin_dir="$target/$subdir"
     printf 'TLINALG_DIR=%q\n' "$TLINALG_DIR"
     printf 'BIN_DIR=%q\n' "$bin_dir"
     printf 'BUILD_FEATURES=%q\n' "$FEATURES"
+    printf 'BUILD_ENV=%q\n' "$VENDOR_BUILD_ENV"
 } > "$OUT_FILE"
 echo "built ${BINS[*]} for tlinalg-rs $rev (dirty=$dirty) in $bin_dir" >&2
