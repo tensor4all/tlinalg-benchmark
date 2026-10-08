@@ -39,5 +39,25 @@ jobs:
           python3 scripts/validate_run.py "${files[@]}"
       - name: Index is current, required cells present
         run: python3 scripts/gen_index.py --check
-  # The smoke job (build the pinned harness) is added together with the first pin
-  # that contains `tlbench`; until then the pin names a revision without it.
+  # The pin now names a revision that contains the harness, so a cell can be recorded from it. This
+  # job proves that: it builds `tlbench` out of the pinned checkout, the same way the recorder does.
+  # The vendor build is cached with the runner's CPU model in the key, because the from-source
+  # OpenBLAS is produced by one machine and executed by whatever restores it.
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ runner.os }}-smoke
+      - id: runner
+        run: |
+          echo "key=$(lscpu | sed -n 's/^Model name: *//p' | tr -d ' ')" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        with:
+          path: target/tlinalg-rev/*/release/build/openblas-src-*
+          key: openblas-${{ runner.os }}-${{ runner.arch }}-${{ steps.runner.outputs.key }}-${{ hashFiles('pins/tlinalg-rs.rev') }}
+      - run: ./scripts/setup_extern_deps.sh
+      - name: The pinned harness builds
+        run: CARGO_BUILD_JOBS=4 ./scripts/build_for_tlinalg_rev.sh "$PWD/extern/tlinalg-rs" /tmp/pin.env tlbench
