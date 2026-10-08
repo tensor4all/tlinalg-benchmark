@@ -1,0 +1,136 @@
+schema_version: 1
+target_profile: zen5-cpu
+suite_id: tlinalg-kernels
+suite_file: benchmarks/suites/tlinalg-kernels.yaml
+suite_sha256: 1e0d4882a9b459760903db6d0b393e5b252a65f20dec36142be6f305db498f4c
+timestamp: '2026-10-08T09:00:03.497247Z'
+command: scripts/record_run.py zen5-cpu tlinalg-kernels --regimes small --threads
+  1,8 --label baseline
+library:
+  url: https://github.com/tensor4all/tlinalg-rs
+  commit: 6d55cb6f68bd3e0e0132f6b84feed9568edb81b2
+  dirty: false
+  features:
+  - tlinalg-bench/link-openblas-static
+  measured_path: /home/shinaoka/projects/tensor4all/tlinalg-rs
+  version: null
+vendor:
+  name: openblas
+  linkage: static
+  version: 0.3.32
+  config: OpenBLAS 0.3.32 DYNAMIC_ARCH NO_AFFINITY Cooperlake MAX_THREADS=24
+  corename: Cooperlake
+  parallel: pthread
+  procs: 24
+  build_env: OPENBLAS_DYNAMIC_ARCH=1
+harness:
+  commit: 967cb1db0654c07a377920f89ad17098ccdd75e7
+  dirty: true
+host:
+  hostname: shinaoka-EVO-X1Pro
+  cpu: AMD Ryzen AI 9 HX 470
+  os: Linux 7.0.0-38-generic
+  arch: x86_64
+  logical_cpus: 24
+  l3: 24 MiB (2 instances)
+  l3_domains: '0-3: 16 MiB shared; 4-11: 8 MiB shared'
+  notes: 'AMD Ryzen AI 9 HX 470 (Zen5 mobile APU), 12 physical / 24 logical cores.
+    Heterogeneous L3: CPUs 0-3 share 16 MiB, CPUs 4-11 share 8 MiB, so a thread set
+    must be stated together with the domain it sits in. SMT siblings of CPUs 4-11
+    are 16-23; the idle gate checks them too, because a busy sibling contends with
+    the physical core being measured.'
+threads:
+  counts:
+  - 1
+  - 8
+  cpu_sets:
+    '1': '4'
+    '8': 4-11
+  env:
+    OMP_NUM_THREADS: null
+    RAYON_NUM_THREADS: null
+    OPENBLAS_NUM_THREADS: null
+  note: the vendor's budget is set by the harness from the row's thread count and
+    read back before each measurement; these variables were removed from the measured
+    process's environment so it cannot inherit a different one
+timing_policy:
+  version: 1
+  minimum_untimed_priming_ms: 500
+  statistic: best
+  repetitions: 5
+  notes: 'priming is time-based, not a call count: after an idle gate this host reads
+    low for the first second or two of sustained work'
+guards:
+  idle_window_seconds: 3
+  max_busy_percent: 5.0
+  attempts: 3
+  sibling_aware: true
+  logs:
+  - run0-small-1t.guard
+  - run0-small-8t.guard
+  - verify-small-1t.guard
+  - verify-small-8t.guard
+providers:
+- name: tlinalg
+  version: null
+  commit: null
+  path: null
+  note: the faer-backed provider in the measured revision; see library above
+- name: openblas
+  version: 0.3.32
+  commit: null
+  path: null
+  note: linked static, kernel dispatched to Cooperlake, config OpenBLAS 0.3.32 DYNAMIC_ARCH
+    NO_AFFINITY Cooperlake MAX_THREADS=24
+invalidated_by:
+- crates/tlinalg/**
+- crates/tlinalg-blas/**
+- crates/tlinalg-bench/**
+- crates/tlinalg-testkit/**
+- benchmarks/scripts/**
+- Cargo.toml
+- Cargo.lock
+result_files:
+- run0-small-1t.csv
+- run0-small-8t.csv
+run_spec:
+  populations:
+  - regime: small
+    families:
+    - lu_factor
+    - lu_solve_prepared
+    - lu_factor_solve
+    - solve
+    - lu
+    - cholesky
+    - triangular_solve
+    - svd_values
+    - qr
+    - rank_revealing_qr
+    - svd_thin
+    - eigh
+    - eigvalsh
+    - householder_factor
+    - householder_apply
+    - svd_full
+    - eig
+    - eigvals
+    - full_piv_lu
+    - full_piv_lu_solve
+    n:
+    - '4'
+    - '8'
+    - '16'
+    batch:
+    - 1
+    - 64
+    - 1024
+  dtypes:
+  - f64
+  - c64
+  engines:
+  - faer-1lane
+  - faer-pool
+  - lapack-openblas
+  aa: 1
+  covers_declared_suite: false
