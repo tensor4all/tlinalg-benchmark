@@ -2,6 +2,31 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-08 — the faer provider is named in the manifest
+
+tlinalg can now be built against tensor4all's fork of faer, published as
+`t4a-faer` (with `t4a-faer-traits`). The fork is an experiment bench whose patches
+can change numerical behaviour, so two pages could differ only in the faer they
+were built against and nothing in the manifest would say so. It is recorded first
+because every later measurement depends on it.
+
+The recorder now reads `faer`/`t4a-faer` (and their `-traits` crates) out of the
+*measured checkout's* `Cargo.lock` and records each as a `providers[]` entry using
+the existing item shape: name and version for a registry source, the revision in
+`commit` for a git source, and the source string in the note. The report prints
+the faer identity in its provenance block and under the `faer` rows next to the
+vendor's `As measured` line, so the page says which faer produced the numbers.
+
+The entry keeps the package's own name (`faer` or `t4a-faer`), never the engine's
+provider name: `PROVIDER_OF_ENGINE` maps the `faer-*` engine rows to `tlinalg`,
+which is the provider that computes, while `t4a-faer` is a dependency it links.
+They are different axes, and the manifest keeps them distinct.
+
+It is recorded, not yet enforced: `validate_run.py` accepts a manifest without a
+faer entry, so the one existing baseline page is unchanged. Whether to refuse a
+`tlinalg` run that names no faer is a follow-up once a fork-built cell exists to
+validate against.
+
 ## 2026-10-08 — the noise floor, measured before any claim was made
 
 A recording run died at its manifest step (a missing `import csv`), which left a complete set of

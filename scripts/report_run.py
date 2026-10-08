@@ -13,7 +13,7 @@ import pathlib
 import statistics
 import sys
 
-from campaign import ROOT, load
+from campaign import FAER_PACKAGES, ROOT, load
 
 COLUMNS = ["regime", "family", "dtype", "m", "n", "batch", "row", "threads",
            "total_ms", "per_item_us", "status", "note"]
@@ -61,8 +61,21 @@ def best_per_case(rows):
     return best, skipped
 
 
+def provider_text(prov):
+    """One provider's identity as a report fragment."""
+    text = f"`{prov['name']}`"
+    if prov.get("version"):
+        text += f" {prov['version']}"
+    if prov.get("commit"):
+        text += f" @ `{prov['commit']}`"
+    if prov.get("note"):
+        text += f" ({prov['note']})"
+    return text
+
+
 def render(manifest, suite, rows, run_dir):
     vendor = manifest.get("vendor") or {}
+    faer = [p for p in manifest.get("providers", []) if p["name"] in FAER_PACKAGES]
     engines = manifest["run_spec"]["engines"]
     row_names = [e for e in ["faer-1lane", "faer-pool", "lapack-openblas"] if e in engines]
     best, skipped = best_per_case(rows)
@@ -72,6 +85,7 @@ def render(manifest, suite, rows, run_dir):
         f"- tlinalg-rs commit: `{manifest['library']['commit']}`"
         + (" **(dirty)**" if manifest["library"]["dirty"] else ""),
         f"- features: `{', '.join(manifest['library']['features']) or 'default'}`",
+        *(["- faer provider: " + "; ".join(provider_text(p) for p in faer)] if faer else []),
         f"- harness commit: `{manifest['harness']['commit']}`",
         f"- hardware profile: `{manifest['target_profile']}`",
         f"- timestamp: `{manifest['timestamp']}`",
@@ -102,6 +116,8 @@ def render(manifest, suite, rows, run_dir):
         out.append(f"    Identity: {doc['identity']}")
         if doc.get("caveat"):
             out.append(f"    Caveat: {doc['caveat']}")
+        if engine in ("faer-1lane", "faer-pool") and faer:
+            out.append("    As measured: " + "; ".join(provider_text(p) for p in faer))
     if row_names and "lapack-openblas" in row_names:
         parts = [f"linked {vendor.get('linkage', '?')}"]
         if vendor.get("version"):

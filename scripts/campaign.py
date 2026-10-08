@@ -23,6 +23,13 @@ PROVIDER_OF_ENGINE = {
     "lapack-openblas": "openblas",
 }
 
+# The faer crates the `tlinalg` provider links, read out of the measured
+# checkout's `Cargo.lock` and recorded under their own package names (`faer` or
+# the fork's `t4a-faer`). They are dependencies, not engines: the provider that
+# computes is `tlinalg`, which is what `PROVIDER_OF_ENGINE` maps to, so a
+# dependency entry can never be confused with the engine's provider.
+FAER_PACKAGES = ("faer", "faer-traits", "t4a-faer", "t4a-faer-traits")
+
 
 def load(path) -> dict:
     return yaml.safe_load(pathlib.Path(path).read_text())

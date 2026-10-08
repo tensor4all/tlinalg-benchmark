@@ -12,11 +12,11 @@ result/INDEX.md                                 generated table of contents over
 A result page is one `(suite, hardware profile, measured revision)`, and it
 carries that revision and the hardware itself: commit, version when the measured
 project has one, features, harness commit, host CPU, logical CPU count, L3, OS
-and arch, the CPU set used at each thread count, the timing policy, the vendor
-library and its kernel, and the guarantees. Measuring a new revision adds a page
-rather than replacing the previous one. A dirty checkout gets its own `-dirty`
-page, because those numbers are not comparable with a clean build of the same
-commit.
+and arch, the CPU set used at each thread count, the timing policy, the faer
+crates the measured provider was built against, the vendor library and its
+kernel, and the guarantees. Measuring a new revision adds a page rather than
+replacing the previous one. A dirty checkout gets its own `-dirty` page, because
+those numbers are not comparable with a clean build of the same commit.
 
 ## run.yaml
 
@@ -36,7 +36,13 @@ records:
 - `threads`: the counts, the CPU set used for each, the ambient thread variables
   (removed for the measured process), and how the budget was enforced;
 - `timing_policy`: version, priming, statistic, repetitions;
-- `providers`: what was compared against, with versions or commits;
+- `providers`: what was compared against, with versions or commits — the
+  `tlinalg` provider and the `faer`/`t4a-faer` crates it links, read from the
+  measured checkout's `Cargo.lock` (a registry dependency by name and version, a
+  git dependency by revision), plus the `openblas` vendor arm. Which faer was
+  linked is provenance: the fork's patches can move numbers, so a page that names
+  the tlinalg commit but not its faer is not comparable with one built against a
+  different faer;
 - `guards`: the idle window including the sibling check, the busy threshold, the
   attempt budget, the log files;
 - `run_spec`: the resolved populations this run covered — regime, families,

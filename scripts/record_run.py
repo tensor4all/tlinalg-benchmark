@@ -30,7 +30,8 @@ import sys
 
 import yaml
 
-from campaign import PROVIDER_OF_ENGINE, ROOT, populations, same_populations, vendors_declared
+from campaign import (FAER_PACKAGES, PROVIDER_OF_ENGINE, ROOT, populations,
+                     same_populations, vendors_declared)
 
 
 def sh(cmd, **kw):
@@ -97,12 +98,43 @@ def vendor_identity(binary, env):
     return fields
 
 
-def providers_for(engines, vendor):
+def lock_providers(lock_path):
+    """The faer crates the measured checkout links, from its own `Cargo.lock`.
+
+    Which faer was linked is provenance: the fork's patches can move numerical
+    behaviour, so a page that names the tlinalg commit but not the faer it was
+    built against cannot be compared with one built against a different faer.
+    A registry dependency records its name and version; a git dependency records
+    its revision in `commit`. Each entry keeps the package's own name, never the
+    engine's provider name, so it cannot collide with the `tlinalg` provider.
+    """
+    import tomllib
+
+    lock = pathlib.Path(lock_path)
+    if not lock.exists():
+        return []
+    packages = tomllib.loads(lock.read_text()).get("package", [])
+    out = []
+    for pkg in packages:
+        if pkg.get("name") not in FAER_PACKAGES:
+            continue
+        source = pkg.get("source") or ""
+        commit = source.rsplit("#", 1)[-1] if source.startswith("git+") and "#" in source else None
+        note = "linked dependency of the tlinalg provider"
+        if source:
+            note += f"; source {source}"
+        out.append({"name": pkg["name"], "version": pkg.get("version"),
+                    "commit": commit, "path": None, "note": note})
+    return out
+
+
+def providers_for(engines, vendor, faer=()):
     out = []
     names = {PROVIDER_OF_ENGINE.get(e) for e in engines}
     if "tlinalg" in names:
         out.append({"name": "tlinalg", "version": None, "commit": None, "path": None,
                     "note": "the faer-backed provider in the measured revision; see library above"})
+        out.extend(faer)
     if "openblas" in names:
         config = vendor.get("vendor.config") or ""
         note = f"linked {vendor.get('vendor.linkage', '?')}"
@@ -333,7 +365,8 @@ def main():
             "sibling_aware": True,
             "logs": sorted(set(guards)),
         },
-        "providers": providers_for(engines, vendor),
+        "providers": providers_for(engines, vendor,
+                                   lock_providers(pathlib.Path(pin["TLINALG_DIR"]) / "Cargo.lock")),
         "invalidated_by": suite["invalidated_by"],
         "result_files": [pathlib.Path(c).name for c in csvs],
         "run_spec": {
