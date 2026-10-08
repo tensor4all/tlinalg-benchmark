@@ -1,0 +1,135 @@
+schema_version: 1
+id: tlinalg-kernels
+description: >-
+  The batched kernel families of both providers, from one call per batch over a
+  rank-2+B strided descriptor: the faer-backed `tlinalg` and the LAPACK/BLAS
+  provider `tlinalg-blas`, the latter against the vendor build recorded in each
+  manifest. Rows are declared as populations (regime x family group x shape
+  grid x thread budget) rather than one Cartesian product, because a universal
+  product over every family and shape is dominated by priming alone and the
+  expensive families buy no extra information at every size.
+# Only paths whose change can alter a measured result. Deliberately not
+# `docs/**`: a README edit does not make a measurement stale, and a rule that
+# could not tell the difference would be ignored in practice.
+invalidated_by:
+  - crates/tlinalg/**
+  - crates/tlinalg-blas/**
+  - crates/tlinalg-bench/**
+  - crates/tlinalg-testkit/**
+  - benchmarks/scripts/**
+  - Cargo.toml
+  - Cargo.lock
+stale_after: 20
+# No profile is required yet: the first real cell has to be recorded before one
+# can be, because a required cell with no run fails the index gate, and a run
+# requires the harness to exist at the pinned revision. The first recorded
+# (zen5-cpu, tlinalg-kernels) cell moves zen5-cpu here.
+required_profiles: []
+optional_profiles:
+  - zen5-cpu
+
+# Family groups. A group is a set of families that are worth measuring on the
+# same shape grid; the runs below say which groups are measured per regime. The
+# provider rejects a shape it cannot take, and the harness emits that case as
+# `skipped` so the coverage of a run stays visible in its own CSV.
+family_groups:
+  factor:
+    - lu_factor
+    - lu_solve_prepared
+    - lu_factor_solve
+    - solve
+    - lu
+    - cholesky
+    - triangular_solve
+    - svd_values
+  decompose:
+    - qr
+    - rank_revealing_qr
+    - svd_thin
+    - eigh
+    - eigvalsh
+    - householder_factor
+    - householder_apply
+  heavy:
+    - svd_full
+    - eig
+    - eigvals
+    - full_piv_lu
+    - full_piv_lu_solve
+  rectangular:
+    - svd_thin
+    - qr
+    - rank_revealing_qr
+    - householder_factor
+
+# What the workload is, in a form the result page can print.
+workloads:
+  name: batched dense kernels
+  description: >-
+    Square and rectangular dense matrices in a batch: one call per batch over a
+    rank-2+B descriptor, `n x n` or `m x n` per item. Sizes are the matrix
+    dimension, not a memory budget, so a case name says exactly what was
+    factored; the batch extent is a separate axis and is never collapsed.
+  source: >-
+    The library's own kernel inventory (crates/tlinalg/src, crates/tlinalg-blas/src).
+    Inputs are seeded from the case, so `verify` and `run` measure the same
+    matrices and a rerun is reproducible.
+  known_blind_spots:
+    - "Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope."
+    - "Batch extents are declared per regime, so a cost proportional to batch elements is visible only where the regime says so."
+    - "The providers are compared at the thread budgets declared here; a budget the vendor threads itself by, outside that set, is not covered."
+
+# One entry per engine name the harness emits. A result page explains every
+# column from this, so a reader needs no context beyond the page.
+engines_doc:
+  faer-1lane:
+    provider: tlinalg
+    summary: >-
+      The faer-backed provider on one sequential lane: the per-item cost plus the
+      batch loop, with no threading at all. The overhead baseline.
+    identity: tlinalg-rs (this repository's pinned revision)
+  faer-pool:
+    provider: tlinalg
+    summary: >-
+      The same provider on a host-owned Rayon pool of the row's thread budget,
+      with the library choosing its batch lanes. The thread count is a column,
+      not part of the row name.
+    identity: tlinalg-rs (this repository's pinned revision)
+    caveat: >-
+      A faer count hint is not a hard active-thread limit; see the `Parallel`
+      budget contract in tlinalg.
+  lapack-openblas:
+    provider: openblas
+    summary: >-
+      The LAPACK/BLAS provider: vendor calls and their marshalling, a serial
+      batch loop, vendor-owned threading. The vendor's own thread budget is set
+      by the harness before the row and read back, and the vendor identity and
+      the kernel its runtime dispatched to are recorded in the manifest.
+    identity: the OpenBLAS build recorded in this run's manifest (`providers[openblas]`)
+    caveat: >-
+      LAPACK and BLAS own their threading, so this row's thread budget is the
+      vendor's, not the host pool's. Where a family has no LAPACK route the
+      row is absent and the CSV says the case was skipped for it.
+
+runs:
+  - threads: [1, 4, 8]
+    cpu_sets: ["4", "4-7", "4-11"]
+    dtypes: [f64, c64]
+    engines: [faer-1lane, faer-pool, lapack-openblas]
+    populations:
+      - regime: small
+        groups: [factor, decompose, heavy]
+        n: ["4", "8", "16"]
+        batch: [1, 64, 1024]
+      - regime: medium
+        groups: [factor, decompose]
+        n: ["32", "64", "128"]
+        batch: [1, 16, 128]
+      - regime: large
+        groups: [factor, decompose]
+        n: ["256", "512"]
+        batch: [1, 4]
+      - regime: tall
+        groups: [rectangular]
+        n: ["1024x64", "4096x256"]
+        batch: [1]
