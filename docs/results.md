@@ -69,3 +69,23 @@ when the cell was measured over the suite's whole declared spec and the
 declaration has not moved since, `partial` when it covered a subset, and
 `declaration-changed` when the declaration itself changed after the measurement,
 so the two have to be compared by hand. A partial run never displaces a full one.
+
+## Comparing two revisions
+
+A change is judged from two recorded pages, not from one run read twice. The procedure, which is
+also what the perf work on `tlinalg-rs#16`-`#25` follows:
+
+1. A **clean checkout per revision**, so neither is recorded dirty: `git worktree add --detach
+   /tmp/tlinalg-base <before-commit>` (and one for the change), and no edits in either while it is
+   measured.
+2. The same populations, thread counts and dtypes on both sides, into the *same* suite declaration,
+   so the two runs are the same cells: `scripts/record_run.py zen5-cpu tlinalg-kernels --regimes
+   ... --threads ... --checkout <worktree>`.
+3. **At least two complete sets** (`--aa 2`) for anything that will be claimed as a performance
+   change, because the timing policy's measured noise floor makes a single set insufficient for the
+   pooled rows and only marginal for the rest.
+4. `scripts/compare_runs.py <before-run-dir> <after-run-dir>`, which reports per-cell ratios, the
+   per-family medians and the A/A spread, and says plainly when it is a scan rather than a paired
+   comparison.
+5. Both runs are recorded as pages even when one is a regression: a page that only shows the
+   improvement is a page that hides the rest of the grid.
