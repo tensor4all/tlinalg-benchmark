@@ -2,6 +2,39 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-08 — the noise floor, measured before any claim was made
+
+A recording run died at its manifest step (a missing `import csv`), which left a complete set of
+CSVs with no manifest. They turned out to be worth keeping: comparing them with the successful
+re-run of the *same* revision is an A/A pair, and it says which rows a per-cell claim may be made
+on.
+
+| threads | row | median | p10-p90 | cells off by more than 15% |
+|---|---|---|---|---|
+| 1T | `faer-1lane` | 1.002 | 0.972-1.029 | 1.1% |
+| 1T | `lapack-openblas` | 1.000 | 0.985-1.018 | 0.0% |
+| 8T | `faer-1lane` | 1.005 | 0.983-1.038 | 1.1% |
+| 8T | `faer-pool` | 1.007 | 0.771-1.463 | 28.9% |
+| 8T | `lapack-openblas` | 0.998 | 0.972-1.030 | 5.3% |
+
+The 1T rows reproduce to about 3%, so the perf work can be adjudicated on them; the pooled 8T rows
+move by up to 2.5x on identical code, so a pooled cell without its spread is machine state. The
+policy now says so, and `scripts/compare_runs.py` reports the ratios with the spread instead of a
+bare table.
+
+The first real cell was recorded in the same pass: `zen5-cpu`, `small` regime, 1T and 8T, 1800 rows
+at `6d55cb6`, with the vendor budget set and read back and the idle gate covering the SMT siblings
+of the measured cores. The manifest names what produced it — OpenBLAS 0.3.32 linked statically,
+built with `DYNAMIC_ARCH` and dispatched at run time to `Cooperlake`, pthread threading — and the
+coverage is `partial`, because the small regime is one of four declared populations.
+
+What the baseline says about where to work, in faer-1lane vs lapack-openblas at 1T on `n=4..16`:
+the native provider is *slower* than LAPACK for `eigvalsh` (1.4-2.3x), `svd_values` (1.0-1.5x),
+`eig` in f64 (1.2-1.35x) and `lu_factor` at `batch=1` (1.8-2.1x), and *faster* for cholesky, qr,
+solve, full-pivot LU and the Householder pair. So the workload need for the zero-fill and
+direct-output issues is established in the grid already measured, while the reflector-copy and
+right-side-solve candidates are not — which is what those issues themselves said to check first.
+
 ## 2026-10-08 — the linked-LAPACK gate was red, and the cause was the cache's provenance
 
 Before any cell could be recorded, `tlinalg-rs`'s own linked-LAPACK gate was failing: `tlinalg-blas

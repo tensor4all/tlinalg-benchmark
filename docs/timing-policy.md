@@ -46,6 +46,27 @@ reports the best time per row; the report aggregates repeats and prints the A/A
 spread. A single scan flags suspects; only a complete paired run makes a
 performance claim.
 
+**Measured noise floor, and what it costs the pooled row.** Two complete sets of
+the *same* revision (the small regime, 1T and 8T, 360 cells per row) give the
+ratios below, which must be 1.0 if a row reproduces. They do not, for the pooled
+rows:
+
+| threads | row | median | p10-p90 | cells off by more than 15% |
+|---|---|---|---|---|
+| 1T | `faer-1lane` | 1.002 | 0.972-1.029 | 1.1% |
+| 1T | `lapack-openblas` | 1.000 | 0.985-1.018 | 0.0% |
+| 8T | `faer-1lane` | 1.005 | 0.983-1.038 | 1.1% |
+| 8T | `faer-pool` | 1.007 | 0.771-1.463 | **28.9%** |
+| 8T | `lapack-openblas` | 0.998 | 0.972-1.030 | 5.3% |
+
+A per-cell claim is therefore made on the **1T rows**, where a complete set
+reproduces to about 3%; the pooled rows move by up to 2.5x between complete sets
+of identical code, so a pooled number is a distribution rather than a value unless
+several complete sets are taken, and the vendor's threaded rows sit in between. A
+comparison that reports pooled cells without their spread is reporting machine
+state. `scripts/compare_runs.py` prints the per-cell ratios and the A/A spread for
+exactly this reason.
+
 ## Guarding the host
 
 Every measurement runs through `benchmarks/scripts/pinned.sh` of the measured
