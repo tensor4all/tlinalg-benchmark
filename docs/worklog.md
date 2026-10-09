@@ -27,6 +27,26 @@ faer entry, so the one existing baseline page is unchanged. Whether to refuse a
 `tlinalg` run that names no faer is a follow-up once a fork-built cell exists to
 validate against.
 
+## 2026-10-09 — #21 adopted as a duplication removal, not a measured change
+
+tlinalg-rs#34 removed the two kinds of redundant zero-fill behind #21: the native lane scratch is no
+longer reset before the first item (it was zeroed when built), and the LAPACK real-input eig
+conversion no longer grows the eigenvector output with `n * n` zeros before overwriting every entry.
+
+This repository cannot adjudicate it, and says so rather than implying otherwise. The native resets
+are one O(n^2) pass per *call* against an O(n^3) decomposition — about 1/n, under 0.4% at n = 512
+against the three-to-five per cent a 1T cell reproduces to — and the LAPACK one removes a second pass
+over output the same routine writes anyway. The allocation counts are unchanged, deliberately, since
+resetting allocates nothing. So #21 is closed as a removal of provably duplicate work, with the
+correctness gate as its check.
+
+The last loose end of #28 closed with it: the wide case in `nearly_dependent_columns` was
+`#[ignore]`d while it disagreed with both faer and the harness, and the disagreement turned out to be
+the test's own indexing — the transposed matrix was built with `3` as the column stride instead of
+`m`, so the QR ran on a 3x1000 matrix that was mostly zeros. It is enabled and passing, and it is
+coverage rather than a regression: at three rows the fixture's perturbations sit far above faer's
+skip threshold, and it passes against 0.24.4 too. The tall case remains the one that reproduced #28.
+
 ## 2026-10-09 — the first before/after pair, on the small regime
 
 Two recorded pages and the ratio between them: `6d55cb6` (crates.io faer 0.24.4) against `8276e09`
