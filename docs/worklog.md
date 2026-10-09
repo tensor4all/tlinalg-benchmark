@@ -70,9 +70,11 @@ matrix or a wide right-hand side, which this cell does not contain.
 landed in the same measured revision, so a reader may only conclude what the two together did. The
 Cholesky attribution above is the exception and it rests on the fork having no Cholesky path at all.
 
-**A/A.** The after run took two complete sets; within it, the 1T rows reproduce to a median max/min
-of 8905.193 and the 8T pooled rows to 340.020, over the cells each contains. That is the yardstick
-the ratios above are read against.
+**A/A.** The after run took two complete sets, so it carries its own floor. Over the 360 cells of
+each `(threads, row)`, the ratio between the two sets has a median of 1.006 to 1.009, a p10-p90 of
+1.001 to 1.05 for the lanes, and 1.004 to 1.63 for the 8T pooled rows. A 1T cell is therefore
+reproducible to about three to five per cent, which is the yardstick the Cholesky ten per cent is
+read against — and why nothing else in the table is called a change.
 
 ## 2026-10-08 — the noise floor, measured before any claim was made
 
