@@ -27,6 +27,53 @@ faer entry, so the one existing baseline page is unchanged. Whether to refuse a
 `tlinalg` run that names no faer is a follow-up once a fork-built cell exists to
 validate against.
 
+## 2026-10-09 — the first before/after pair, on the small regime
+
+Two recorded pages and the ratio between them: `6d55cb6` (crates.io faer 0.24.4) against `8276e09`
+(the fork at `d16929b`, plus the storage/marshalling batch #18, #22, #17, #19), `small` regime,
+1T and 8T, one complete set before and two after.
+
+Per-family medians of `after / before` at 1T, over the 18 cells of each family and dtype (so a value
+of 0.90 is a tenth faster):
+
+| family | c64 | f64 |
+|---|---|---|
+| `cholesky` | **0.906** | **0.888** |
+| `triangular_solve` | 0.969 | 0.997 |
+| `solve` | 0.977 | 0.989 |
+| `full_piv_lu` | 0.989 | 0.988 |
+| `full_piv_lu_solve` | 0.991 | 0.995 |
+| `eigh` | 0.990 | 0.995 |
+| `svd_full` | 0.992 | 0.997 |
+| `svd_thin` | 0.994 | 0.997 |
+| `svd_values` | 0.996 | 0.996 |
+| `eigvals` | 0.996 | 1.000 |
+| `eig` | 0.998 | 0.999 |
+| `eigvalsh` | 0.999 | 1.001 |
+| `rank_revealing_qr` | 1.012 | 1.002 |
+
+The 8T rows are the same story with a wider spread, as the timing policy says they must be.
+
+**What the pair establishes.** The Cholesky change (#18) is real and attributable: it is about ten
+per cent, consistent across both dtypes and both thread counts, and it cannot come from the fork,
+which changed only the QR that Cholesky never calls. Everything else is inside the ±3% a 1T row
+reproduces to, so the pair says two things about the rest: the fork's QR repair does **not** cost
+anything measurable in the SVD and QR families it passes through, and the two changes kept on smoke
+evidence — borrowing the compact reflector column (#17) and solving the right side on a transposed
+view (#19) — show **no measurable effect at `n = 4..16`**. They are not wrong: #17 also removes a
+per-lane allocation (the allocation counts in `tlinalg` moved from 3 to 2 for `compact_factor`) and
+#19 removes a copy of `B`. But at these sizes the copies are not what the clock is measuring, so
+the honest verdict is "kept, unproven", and the population that would settle it is a large single
+matrix or a wide right-hand side, which this cell does not contain.
+
+**The pair is a combined treatment, not two single-variable pairs.** The fork revision and the batch
+landed in the same measured revision, so a reader may only conclude what the two together did. The
+Cholesky attribution above is the exception and it rests on the fork having no Cholesky path at all.
+
+**A/A.** The after run took two complete sets; within it, the 1T rows reproduce to a median max/min
+of 8905.193 and the 8T pooled rows to 340.020, over the cells each contains. That is the yardstick
+the ratios above are read against.
+
 ## 2026-10-08 — the noise floor, measured before any claim was made
 
 A recording run died at its manifest step (a missing `import csv`), which left a complete set of
