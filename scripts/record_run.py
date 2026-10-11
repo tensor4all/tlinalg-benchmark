@@ -30,8 +30,31 @@ import sys
 
 import yaml
 
-from campaign import (FAER_PACKAGES, PROVIDER_OF_ENGINE, ROOT, populations,
-                     same_populations, vendors_declared)
+from campaign import (FAER_PACKAGES, PROVIDER_OF_ENGINE, ROOT, engines_for_vendor, populations,
+                       same_populations, vendor_engines, vendor_of_engines)
+
+# One binary links one vendor library, so a run measures one arm, and the arm decides the
+# features. `BENCH_FEATURES` must not be inherited: the feature set is what names the vendor in
+# the manifest, and a run that measured one library while recording another is worse than no run.
+# The arm is passed to `build_for_tlinalg_rev.sh`, which declares what the vendor is built with
+# and reports it back for the manifest to record.
+VENDOR_ARMS = ("openblas", "mkl")
+
+# Thread-budget variables that belong to a vendor library, not to the measurement. The harness
+# sets the budget from the row's thread count and reads it back, so an inherited value must not
+# reach the measured process as if it were a declaration. MKL adds a budget, a domain budget, and
+# two selectable layers, one of which is an ABI.
+VENDOR_ENV = (
+    "OPENBLAS_NUM_THREADS",
+    "MKL_NUM_THREADS",
+    "MKL_DOMAIN_NUM_THREADS",
+    "MKL_INTERFACE_LAYER",
+    "MKL_THREADING_LAYER",
+    "MKL_DYNAMIC",
+    "MKL_ENABLE_INSTRUCTIONS",
+    "OMP_NUM_THREADS",
+    "RAYON_NUM_THREADS",
+)
 
 
 def sh(cmd, **kw):
@@ -45,10 +68,11 @@ def git(dir_, *args):
                           text=True, capture_output=True).stdout.strip()
 
 
-def build(checkout):
-    env_file = ROOT / "target/pin.env"
+def build(checkout, vendor):
+    env_file = ROOT / "target" / f"pin-{vendor}.env"
     env_file.parent.mkdir(parents=True, exist_ok=True)
-    sh([ROOT / "scripts/build_for_tlinalg_rev.sh", checkout, env_file, "tlbench"])
+    sh([ROOT / "scripts/build_for_tlinalg_rev.sh", checkout, env_file, "tlbench"],
+       env=dict(os.environ, BENCH_VENDOR=vendor))
     pin = {}
     for line in env_file.read_text().splitlines():
         if "=" in line:
@@ -129,20 +153,29 @@ def lock_providers(lock_path):
 
 
 def providers_for(engines, vendor, faer=()):
+    """The providers and vendor library this run was measured against.
+
+    The vendor entry is written from the identity the harness read out of the linked library,
+    never from the arm that was requested: the point of reading it back is that the manifest
+    records what was linked rather than what was asked for.
+    """
     out = []
     names = {PROVIDER_OF_ENGINE.get(e) for e in engines}
     if "tlinalg" in names:
         out.append({"name": "tlinalg", "version": None, "commit": None, "path": None,
                     "note": "the faer-backed provider in the measured revision; see library above"})
         out.extend(faer)
-    if "openblas" in names:
-        config = vendor.get("vendor.config") or ""
+    for provider in vendor_engines(engines):
+        if vendor.get("vendor.name") != provider:
+            continue
         note = f"linked {vendor.get('vendor.linkage', '?')}"
         if vendor.get("vendor.corename"):
             note += f", kernel dispatched to {vendor['vendor.corename']}"
-        if config:
-            note += f", config {config}"
-        out.append({"name": "openblas", "version": vendor.get("vendor.version") or None,
+        elif provider == "mkl":
+            note += ", kernel not reported by the vendor"
+        if vendor.get("vendor.config"):
+            note += f", config {vendor['vendor.config']}"
+        out.append({"name": provider, "version": vendor.get("vendor.version") or None,
                     "commit": None, "path": None, "note": note})
     return out
 
@@ -196,6 +229,9 @@ def main():
     ap.add_argument("--threads", default=None, help="override, comma separated")
     ap.add_argument("--dtypes", default=None)
     ap.add_argument("--engines", default=None)
+    ap.add_argument("--vendor", default=None,
+                    help="which vendor arm to record: one binary links one vendor library, so an arm "
+                         "is its own run. Required when the suite declares more than one.")
     ap.add_argument("--label", default=None, help="suffix for the run directory")
     args = ap.parse_args()
 
@@ -217,7 +253,21 @@ def main():
         covered = [p for p in covered if p["families"]]
     threads = [int(t) for t in args.threads.split(",")] if args.threads else spec["threads"]
     dtypes = args.dtypes.split(",") if args.dtypes else spec["dtypes"]
-    engines = args.engines.split(",") if args.engines else spec["engines"]
+    arms = vendor_engines(spec["engines"])
+    if args.vendor:
+        arm = args.vendor
+    elif len(arms) == 1:
+        arm = arms[0]
+    else:
+        sys.exit(f"ERROR: this suite declares the vendor arms {arms}, and one binary links one vendor "
+                 f"library, so one run records one of them: pass --vendor")
+    if arm not in arms:
+        sys.exit(f"ERROR: --vendor {arm!r} is not one of the arms this suite declares ({arms})")
+    if arm not in VENDOR_ARMS:
+        sys.exit(f"ERROR: unknown vendor arm {arm!r}; this recorder knows {list(VENDOR_ARMS)}")
+    # The engines this arm is expected to measure: the faer rows every arm carries, plus this
+    # arm's own LAPACK row. Anything else is another binary's to measure.
+    engines = args.engines.split(",") if args.engines else engines_for_vendor(suite, arm)
     cpu_sets = {str(t): spec["cpu_sets"][spec["threads"].index(t)] for t in threads}
 
     # One measurement at a time, and no build while a measurement runs. Taken
@@ -232,7 +282,7 @@ def main():
                  "the campaign is one measurement at a time")
 
     checkout = pathlib.Path(args.checkout)
-    pin = build(checkout)
+    pin = build(checkout, arm)
     rev, dirty = pin["TLINALG_REV"], pin["TLINALG_DIRTY"] == "true"
     if dirty:
         print("WARNING: the measured checkout is dirty; this cell will be marked dirty", file=sys.stderr)
@@ -253,14 +303,17 @@ def main():
     # library is set from the row's budget by the harness and read back, so an
     # ambient value must not be inherited as if it were a declaration.
     env = dict(os.environ)
-    for variable in ("OPENBLAS_NUM_THREADS", "OMP_NUM_THREADS", "RAYON_NUM_THREADS"):
+    for variable in VENDOR_ENV:
         env.pop(variable, None)
     env.setdefault("CARGO_BUILD_JOBS", str(max(1, (os.cpu_count() or 4) // 4)))
 
-    vendor = vendor_identity(tlbench, env)
-    if "openblas" in {PROVIDER_OF_ENGINE.get(e) for e in engines} and (
-            not vendor.get("vendor.name") or vendor["vendor.name"] == "none"):
-        sys.exit("ERROR: the suite declares a vendor arm, but the harness reports no vendor library")
+    # What the harness reports it linked decides the manifest, not what was asked for: the arm
+    # and the binary have to agree, or the run is not recorded at all.
+    identity = vendor_identity(tlbench, env)
+    if identity.get("vendor.name") != arm:
+        sys.exit(f"ERROR: this run records the {arm} arm, but the harness built for it reports "
+                 f"{identity.get('vendor.name')!r}; a page may not name a vendor the binary did "
+                 f"not link")
 
     guards = []
     csvs = []
@@ -335,7 +388,7 @@ def main():
             "measured_path": pin["TLINALG_DIR"],
             "version": None,
         },
-        "vendor": vendor_block(vendor, pin.get("BUILD_ENV")),
+        "vendor": vendor_block(identity, pin.get("BUILD_ENV")),
         "harness": {
             "commit": git(ROOT, "rev-parse", "HEAD"),
             "dirty": bool(git(ROOT, "status", "--porcelain", "--untracked-files=no")),
@@ -344,11 +397,12 @@ def main():
         "threads": {
             "counts": threads,
             "cpu_sets": cpu_sets,
-            "env": {k: os.environ.get(k) for k in
-                    ["OMP_NUM_THREADS", "RAYON_NUM_THREADS", "OPENBLAS_NUM_THREADS"]},
+            "env": {k: os.environ.get(k) for k in VENDOR_ENV},
             "note": "the vendor's budget is set by the harness from the row's thread count and "
                     "read back before each measurement; these variables were removed from the "
-                    "measured process's environment so it cannot inherit a different one",
+                    "measured process's environment so it cannot inherit a different one"
+                    + (", and the harness pins MKL's LP64 interface and Intel OpenMP layers "
+                       "before its first call" if arm == "mkl" else ""),
         },
         "timing_policy": {
             "version": 1,
@@ -365,7 +419,7 @@ def main():
             "sibling_aware": True,
             "logs": sorted(set(guards)),
         },
-        "providers": providers_for(engines, vendor,
+        "providers": providers_for(engines, identity,
                                    lock_providers(pathlib.Path(pin["TLINALG_DIR"]) / "Cargo.lock")),
         "invalidated_by": suite["invalidated_by"],
         "result_files": [pathlib.Path(c).name for c in csvs],
@@ -376,7 +430,7 @@ def main():
             "aa": args.aa,
             "covers_declared_suite": (threads == spec["threads"]
                                       and dtypes == spec["dtypes"]
-                                      and engines == spec["engines"]
+                                      and engines == engines_for_vendor(suite, arm)
                                       and same_populations(covered, declared)),
         },
     }

@@ -11,6 +11,7 @@ re-publish after a report-format change cannot disagree:
 """
 import argparse
 import pathlib
+import re
 import subprocess
 import sys
 
@@ -19,20 +20,40 @@ import yaml
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 
 
+def page_source(page):
+    """The run directory a page was generated from, read out of the page itself.
+
+    The page's first line names the report it was copied from, so the index can tell which run
+    a page actually holds instead of guessing from the newest manifest that would have written
+    it. Publishing refuses a partial run over a full-coverage page, so those two are not the same
+    question and must not be conflated.
+    """
+    with open(page) as handle:
+        first = handle.readline()
+    found = re.match(r"<!-- generated from (\S+)/report\.md by ", first)
+    return ROOT / found.group(1) if found else None
+
+
 def page_path(manifest):
-    """One page per measured (suite, profile, commit, version).
+    """One page per measured (suite, profile, commit, version, vendor arm).
 
     The page is named after the revision rather than the cell so that measuring
     a new commit adds a page instead of replacing the previous one: the tree
     keeps the history the index links to, and a reader can always see what a
     number was measured at. A dirty checkout gets its own suffix, because its
     numbers are not comparable with a clean build of the same commit.
+
+    The vendor is part of the name because it is part of the measurement: one
+    binary links one vendor library, so one run carries one arm, and two arms at
+    the same revision are two pages that a reader compares side by side.
     """
     library = manifest["library"]
     suffix = "-dirty" if library["dirty"] else ""
     version = f"-{library['version']}" if library.get("version") else ""
+    vendor = (manifest.get("vendor") or {}).get("name")
+    arm = f"-{vendor}" if vendor else ""
     return (ROOT / "result" / manifest["target_profile"] / manifest["suite_id"]
-            / f"{library['commit'][:12]}{version}{suffix}.md")
+            / f"{library['commit'][:12]}{version}{arm}{suffix}.md")
 
 
 def publish(run_dir):
@@ -46,10 +67,23 @@ def publish(run_dir):
         report.write_text(header + (run_dir / "report.md").read_text())
         print(f"published {report.relative_to(ROOT)} from {run_dir.relative_to(ROOT)} "
               f"(coverage={'full' if covers else 'partial'})")
+    elif published_full(report):
+        print(f"kept the existing {report.relative_to(ROOT)}: this run is partial and the page "
+              f"already there covers the whole declaration")
     else:
-        print(f"kept the existing {report.relative_to(ROOT)}: this run is partial and a "
-              f"full-coverage page for the same revision already exists")
+        report.write_text(header + (run_dir / "report.md").read_text())
+        print(f"replaced the partial {report.relative_to(ROOT)} with this run "
+              f"(coverage=partial): the page it held did not cover the whole declaration")
     subprocess.run([sys.executable, str(ROOT / "scripts/gen_index.py"), "--write"], check=True)
+
+
+def published_full(report):
+    """Whether the page already published for this revision covers the whole declaration."""
+    source = page_source(report)
+    manifest = source / "run.yaml" if source else None
+    if manifest is None or not manifest.exists():
+        return False
+    return bool(yaml.safe_load(manifest.read_text())["run_spec"].get("covers_declared_suite"))
 
 
 def main():

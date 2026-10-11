@@ -2,6 +2,63 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-11 — MKL is a second vendor arm, and the grid is sampled at its ends
+
+**Why an arm and not an engine string.** MKL and OpenBLAS define the same BLAS/LAPACK symbols, so
+one process resolves them to one library: an arm is a *build*, and a run is one arm. The harness now
+names the LAPACK row after the library it linked (`lapack-mkl`, `lapack-openblas`) instead of after
+a literal, and `tlinalg-blas` refuses a build that asks for both vendors. Two arms at the same
+revision are two pages, compared side by side, each carrying its own faer rows and its own vendor
+identity. A single page carrying both was the other candidate; it was rejected because it would
+have needed the manifest to describe two builds' features, environments and result files at once,
+which is more provenance machinery than it saves, and because "one manifest is one build" is worth
+keeping. The consequence is deliberate: two arms mean two recorders run sequentially, and no page
+holds a vendor comparison that was not measured in one process.
+
+**What MKL needs that OpenBLAS does not.** The installed library, named by `MKLROOT`, not
+`blas-src`'s route through `intel-mkl-src` (which would fetch its own MKL tree, and whose features
+are additive with the OpenBLAS source this crate already activates). A `build.rs` in `tlinalg-blas`
+emits the library side, and one in `tlinalg-bench` -- the package the executable belongs to -- the
+final-link side, because `rustc-link-arg` does not reach another package's binary. That side is
+load-bearing: `libmkl_intel_thread.so` enters with an undefined `omp_get_num_procs`, and nothing
+references `libiomp5`'s symbols, so `--as-needed` drops it unless the link says otherwise; and
+`rustc` does not turn a search path into an `-rpath`, so without one the harness only runs with
+`LD_LIBRARY_PATH` arranged for it. MKL's interface layer is an ABI, and the environment can choose
+it, so the harness pins LP64 and the Intel OpenMP layer before its first MKL call and refuses to
+continue if the library will not take them. It reports no dispatched kernel and no processor count,
+so those stay empty in the manifest.
+
+**The grid is sampled at the ends, not across it.** Priming is 0.5 s per engine row per case and does
+not scale with the shape, so a middle point costs exactly what an end point costs while adding the
+least information: batch 1 is latency and batch 1024 is throughput, and the batch between them is
+neither, while n=8 sits between two sizes that are already there. Dropping the middle of each axis
+took the declared grid from 383 cases to 248 -- 3,968 engine rows per complete set per arm, about
+33 minutes of priming each, where the middle points alone were 135 cases. This is a declared
+reduction, not a partial run: the shape grid in the suite file *is* what a full-coverage page must
+cover, and the workload says in its own words that a cost visible only in the middle of a range is
+not covered.
+
+**The large end is affordable, which the earlier worklog flagged as a pilot rather than an
+assumption.** Measured on `zen5-cpu` at revision `6d55cb6f68bd` with the OpenBLAS arm (one repeat,
+200 ms priming, unpinned and therefore not a published number): `svd_thin` 512x512 batch 4 at 8T is
+182 / 129 / 166 ms for faer-1lane / faer-pool / lapack-openblas, and the whole `tall` regime at
+4096x256 batch 1 is 20-156 ms per row. The undeclared n=1024 costs 186-386 ms for the same families.
+The `large` and `tall` regimes are minutes of wall time; it is the number of rows, not the size of
+the matrix, that decides the session.
+
+**Fixed here, because the new records would otherwise be published wrongly.** A partial run no
+longer displaces a full-coverage page *without checking that the page it would displace is full*;
+the index reads which run a page was actually generated from instead of taking the newest manifest
+that would have written that path, so a run the publisher refused can no longer describe a page;
+a revision *ahead* of the pin is `current` rather than `diverged`; the validator's
+vendor-identity and commit-resolution checks now run even when the declaration has drifted, instead
+of being skipped with the declaration-derived ones; and a row the harness recorded as `failed` is no
+longer publishable, which the recorders previously accepted as a successful run. `zen5-cpu` is now
+a required profile, which the first recorded cell made due.
+
+**Not done here.** The pin still names `8276e097c214`; it moves to the revision that contains the MKL
+arm once that is merged, and both arms are then recorded against it.
+
 ## 2026-10-08 — the faer provider is named in the manifest
 
 tlinalg can now be built against tensor4all's fork of faer, published as

@@ -7,6 +7,7 @@ express: that the profile and suite are declared, that `cpu_sets` lines up with
 names — a manifest that points at a commit nobody can resolve is not evidence.
 """
 import argparse
+import csv
 import json
 import pathlib
 import subprocess
@@ -14,7 +15,8 @@ import sys
 
 import jsonschema
 
-from campaign import PROVIDER_OF_ENGINE, ROOT, load, populations, same_populations, vendors_declared
+from campaign import (ROOT, engines_for_vendor, load, populations, same_populations,
+                       vendor_engines, vendor_of_engines)
 
 
 def known_profiles():
@@ -45,6 +47,59 @@ def declaration_drifted(manifest, suite_file):
     return recorded != current
 
 
+def check_vendor(manifest, errors):
+    """The recorded vendor library has to be the one the declared engines name.
+
+    Checked against the manifest's *own* recorded engines rather than against the
+    current declaration: this has to hold for a manifest measured under a declaration
+    that has since moved, and it is the part that decides whether a page may name its
+    vendor at all. One binary links one vendor library, so a run carries one arm.
+    """
+    named = vendor_engines(manifest.get("run_spec", {}).get("engines", []))
+    vendor = manifest.get("vendor") or {}
+    if len(named) > 1:
+        errors.append(f"run_spec.engines declares the vendors {named}: one binary links one vendor "
+                      f"library, so a run measures one arm")
+        return
+    if not named:
+        if vendor:
+            errors.append(f"the manifest records vendor {vendor.get('name')!r}, but no declared "
+                          f"engine is backed by a vendor library")
+        return
+    if not vendor:
+        errors.append(f"run_spec.engines declares the vendor arm {named[0]!r}, but the manifest "
+                      f"records no vendor identity; nothing is published from an arm whose library "
+                      f"cannot be named")
+    elif vendor.get("name") != named[0]:
+        errors.append(f"the manifest records vendor {vendor.get('name')!r}, but its declared engines "
+                      f"name {named[0]!r}")
+
+
+def check_result_rows(path, manifest, errors):
+    """Every timed row has to be a measurement, not a failure.
+
+    A family can pass verification and still fail while timing. The harness records that
+    in its CSV as `failed` and still exits zero, and the report drops such a row silently,
+    so without this a run could be published at full coverage with measurements missing.
+    """
+    run_dir = pathlib.Path(path).parent
+    failures = []
+    for name in manifest.get("result_files", []):
+        csv_path = run_dir / name
+        if not csv_path.exists():
+            errors.append(f"result file {name} is not in the run directory")
+            continue
+        with open(csv_path) as handle:
+            for row in csv.DictReader(handle):
+                if row.get("status") not in ("ok", "skipped"):
+                    failures.append(f"{name}: {row.get('family')}/{row.get('row')} "
+                                    f"{row.get('status')!r} {row.get('note', '')}".strip())
+    if failures:
+        errors.append(f"{len(failures)} row(s) were recorded as failed rather than measured: "
+                      + "; ".join(failures[:3])
+                      + (" ..." if len(failures) > 3 else ""))
+
+
 def validate(path, check_git=True):
     errors = []
     manifest = load(path)
@@ -64,6 +119,7 @@ def validate(path, check_git=True):
         declared = pathlib.Path(manifest["suite_file"])
         if declared.resolve() != suite_file.resolve():
             errors.append(f"suite_file {declared} is not the declaration for {manifest['suite_id']!r} ({suite_file})")
+        check_vendor(manifest, errors)
         if manifest["target_profile"] not in suite["required_profiles"] + suite.get("optional_profiles", []):
             errors.append(f"suite {manifest['suite_id']!r} does not list profile {manifest['target_profile']!r}")
         elif declaration_drifted(manifest, suite_file):
@@ -73,15 +129,16 @@ def validate(path, check_git=True):
             return errors
         spec = suite["runs"][0]
         declared = {p["regime"]: p for p in populations(suite)}
+        rs = manifest.get("run_spec", {})
         # A partial run is legitimate -- the campaign is not run in full on every
-        # profile -- but it may only be a subset of what the suite declares, and
-        # the manifest has to say whether it covered the declaration.
+        # profile -- but for this vendor arm it may only be a subset of what the suite
+        # declares, and the manifest has to say whether it covered the declaration.
+        arm = vendor_of_engines(rs.get("engines", []))
         for t in manifest["threads"]["counts"]:
             if t not in spec["threads"]:
                 errors.append(f"threads.counts contains {t}, which the suite does not declare")
             if str(t) not in manifest["threads"]["cpu_sets"]:
                 errors.append(f"threads.cpu_sets is missing an entry for {t}T")
-        rs = manifest.get("run_spec", {})
         covered = rs.get("populations", [])
         if not covered:
             errors.append("run_spec.populations is empty: a run states what it covered")
@@ -103,19 +160,22 @@ def validate(path, check_git=True):
                 if batch not in want["batch"]:
                     errors.append(f"run_spec.populations[{population['regime']}] contains batch "
                                   f"{batch!r}, which the suite does not declare for that regime")
-        for key, declared_values in (("dtypes", spec["dtypes"]), ("engines", spec["engines"])):
+        for key, declared_values in (("dtypes", spec["dtypes"]),
+                                     ("engines", engines_for_vendor(suite,
+                                                                     vendor_of_engines(rs.get("engines", []))
+                                                                     or ""),)):
             for v in rs.get(key, []):
                 if v not in declared_values:
-                    errors.append(f"run_spec.{key} contains {v!r}, which the suite does not declare")
-        if vendors_declared(rs.get("engines", [])) and not manifest.get("vendor"):
-            errors.append("run_spec.engines declares a vendor arm, but the manifest records no vendor "
-                          "identity; nothing is published from an arm whose library cannot be named")
+                    errors.append(f"run_spec.{key} contains {v!r}, which the suite does not declare "
+                                  f"for a run of this vendor arm")
         covers = (same_populations(covered, populations(suite))
                   and manifest["threads"]["counts"] == spec["threads"]
                   and rs.get("dtypes") == spec["dtypes"]
-                  and rs.get("engines") == spec["engines"])
+                  and rs.get("engines") == engines_for_vendor(suite, vendor_of_engines(rs.get("engines", []))))
         if rs.get("covers_declared_suite") != covers:
             errors.append(f"run_spec.covers_declared_suite should be {covers}")
+
+    check_result_rows(path, manifest, errors)
 
     if check_git:
         commit = manifest["library"]["commit"]

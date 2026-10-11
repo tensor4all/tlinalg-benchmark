@@ -21,6 +21,19 @@ logs, and the timing policy. `scripts/validate_run.py` refuses to accept a manif
 does not resolve, or whose declared engines include a vendor arm with no vendor identity. If you
 quote a number anywhere, quote its commit with it.
 
+## One vendor arm per run
+
+The vendor row's name is not chosen by whoever writes the row: the harness derives it from the
+library the binary linked, so it emits `lapack-openblas` or `lapack-mkl` because that is what it
+loaded. The two are mutually exclusive in one process -- they define the same symbols -- so
+`--vendor` selects an arm at build time and an arm is a whole run, with its own manifest, its own
+page and its own faer rows. Do not merge two arms into one manifest or one page: `vendor`
+describes the one library that produced those numbers, and a manifest naming two would describe
+neither. The recorder refuses a run whose harness reports a vendor other than the arm requested,
+and the validator refuses a manifest whose vendor is not the one its engines name. MKL reports no
+dispatched-kernel name and no processor count; its manifest leaves both empty rather than infer
+them, and the page says so.
+
 ## Timing discipline
 
 One measurement at a time, and **no build while a measurement is running**. `scripts/record_run.py`

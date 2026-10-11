@@ -26,16 +26,20 @@ against; building it in place makes the recorded commit describe both.
 ./scripts/setup_extern_deps.sh                     # clone tlinalg-rs at pins/tlinalg-rs.rev
 ./scripts/setup_extern_deps.sh /path/to/checkout   # or symlink a local checkout
 
-# record one cell: build, verify, measure, validate, publish, reindex
-python3 scripts/record_run.py zen5-cpu tlinalg-kernels
+# record one cell: for one vendor arm, build, verify, measure, validate, publish, reindex.
+# One binary links one vendor library, so an arm is a run of its own.
+python3 scripts/record_run.py zen5-cpu tlinalg-kernels --vendor openblas
+python3 scripts/record_run.py zen5-cpu tlinalg-kernels --vendor mkl
 ```
 
 The comparison is between the two providers of the interface — the faer-backed
 `tlinalg` and the LAPACK/BLAS-backed `tlinalg-blas` — with the vendor library
 named and its own thread budget set and read back, because a row labelled `1T` is
 only a single-thread measurement if the vendor library also ran on one thread.
-OpenBLAS is the first vendor; BLIS is a later arm and needs its own linkage
-decision, since BLIS ships no LAPACK.
+OpenBLAS and Intel MKL are the two vendor arms; each is its own build and its own
+run, because a single dynamic MKL and a static OpenBLAS cannot share a process,
+and each page therefore carries its own faer rows and its own vendor identity.
+BLIS is a later arm and needs its own linkage decision, since BLIS ships no LAPACK.
 
 ## What this repository is not
 

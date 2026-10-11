@@ -77,7 +77,10 @@ def render(manifest, suite, rows, run_dir):
     vendor = manifest.get("vendor") or {}
     faer = [p for p in manifest.get("providers", []) if p["name"] in FAER_PACKAGES]
     engines = manifest["run_spec"]["engines"]
-    row_names = [e for e in ["faer-1lane", "faer-pool", "lapack-openblas"] if e in engines]
+    # The columns are the engines this run recorded measuring, in the declaration's order: a page
+    # prints the arms it has, and a vendor arm has one LAPACK row because one binary links one
+    # vendor library.
+    row_names = list(engines)
     best, skipped = best_per_case(rows)
     out = [
         f"# `{manifest['suite_id']}` on `{manifest['target_profile']}`",
@@ -118,12 +121,18 @@ def render(manifest, suite, rows, run_dir):
             out.append(f"    Caveat: {doc['caveat']}")
         if engine in ("faer-1lane", "faer-pool") and faer:
             out.append("    As measured: " + "; ".join(provider_text(p) for p in faer))
-    if row_names and "lapack-openblas" in row_names:
-        parts = [f"linked {vendor.get('linkage', '?')}"]
+    # Every vendor row names the library that produced it, from the identity the harness read out
+    # of that library. Nothing here is written from the arm that was requested.
+    for engine in row_names:
+        if not engine.startswith("lapack-") or engine[len("lapack-"):] != vendor.get("name"):
+            continue
+        parts = [f"linked {vendor.get('linkage', '?')}", f"{vendor.get('name')}"]
         if vendor.get("version"):
-            parts.append(f"OpenBLAS {vendor['version']}")
+            parts[-1] += f" {vendor['version']}"
         if vendor.get("corename"):
             parts.append(f"kernel dispatched to `{vendor['corename']}`")
+        else:
+            parts.append("kernel not reported by the vendor")
         if vendor.get("parallel"):
             parts.append(f"{vendor['parallel']} threading")
         if vendor.get("config"):
