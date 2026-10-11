@@ -2,6 +2,29 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-11 — the record moves to the merged revision
+
+`tlinalg-rs#39` is merged, as a merge commit (`7dbed2f`) rather than a squash, so the revision the
+first record was taken at stays reachable and its manifests keep resolving. The pin moves to that
+merge commit.
+
+`main` had meanwhile gained three commits this suite declares invalidating -- `fix(svd): give a
+values-only complex ?gesdd the pre-3.7 real workspace` and two strided-rs pin bumps -- so the first
+record read `3 behind` rather than `current`, and its `c64` SVD rows were measured before that fix.
+Both arms were therefore re-recorded at the new revision, one complete set each, and both cells now
+read `full` and `current`. The earlier pages are kept: a record that was correct when it was taken is
+not deleted because a later one exists, and the index still shows it, `3 behind`, with its own
+commit.
+
+What the two arms say at 8T on the large shapes, as a median of the MKL/OpenBLAS ratio over each
+family's four shapes: MKL is faster on most decompositions -- `householder_apply` 0.31,
+`householder_factor` 0.35, `qr` 0.66, `eigh` 0.68, `svd_thin` 0.70, `lu_factor` 0.73 -- and slower on
+`triangular_solve` (1.13) and `eigvalsh` (1.04). `rank_revealing_qr` is where the two disagree in the
+other direction, 1.01 in f64 and 2.13 in c64, and it is the one family whose MKL result would need a
+paired repeat before it is quoted. At 1T MKL is slower nearly everywhere (1.03-1.2 in f64, up to 1.5
+in c64), which is the opposite of what the 8T columns show and is consistent with OpenBLAS
+dispatching to a Cooperlake AVX-512 kernel while MKL's single-threaded path does not.
+
 ## 2026-10-11 — MKL is a second vendor arm, and the grid is sampled at its ends
 
 **Why an arm and not an engine string.** MKL and OpenBLAS define the same BLAS/LAPACK symbols, so
