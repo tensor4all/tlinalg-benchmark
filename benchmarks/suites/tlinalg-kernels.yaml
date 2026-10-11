@@ -78,7 +78,7 @@ workloads:
     - "Batch extents are declared per regime, so a cost proportional to batch elements is visible only where the regime says so."
     - "The providers are compared at the thread budgets declared here; a budget the vendor threads itself by, outside that set, is not covered."
     - "A vendor arm records the vendor library, but only OpenBLAS reports the kernel its runtime dispatched to. MKL's manifest records its own version and the threading layer the harness pins; it names no kernel, because MKL exposes none to name."
-    - "Each axis is sampled at two ends, not across it: n=8 in the small regime and n=64 in the medium regime are not measured, and neither is the batch between 1 and 1024. A cost that is only visible in the middle of a range is not covered here."
+    - "The small and medium regimes give up the middle of their batch axis (small: batch 64 of 1, 64, 1024; medium: batch 16 of 1, 16, 128) and the medium regime also gives up n=64 of 32, 64, 128. A cost that is only visible in the middle of one of those ranges is not covered here. Large and tall declare every shape they measure."
 
 # One entry per engine name the harness emits. A result page explains every
 # column from this, so a reader needs no context beyond the page.
@@ -126,12 +126,15 @@ engines_doc:
       manifest records neither rather than inferring them. Its threading is
       vendor-owned, as for OpenBLAS.
 
-# Populations are sampled at the two ends of each axis rather than across it. Priming is a fixed
-# 0.5 s per engine row per case and does not scale with the shape, so a middle point costs exactly
-# what an end point costs while adding the least: batch=1 and batch=1024 are latency and throughput,
-# and the batch between them is neither. Dropping the middle of each axis is what makes the whole
-# declared grid affordable in one session; it is a declared reduction, not a silently partial run,
-# and the shape grid below is the whole of what a full-coverage page must cover.
+# Populations are sampled at the ends of each axis rather than across it, where the axis has a
+# middle worth dropping. Priming is a fixed 0.5 s per engine row per case and does not scale with
+# the shape, so a middle point costs exactly what an end point costs while adding the least:
+# batch=1 is latency and batch=1024 is throughput, and the batch between them is neither. That is
+# what the small and medium regimes give up -- 120 + 60 cases instead of 180 + 135, so 248 cases for
+# the suite instead of 383, about 33 minutes of priming per arm instead of 51. The large and tall
+# regimes keep every shape they declare, because those are the shapes that were never measured at
+# all. This is a declared reduction, not a silently partial run: the grid below is the whole of
+# what a full-coverage page must cover.
 runs:
   - threads: [1, 4, 8]
     cpu_sets: ["4", "4-7", "4-11"]

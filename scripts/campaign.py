@@ -30,9 +30,6 @@ PROVIDER_OF_ENGINE = {
     "lapack-mkl": "mkl",
 }
 
-# The engines the faer-backed provider measures. They are not a vendor arm: they
-# are in every arm, because a page has to carry the comparison it is making.
-FAER_ENGINES = ("faer-1lane", "faer-pool")
 
 # The faer crates the `tlinalg` provider links, read out of the measured
 # checkout's `Cargo.lock` and recorded under their own package names (`faer` or
@@ -81,11 +78,6 @@ def same_populations(covered: list[dict], declared: list[dict]) -> bool:
     return sorted(key(p) for p in covered) == sorted(key(p) for p in declared)
 
 
-def vendors_declared(engines) -> bool:
-    """Whether any declared engine is backed by a vendor library."""
-    return bool(vendor_engines(engines))
-
-
 def vendor_engines(engines) -> list[str]:
     """The vendor libraries a declared engine list measures against, in order.
 
@@ -123,3 +115,70 @@ def engines_for_vendor(suite: dict, vendor: str) -> list[str]:
         if provider in (None, "tlinalg") or provider == vendor:
             out.append(engine)
     return out
+
+
+def coverage_of(suite: dict, manifest: dict) -> str:
+    """How a run relates to the *current* declaration, by content rather than by hash.
+
+    `full` when the run covered the whole declared grid for its vendor arm, `partial`
+    when it covered a subset of it, and `declaration-changed` when what it covered is
+    not a subset of what is declared today, so the two have to be compared by hand.
+    The grid is what a reader needs to know about; a hash would have called an edited
+    sentence a moved declaration. The publish rule and the index both call this, so
+    they cannot disagree about which pages are full.
+    """
+    spec = run_spec(suite)
+    rs = manifest.get("run_spec", {})
+    arm = vendor_of_engines(rs.get("engines", []))
+    want = {p["regime"]: p for p in populations(suite)}
+    got = rs.get("populations", [])
+    if not got:
+        return "declaration-changed"
+    subset = all(
+        p.get("regime") in want
+        and set(p.get("families", [])) <= set(want[p["regime"]]["families"])
+        and set(p.get("n", [])) <= set(want[p["regime"]]["n"])
+        and set(p.get("batch", [])) <= set(want[p["regime"]]["batch"])
+        for p in got)
+    declared_engines = set(engines_for_vendor(suite, arm))
+    if not (subset
+            and set(manifest["threads"]["counts"]) <= set(spec["threads"])
+            and set(rs.get("dtypes", [])) <= set(spec["dtypes"])
+            and set(rs.get("engines", [])) <= declared_engines):
+        return "declaration-changed"
+    full = (same_populations(got, populations(suite))
+            and manifest["threads"]["counts"] == spec["threads"]
+            and rs.get("dtypes") == spec["dtypes"]
+            and rs.get("engines") == engines_for_vendor(suite, arm))
+    return "full" if full else "partial"
+
+
+def page_relative(profile: str, suite_id: str, manifest: dict) -> str:
+    """The published page for a run, relative to the repository root.
+
+    One page per measured run, named after the revision so that measuring a new commit
+    adds a page instead of replacing the previous one. The vendor is part of the name
+    because it is part of the measurement: one binary links one vendor library, so an
+    arm is its own run, and two arms at one revision are two pages a reader compares.
+    """
+    library = manifest["library"]
+    suffix = "-dirty" if library["dirty"] else ""
+    version = f"-{library['version']}" if library.get("version") else ""
+    vendor = (manifest.get("vendor") or {}).get("name")
+    arm = f"-{vendor}" if vendor else ""
+    return (f"result/{profile}/{suite_id}/"
+            f"{library['commit'][:12]}{version}{arm}{suffix}.md")
+
+
+def page_source(page):
+    """The run directory a page was generated from, read out of the page itself, or None.
+
+    Publication refuses a partial run over a full-coverage page, so the newest manifest
+    that would have written a path is not the same thing as the run whose numbers the page
+    holds. The page names the report it was copied from; nothing has to guess.
+    """
+    import re
+    with open(page) as handle:
+        first = handle.readline()
+    found = re.match(r"<!-- generated from (\S+)/report\.md by ", first)
+    return ROOT / found.group(1) if found else None

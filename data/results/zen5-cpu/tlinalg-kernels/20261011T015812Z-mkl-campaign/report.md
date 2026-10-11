@@ -19,7 +19,7 @@
   Known blind spot: Batch extents are declared per regime, so a cost proportional to batch elements is visible only where the regime says so.
   Known blind spot: The providers are compared at the thread budgets declared here; a budget the vendor threads itself by, outside that set, is not covered.
   Known blind spot: A vendor arm records the vendor library, but only OpenBLAS reports the kernel its runtime dispatched to. MKL's manifest records its own version and the threading layer the harness pins; it names no kernel, because MKL exposes none to name.
-  Known blind spot: Each axis is sampled at two ends, not across it: n=8 in the small regime and n=64 in the medium regime are not measured, and neither is the batch between 1 and 1024. A cost that is only visible in the middle of a range is not covered here.
+  Known blind spot: The small and medium regimes give up the middle of their batch axis (small: batch 64 of 1, 64, 1024; medium: batch 16 of 1, 16, 128) and the medium regime also gives up n=64 of 32, 64, 128. A cost that is only visible in the middle of one of those ranges is not covered here. Large and tall declare every shape they measure.
 - **Rows** — one row per engine in every table below:
   - `faer-1lane` — The faer-backed provider on one sequential lane: the per-item cost plus the batch loop, with no threading at all. The overhead baseline.
     Identity: tlinalg-rs (this repository's pinned revision)

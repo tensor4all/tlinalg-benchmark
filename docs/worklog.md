@@ -56,8 +56,33 @@ of being skipped with the declaration-derived ones; and a row the harness record
 longer publishable, which the recorders previously accepted as a successful run. `zen5-cpu` is now
 a required profile, which the first recorded cell made due.
 
+**The review of this change found more than the change itself.** An independent review of the
+finished diff found one blocker and eight important items, and each one was checked against the
+source before it was acted on. The blocker was real: the declaration-drift early return still sat
+above both commit resolution and the new failed-row check, so a suite edit would have switched those
+off for every manifest in the tree -- the drift branch now skips only the declaration-derived checks,
+and a synthetic manifest with an unresolvable commit under a drifted declaration is rejected.
+The rest: the publisher decides fullness by the same content rule as the index rather than by the
+recorded flag, so the two can no longer disagree about what `full` means (and an edited sentence no
+longer reads as a moved declaration); a page whose provenance cannot be read is reported rather than
+attributed to the newest manifest, and is not overwritten by a partial run; the required-cell gate
+checks the cell's selected page instead of every page ever published for it; the report and the
+comparator read exactly the files the manifest names, so validation and publication consume the same
+evidence, and a hand-run publication now meets the same validate-first bar; `compare_runs.py`
+refuses to compare two different arms, keeps the engine in its family aggregation, and says which
+arm it compared; the MKL discovery loop sees every installation, records a resolved versioned path
+instead of a symlink, and the recorder reads the builder's `%q`-quoted output as shell words rather
+than stripping quotes from it; and the enumerated environment now covers the OpenMP placement and
+limit variables and `MKL_CBWR`, which the read-back of a thread count was never evidence about.
+
+Two findings were dismissed with reasons: `VENDOR_ARMS` (the build script would reject an unknown
+arm, but only after Cargo has been invoked, and the recorder's own vocabulary is worth the two
+lines) and the index's newest-manifest tie-break (page provenance is *reported* when it cannot be
+read, not required, so a tie is still possible).
+
 **Not done here.** The pin still names `8276e097c214`; it moves to the revision that contains the MKL
-arm once that is merged, and both arms are then recorded against it.
+arm once that is merged -- with a merge commit, so that the revision the two arms were recorded at
+stays reachable -- and both arms are already recorded against it.
 
 ## 2026-10-08 — the faer provider is named in the manifest
 

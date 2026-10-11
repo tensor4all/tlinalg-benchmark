@@ -15,20 +15,12 @@ import sys
 
 import jsonschema
 
-from campaign import (ROOT, engines_for_vendor, load, populations, same_populations,
-                       vendor_engines, vendor_of_engines)
+from campaign import (ROOT, engines_for_vendor, find_suite, load, populations,
+                       same_populations, vendor_engines, vendor_of_engines)
 
 
 def known_profiles():
     return {p["name"] for p in load(ROOT / "benchmarks/profiles.yaml")["profiles"]}
-
-
-def find_suite(suite_id):
-    for f in sorted((ROOT / "benchmarks/suites").glob("*.yaml")):
-        data = load(f)
-        if data["id"] == suite_id:
-            return f, data
-    return None, None
 
 
 def declaration_drifted(manifest, suite_file):
@@ -84,7 +76,11 @@ def check_result_rows(path, manifest, errors):
     """
     run_dir = pathlib.Path(path).parent
     failures = []
-    for name in manifest.get("result_files", []):
+    names = manifest.get("result_files") or []
+    if not names:
+        errors.append("result_files is empty: a run has to name the files that hold what it "
+                      "measured, or the report and the validator are reading different evidence")
+    for name in names:
         csv_path = run_dir / name
         if not csv_path.exists():
             errors.append(f"result file {name} is not in the run directory")
@@ -98,6 +94,65 @@ def check_result_rows(path, manifest, errors):
         errors.append(f"{len(failures)} row(s) were recorded as failed rather than measured: "
                       + "; ".join(failures[:3])
                       + (" ..." if len(failures) > 3 else ""))
+
+
+def spec_of(suite):
+    return suite["runs"][0]
+
+
+def check_declaration(manifest, suite, spec, errors):
+    """The checks that only make sense against the declaration as it stands today.
+
+    A manifest was correct under the declaration it was written against and that declaration
+    cannot be reconstructed, so these are skipped once the suite has moved -- but only these.
+    What a manifest says about itself, what it recorded and what it linked is checked either way.
+    """
+    declared = {p["regime"]: p for p in populations(suite)}
+    rs = manifest.get("run_spec", {})
+    # A partial run is legitimate -- the campaign is not run in full on every
+    # profile -- but for this vendor arm it may only be a subset of what the suite
+    # declares, and the manifest has to say whether it covered the declaration.
+    arm = vendor_of_engines(rs.get("engines", []))
+    for t in manifest["threads"]["counts"]:
+        if t not in spec["threads"]:
+            errors.append(f"threads.counts contains {t}, which the suite does not declare")
+        if str(t) not in manifest["threads"]["cpu_sets"]:
+            errors.append(f"threads.cpu_sets is missing an entry for {t}T")
+    covered = rs.get("populations", [])
+    if not covered:
+        errors.append("run_spec.populations is empty: a run states what it covered")
+    for population in covered:
+        want = declared.get(population.get("regime"))
+        if want is None:
+            errors.append(f"run_spec.populations names regime {population.get('regime')!r}, "
+                          f"which the suite does not declare")
+            continue
+        for family in population.get("families", []):
+            if family not in want["families"]:
+                errors.append(f"run_spec.populations[{population['regime']}] contains family "
+                              f"{family!r}, which the suite does not declare for that regime")
+        for n in population.get("n", []):
+            if n not in want["n"]:
+                errors.append(f"run_spec.populations[{population['regime']}] contains n {n!r}, "
+                              f"which the suite does not declare for that regime")
+        for batch in population.get("batch", []):
+            if batch not in want["batch"]:
+                errors.append(f"run_spec.populations[{population['regime']}] contains batch "
+                              f"{batch!r}, which the suite does not declare for that regime")
+    for key, declared_values in (("dtypes", spec["dtypes"]),
+                                 ("engines", engines_for_vendor(suite,
+                                                                 vendor_of_engines(rs.get("engines", []))
+                                                                 or ""),)):
+        for v in rs.get(key, []):
+            if v not in declared_values:
+                errors.append(f"run_spec.{key} contains {v!r}, which the suite does not declare "
+                              f"for a run of this vendor arm")
+    covers = (same_populations(covered, populations(suite))
+              and manifest["threads"]["counts"] == spec["threads"]
+              and rs.get("dtypes") == spec["dtypes"]
+              and rs.get("engines") == engines_for_vendor(suite, vendor_of_engines(rs.get("engines", []))))
+    if rs.get("covers_declared_suite") != covers:
+        errors.append(f"run_spec.covers_declared_suite should be {covers}")
 
 
 def validate(path, check_git=True):
@@ -122,60 +177,19 @@ def validate(path, check_git=True):
         check_vendor(manifest, errors)
         if manifest["target_profile"] not in suite["required_profiles"] + suite.get("optional_profiles", []):
             errors.append(f"suite {manifest['suite_id']!r} does not list profile {manifest['target_profile']!r}")
-        elif declaration_drifted(manifest, suite_file):
+        # Only the declaration-derived checks are skipped when the declaration has moved: a
+        # manifest was correct under the declaration it was written against, and reconstructing
+        # that declaration is impossible. Everything that stands on its own -- the commit it
+        # names, the rows it recorded, the vendor it linked -- is still checked, so a later suite
+        # edit cannot switch those off for every manifest in the tree.
+        drifted = declaration_drifted(manifest, suite_file)
+        if drifted:
             print(f"note {path}: measured under a different declaration than the current one "
                   f"(recorded suite_sha256 {manifest.get('suite_sha256') or 'absent'}); "
                   f"declaration-derived checks skipped", file=sys.stderr)
-            return errors
-        spec = suite["runs"][0]
-        declared = {p["regime"]: p for p in populations(suite)}
-        rs = manifest.get("run_spec", {})
-        # A partial run is legitimate -- the campaign is not run in full on every
-        # profile -- but for this vendor arm it may only be a subset of what the suite
-        # declares, and the manifest has to say whether it covered the declaration.
-        arm = vendor_of_engines(rs.get("engines", []))
-        for t in manifest["threads"]["counts"]:
-            if t not in spec["threads"]:
-                errors.append(f"threads.counts contains {t}, which the suite does not declare")
-            if str(t) not in manifest["threads"]["cpu_sets"]:
-                errors.append(f"threads.cpu_sets is missing an entry for {t}T")
-        covered = rs.get("populations", [])
-        if not covered:
-            errors.append("run_spec.populations is empty: a run states what it covered")
-        for population in covered:
-            want = declared.get(population.get("regime"))
-            if want is None:
-                errors.append(f"run_spec.populations names regime {population.get('regime')!r}, "
-                              f"which the suite does not declare")
-                continue
-            for family in population.get("families", []):
-                if family not in want["families"]:
-                    errors.append(f"run_spec.populations[{population['regime']}] contains family "
-                                  f"{family!r}, which the suite does not declare for that regime")
-            for n in population.get("n", []):
-                if n not in want["n"]:
-                    errors.append(f"run_spec.populations[{population['regime']}] contains n {n!r}, "
-                                  f"which the suite does not declare for that regime")
-            for batch in population.get("batch", []):
-                if batch not in want["batch"]:
-                    errors.append(f"run_spec.populations[{population['regime']}] contains batch "
-                                  f"{batch!r}, which the suite does not declare for that regime")
-        for key, declared_values in (("dtypes", spec["dtypes"]),
-                                     ("engines", engines_for_vendor(suite,
-                                                                     vendor_of_engines(rs.get("engines", []))
-                                                                     or ""),)):
-            for v in rs.get(key, []):
-                if v not in declared_values:
-                    errors.append(f"run_spec.{key} contains {v!r}, which the suite does not declare "
-                                  f"for a run of this vendor arm")
-        covers = (same_populations(covered, populations(suite))
-                  and manifest["threads"]["counts"] == spec["threads"]
-                  and rs.get("dtypes") == spec["dtypes"]
-                  and rs.get("engines") == engines_for_vendor(suite, vendor_of_engines(rs.get("engines", []))))
-        if rs.get("covers_declared_suite") != covers:
-            errors.append(f"run_spec.covers_declared_suite should be {covers}")
+        else:
+            check_declaration(manifest, suite, spec_of(suite), errors)
 
-    check_result_rows(path, manifest, errors)
 
     if check_git:
         commit = manifest["library"]["commit"]

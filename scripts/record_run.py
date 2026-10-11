@@ -25,13 +25,14 @@ import hashlib
 import os
 import pathlib
 import platform
+import shlex
 import subprocess
 import sys
 
 import yaml
 
 from campaign import (FAER_PACKAGES, PROVIDER_OF_ENGINE, ROOT, engines_for_vendor, populations,
-                       same_populations, vendor_engines, vendor_of_engines)
+                       same_populations, vendor_engines)
 
 # One binary links one vendor library, so a run measures one arm, and the arm decides the
 # features. `BENCH_FEATURES` must not be inherited: the feature set is what names the vendor in
@@ -40,10 +41,13 @@ from campaign import (FAER_PACKAGES, PROVIDER_OF_ENGINE, ROOT, engines_for_vendo
 # and reports it back for the manifest to record.
 VENDOR_ARMS = ("openblas", "mkl")
 
-# Thread-budget variables that belong to a vendor library, not to the measurement. The harness
-# sets the budget from the row's thread count and reads it back, so an inherited value must not
-# reach the measured process as if it were a declaration. MKL adds a budget, a domain budget, and
-# two selectable layers, one of which is an ABI.
+# Thread-budget and tuning variables that belong to a vendor library, not to the measurement. The
+# harness sets the budget from the row's thread count and reads it back, so an inherited value must
+# not reach the measured process as if it were a declaration. MKL adds a budget, a domain budget and
+# two selectable layers, one of which is an ABI; Intel and GNU OpenMP add a limit, a placement and a
+# conditional-numerical-reproducibility switch, each of which can change how many workers run where,
+# or which code path they take. A read-back of the thread count is not evidence that none of them
+# was set: they were removed, and their values are recorded.
 VENDOR_ENV = (
     "OPENBLAS_NUM_THREADS",
     "MKL_NUM_THREADS",
@@ -52,7 +56,13 @@ VENDOR_ENV = (
     "MKL_THREADING_LAYER",
     "MKL_DYNAMIC",
     "MKL_ENABLE_INSTRUCTIONS",
+    "MKL_CBWR",
     "OMP_NUM_THREADS",
+    "OMP_THREAD_LIMIT",
+    "OMP_PROC_BIND",
+    "OMP_PLACES",
+    "KMP_AFFINITY",
+    "GOMP_CPU_AFFINITY",
     "RAYON_NUM_THREADS",
 )
 
@@ -75,9 +85,13 @@ def build(checkout, vendor):
        env=dict(os.environ, BENCH_VENDOR=vendor))
     pin = {}
     for line in env_file.read_text().splitlines():
-        if "=" in line:
-            k, _, v = line.partition("=")
-            pin[k] = v.strip().strip("'\"")
+        if "=" not in line:
+            continue
+        # The builder writes shell assignments with `printf %q`, so they are read back as shell
+        # words: `.strip("\'\"")` leaves the backslash `%q` puts before a space.
+        (assignment,) = shlex.split(line)
+        k, _, v = assignment.partition("=")
+        pin[k] = v
     return pin
 
 
@@ -228,7 +242,10 @@ def main():
                          "subset it covered, so a partial population is visible rather than implied.")
     ap.add_argument("--threads", default=None, help="override, comma separated")
     ap.add_argument("--dtypes", default=None)
-    ap.add_argument("--engines", default=None)
+    ap.add_argument("--engines", default=None,
+                    help="which engine rows to declare as this run's own, for a report. It does not "
+                         "select what the harness measures: the binary measures the rows it was "
+                         "built with, whatever this says.")
     ap.add_argument("--vendor", default=None,
                     help="which vendor arm to record: one binary links one vendor library, so an arm "
                          "is its own run. Required when the suite declares more than one.")

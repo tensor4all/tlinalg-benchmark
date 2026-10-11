@@ -58,7 +58,9 @@ bin_args=(); for bin in "${BINS[@]}"; do bin_args+=(--bin "$bin"); done
 profile_flag=(); subdir=debug
 if [[ "$profile" == release ]]; then profile_flag=(--release); subdir=release; fi
 
-newest_dir() { ls -d "$1" 2>/dev/null | sort -V | tail -1; }
+# The glob is passed quoted, so the shell does not expand it to many arguments and this
+# function sees only the first: with two installations the newest must still win.
+newest_dir() { ls -d $1 2>/dev/null | sort -V | tail -1; }
 
 case "$VENDOR" in
   openblas)
@@ -77,11 +79,14 @@ case "$VENDOR" in
     # The installed MKL, named by versioned path. The threading runtime is linked eagerly because
     # MKL's Intel OpenMP layer is loaded at run time with an undefined `omp_get_num_procs`, and
     # `--as-needed` would otherwise drop the library nothing references.
-    MKLROOT="${MKLROOT:-$(newest_dir /opt/intel/oneapi/mkl/*/)}"
-    MKL_THREADING_LIB="${MKL_THREADING_LIB:-$(newest_dir /opt/intel/oneapi/compiler/*/lib/libiomp5.so)}"
+    MKLROOT="$(newest_dir "${MKLROOT:-/opt/intel/oneapi/mkl/*/}")"
+    MKL_THREADING_LIB="${MKL_THREADING_LIB:-$(newest_dir "/opt/intel/oneapi/compiler/*/lib/libiomp5.so")}"
     [[ -n "$MKLROOT" && -n "$MKL_THREADING_LIB" ]] || {
       echo "ERROR: no installed MKL found; set MKLROOT and MKL_THREADING_LIB" >&2; exit 1; }
-    MKLROOT="${MKLROOT%/}"
+    # What is recorded has to name the tree that was used, not a symlink that can be moved under it:
+    # `MKLROOT=.../latest` in a manifest records nothing a reader can act on.
+    MKLROOT="$(cd "$MKLROOT" && pwd -P)"
+    MKL_THREADING_LIB="$(readlink -f "$MKL_THREADING_LIB")"
     export MKLROOT MKL_THREADING_LIB
     VENDOR_BUILD_ENV="MKLROOT=$MKLROOT MKL_THREADING_LIB=$MKL_THREADING_LIB"
     ;;

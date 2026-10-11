@@ -32,7 +32,7 @@ import sys
 
 import yaml
 
-from campaign import run_spec, vendor_engines
+from campaign import coverage_of, page_relative, page_source, run_spec, vendor_engines
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "result/INDEX.md"
@@ -71,51 +71,6 @@ def invalidating_distance(checkout, measured, reference, paths):
             return None
         return 0
     return int(git(checkout, "rev-list", "--count", f"{measured}..{reference}", "--", *paths) or 0)
-
-
-def suite_hash(suite):
-    import hashlib
-    return hashlib.sha256((ROOT / "benchmarks/suites" / f"{suite['id']}.yaml").read_bytes()).hexdigest()
-
-
-def coverage_of(suite, manifest):
-    """How a page relates to the *current* declaration.
-
-    `full` and `partial` are the run's own statement, but only meaningful while
-    the declaration it was measured under is unchanged. Once the declaration
-    moves -- an arm added, a size dropped -- the page cannot be described as
-    full or partial against today's spec without comparing the two by hand, so
-    it is labelled `declaration-changed` and the reader is told rather than
-    misled. Evidence is immutable; declarations are not.
-    """
-    recorded = manifest.get("suite_sha256")
-    if recorded and recorded == suite_hash(suite):
-        return "full" if manifest["run_spec"].get("covers_declared_suite") else "partial"
-    return "declaration-changed"
-
-
-def page_source(page):
-    """The run directory a page was generated from, read out of the page itself.
-
-    The publication rule refuses a partial run over a full-coverage page, so the newest manifest
-    that would have written a path is not the same thing as the run whose numbers the page holds.
-    The page says which run it was copied from; the index reads that rather than guessing.
-    """
-    import re
-    with open(page) as handle:
-        first = handle.readline()
-    found = re.match(r"<!-- generated from (\S+)/report\.md by ", first)
-    return ROOT / found.group(1) if found else None
-
-
-def page_relative(profile, suite, manifest):
-    """The published page for a run. Must match scripts/publish_report.py."""
-    library = manifest["library"]
-    suffix = "-dirty" if library["dirty"] else ""
-    version = f"-{library['version']}" if library.get("version") else ""
-    vendor = (manifest.get("vendor") or {}).get("name")
-    arm = f"-{vendor}" if vendor else ""
-    return f"result/{profile}/{suite}/{library['commit'][:12]}{version}{arm}{suffix}.md"
 
 
 def status_of(suite, manifest, checkout, reference, have_checkout):
@@ -166,6 +121,8 @@ def collect():
                 source = page_source(page)
                 if source is not None and source.resolve() != mf.parent.resolve():
                     continue
+                # No readable header means the page cannot be attributed to a run. It is still
+                # indexed -- silently dropping it would hide a page -- but the index says so.
                 status, distance = status_of(suite, m, checkout, reference, have_checkout)
                 arm = (m.get("vendor") or {}).get("name")
                 row = dict(
@@ -174,7 +131,7 @@ def collect():
                     date=m["timestamp"][:10], timestamp=m["timestamp"],
                     coverage=coverage_of(suite, m),
                     status=status, behind=distance, stale_after=suite["stale_after"],
-                    page=rel,
+                    page=rel, unattributed=source is None,
                     sort_key=(m["timestamp"], m["library"]["commit"][:12]),
                 )
                 if rel not in per_page or row["sort_key"] > per_page[rel]["sort_key"]:
@@ -319,10 +276,16 @@ def main():
         if cell["required"]:
             arm = f"/{cell['vendor']}" if cell["vendor"] else ""
             problems.append(f"required cell {cell['suite']}/{cell['profile']}{arm} has no run")
-    for r in published:
-        if not r["required"]:
+    for cell in cells(pages, missing):
+        # The gate is the cell's own newest page, not every page ever published for it: a page
+        # kept for the record must not keep a cell failing after the cell has been re-measured.
+        r = cell["newest"]
+        if not cell["required"] or r is None:
             continue
         arm = f"/{r['vendor']}" if r["vendor"] else ""
+        if r.get("unattributed"):
+            problems.append(f"{r['page']} carries no readable provenance header, so which run it "
+                            f"holds is unknown")
         if r["status"] == "dirty":
             problems.append(f"required cell {r['suite']}/{r['profile']}{arm} was measured from a dirty checkout")
         elif r["status"] == "diverged":

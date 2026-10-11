@@ -4,9 +4,11 @@
     compare_runs.py <before-run-dir> <after-run-dir> [--families a,b] [--threads 1]
 
 Both directories are raw run directories (`data/results/<profile>/<suite>/<timestamp>/`),
-and both must have been produced by `tlbench` over overlapping cells. For every
-cell the table reports the ratio `after / before` of the best wall time, so a value
-below 1 means the change made that cell faster.
+and both must have been produced by `tlbench` over overlapping cells **of the same vendor arm**:
+one binary links one vendor library, so a run of one arm shares no engine row with a run of
+another, and the two are compared by reading their pages side by side rather than here. For every
+cell the table reports the ratio `after / before` of the best wall time, so a value below 1 means
+the change made that cell faster.
 
 What this is and is not:
 
@@ -31,10 +33,25 @@ COLUMNS = ["regime", "family", "dtype", "m", "n", "batch", "row", "threads",
 
 
 def read(run_dir: pathlib.Path):
-    """(cell -> [ms per repeat]) plus the repeat count and the manifest."""
+    """(cell -> [ms per repeat]), the repeat count, and the manifest.
+
+    Only the files the manifest names: that is what the validator checked, and a ratio built from
+    anything else would compare numbers nothing gated.
+    """
+    import yaml
+    manifest_path = run_dir / "run.yaml"
+    if not manifest_path.exists():
+        sys.exit(f"{run_dir} has no run.yaml: a comparison needs to know what was measured")
+    manifest = yaml.safe_load(manifest_path.read_text())
+    listed = manifest.get("result_files") or []
+    if not listed:
+        sys.exit(f"{manifest_path} names no result files")
+    absent = [f for f in listed if not (run_dir / f).exists()]
+    if absent:
+        sys.exit(f"{run_dir}: result files named by the manifest are absent: {absent}")
     cells: dict[tuple, list[float]] = {}
     repeats = set()
-    for path in sorted(run_dir.glob("run*.csv")):
+    for path in [run_dir / f for f in listed]:
         repeats.add(path.stem.split("-")[0])
         with open(path) as handle:
             for row in csv.DictReader(handle):
@@ -46,7 +63,7 @@ def read(run_dir: pathlib.Path):
                 key = (row["regime"], row["family"], row["dtype"], int(row["m"]),
                        int(row["n"]), int(row["batch"]), row["row"], int(row["threads"]))
                 cells.setdefault(key, []).append(float(row["total_ms"]))
-    return cells, len(repeats)
+    return cells, len(repeats), manifest
 
 
 def shape(key) -> str:
@@ -56,11 +73,16 @@ def shape(key) -> str:
 
 
 def aggregate(pairs):
-    """(family, threads, dtype) -> ratios, for the family-level table."""
+    """(family, engine row, threads, dtype) -> ratios, for the family-level table.
+
+    The engine stays in the key. A median over these ratios would otherwise pool the faer rows
+    with the vendor row and call the result a family statistic, and a change that moves one of
+    them would be hidden by the other.
+    """
     groups: dict[tuple, list[float]] = {}
     for key, ratio in pairs:
-        _, family, dtype, _, _, _, _, threads = key
-        groups.setdefault((family, threads, dtype), []).append(ratio)
+        _, family, dtype, _, _, _, row, threads = key
+        groups.setdefault((family, row, threads, dtype), []).append(ratio)
     return groups
 
 
@@ -73,8 +95,21 @@ def main() -> int:
     args = ap.parse_args()
 
     before_dir, after_dir = pathlib.Path(args.before), pathlib.Path(args.after)
-    before, before_repeats = read(before_dir)
-    after, after_repeats = read(after_dir)
+    before, before_repeats, before_manifest = read(before_dir)
+    after, after_repeats, after_manifest = read(after_dir)
+
+    # One binary links one vendor library, so two runs of different arms have no engine row in
+    # common except the faer rows, which are the same code on both sides and say nothing about
+    # either vendor. Comparing them here would produce a table of faer ratios and read as a vendor
+    # comparison; the vendor comparison is two pages read side by side.
+    before_arm = (before_manifest.get("vendor") or {}).get("name")
+    after_arm = (after_manifest.get("vendor") or {}).get("name")
+    if before_arm != after_arm:
+        sys.exit(f"ERROR: these are two vendor arms ({before_arm} and {after_arm}), which is not a "
+                 f"revision comparison: the two binaries share no engine row but the faer rows, "
+                 f"and those are identical code on both sides. Compare each arm with the previous "
+                 f"revision recorded for the same arm, and compare the arms by reading their "
+                 f"pages side by side.")
 
     wanted = set(args.families.split(",")) if args.families else None
     keys = sorted(set(before) & set(after))
@@ -85,6 +120,7 @@ def main() -> int:
 
     print(f"# {args.before} -> {args.after}")
     print()
+    print(f"- vendor arm: `{before_arm}` on both sides")
     print(f"- complete-set repeats: before {before_repeats}, after {after_repeats}")
     only_before = len(set(before) - set(after))
     only_after = len(set(after) - set(before))
@@ -108,10 +144,10 @@ def main() -> int:
     print()
     print("## Per family")
     print()
-    print("| family | threads | dtype | cells | median after/before | min | max |")
-    print("|---|---|---|---|---|---|---|")
-    for (family, threads, dtype), ratios in sorted(aggregate(pairs).items()):
-        print(f"| `{family}` | {threads}T | {dtype} | {len(ratios)} | "
+    print("| family | row | threads | dtype | cells | median after/before | min | max |")
+    print("|---|---|---|---|---|---|---|---|")
+    for (family, row, threads, dtype), ratios in sorted(aggregate(pairs).items()):
+        print(f"| `{family}` | `{row}` | {threads}T | {dtype} | {len(ratios)} | "
               f"{statistics.median(ratios):.3f} | {min(ratios):.3f} | {max(ratios):.3f} |")
 
     if min(before_repeats, after_repeats) >= 2:
