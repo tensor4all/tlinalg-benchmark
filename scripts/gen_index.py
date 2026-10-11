@@ -32,6 +32,8 @@ import sys
 
 import yaml
 
+from campaign import coverage_of, page_relative, page_source, run_spec, vendor_engines
+
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 INDEX = ROOT / "result/INDEX.md"
 
@@ -52,43 +54,23 @@ def reference_rev():
 
 
 def invalidating_distance(checkout, measured, reference, paths):
-    """Commits touching `paths` that are in `reference` but not in `measured`."""
+    """Commits touching `paths` that are in `reference` but not in `measured`.
+
+    A measured revision that is a *descendant* of the reference is current rather than diverged: it
+    contains everything the reference names, so nothing the suite declares invalidating lies
+    between them. Only a revision that is on neither side of the reference is diverged.
+    """
     if measured == reference:
         return 0
     try:
         git(checkout, "merge-base", "--is-ancestor", measured, reference)
     except RuntimeError:
-        return None
+        try:
+            git(checkout, "merge-base", "--is-ancestor", reference, measured)
+        except RuntimeError:
+            return None
+        return 0
     return int(git(checkout, "rev-list", "--count", f"{measured}..{reference}", "--", *paths) or 0)
-
-
-def suite_hash(suite):
-    import hashlib
-    return hashlib.sha256((ROOT / "benchmarks/suites" / f"{suite['id']}.yaml").read_bytes()).hexdigest()
-
-
-def coverage_of(suite, manifest):
-    """How a page relates to the *current* declaration.
-
-    `full` and `partial` are the run's own statement, but only meaningful while
-    the declaration it was measured under is unchanged. Once the declaration
-    moves -- an arm added, a size dropped -- the page cannot be described as
-    full or partial against today's spec without comparing the two by hand, so
-    it is labelled `declaration-changed` and the reader is told rather than
-    misled. Evidence is immutable; declarations are not.
-    """
-    recorded = manifest.get("suite_sha256")
-    if recorded and recorded == suite_hash(suite):
-        return "full" if manifest["run_spec"].get("covers_declared_suite") else "partial"
-    return "declaration-changed"
-
-
-def page_relative(profile, suite, manifest):
-    """The published page for a run. Must match scripts/publish_report.py."""
-    library = manifest["library"]
-    suffix = "-dirty" if library["dirty"] else ""
-    version = f"-{library['version']}" if library.get("version") else ""
-    return f"result/{profile}/{suite}/{library['commit'][:12]}{version}{suffix}.md"
 
 
 def status_of(suite, manifest, checkout, reference, have_checkout):
@@ -109,7 +91,12 @@ def status_of(suite, manifest, checkout, reference, have_checkout):
 
 
 def collect():
-    """The published pages, plus the cells that have no run at all."""
+    """The published pages, plus the cells that have no run at all.
+
+    A cell is `(suite, profile, vendor arm)`: one binary links one vendor library, so an arm is a
+    separate run at the same revision, and an arm with no run has to appear as `missing` rather
+    than be implied by the other arm's page.
+    """
     profiles = [p["name"] for p in load(ROOT / "benchmarks/profiles.yaml")["profiles"]]
     suites = [load(f) for f in sorted((ROOT / "benchmarks/suites").glob("*.yaml"))]
     reference = reference_rev()
@@ -117,47 +104,59 @@ def collect():
     have_checkout = (checkout / ".git").exists()
     pages, missing = [], []
     for suite in suites:
+        arms = vendor_engines(run_spec(suite)["engines"]) or [None]
         wanted = list(suite["required_profiles"]) + [p for p in suite.get("optional_profiles", [])]
         for profile in wanted:
             required = profile in suite["required_profiles"]
             cell = ROOT / "data/results" / profile / suite["id"]
             manifests = sorted(cell.glob("*/run.yaml")) if cell.is_dir() else []
-            if not manifests:
-                missing.append(dict(suite=suite["id"], profile=profile, required=required))
-                continue
-            # One page per revision: keep the newest run that produced it.
+            # One page per revision per arm: keep the run whose numbers the page actually holds.
             per_page = {}
             for mf in manifests:
                 m = load(mf)
                 rel = page_relative(profile, suite["id"], m)
+                page = ROOT / rel
+                if not page.exists():
+                    continue
+                source = page_source(page)
+                if source is not None and source.resolve() != mf.parent.resolve():
+                    continue
+                # No readable header means the page cannot be attributed to a run. It is still
+                # indexed -- silently dropping it would hide a page -- but the index says so.
                 status, distance = status_of(suite, m, checkout, reference, have_checkout)
+                arm = (m.get("vendor") or {}).get("name")
                 row = dict(
-                    suite=suite["id"], profile=profile, required=required,
+                    suite=suite["id"], profile=profile, vendor=arm, required=required,
                     commit=m["library"]["commit"][:12], version=m["library"].get("version"),
                     date=m["timestamp"][:10], timestamp=m["timestamp"],
                     coverage=coverage_of(suite, m),
                     status=status, behind=distance, stale_after=suite["stale_after"],
-                    page=rel if (ROOT / rel).exists() else None,
+                    page=rel, unattributed=source is None,
                     sort_key=(m["timestamp"], m["library"]["commit"][:12]),
                 )
                 if rel not in per_page or row["sort_key"] > per_page[rel]["sort_key"]:
                     per_page[rel] = row
+            published_arms = {r["vendor"] for r in per_page.values()}
+            for arm in arms:
+                if arm not in published_arms:
+                    missing.append(dict(suite=suite["id"], profile=profile, vendor=arm,
+                                        required=required))
             pages.extend(per_page.values())
     return pages, missing, reference, profiles, [s["id"] for s in suites], have_checkout
 
 
 def cells(pages, missing):
-    """(suite, profile) groups, newest page first, including cells with no run."""
+    """(suite, profile, vendor) groups, newest page first, including cells with no run."""
     order, by = [], {}
     for r in missing:
-        key = (r["suite"], r["profile"])
-        by[key] = {"suite": r["suite"], "profile": r["profile"],
+        key = (r["suite"], r["profile"], r["vendor"])
+        by[key] = {"suite": r["suite"], "profile": r["profile"], "vendor": r["vendor"],
                    "required": r["required"], "runs": []}
         order.append(key)
     for r in pages:
-        key = (r["suite"], r["profile"])
+        key = (r["suite"], r["profile"], r["vendor"])
         if key not in by:
-            by[key] = {"suite": r["suite"], "profile": r["profile"],
+            by[key] = {"suite": r["suite"], "profile": r["profile"], "vendor": r["vendor"],
                        "required": r["required"], "runs": []}
             order.append(key)
         by[key]["runs"].append(r)
@@ -196,24 +195,28 @@ def render(pages, missing, reference, generated):
         "",
         f"- Reference revision (`pins/tlinalg-rs.rev`): `{reference}`",
         f"- Newest recorded run: `{generated}`",
-        "- Every page below is one `(suite, hardware profile, revision)` and carries",
-        "  its commit and hardware itself.",
+        "- Every page below is one `(suite, hardware profile, revision, vendor arm)` and carries",
+        "  its commit, its hardware and the vendor library it linked itself.",
         "",
         "## Cells",
         "",
-        "The newest full-coverage page for each cell, and whether it is current.",
+        "The newest full-coverage page for each cell, and whether it is current. One binary links",
+        "one vendor library, so an arm is its own cell: an arm with no run appears as `missing`",
+        "rather than being implied by the other arm's page.",
         "",
-        "| suite | profile | revision | version | date | coverage | status | page |",
-        "|---|---|---|---|---|---|---|---|",
+        "| suite | profile | vendor | revision | version | date | coverage | status | page |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for cell in cells(pages, missing):
         mark = "" if cell["required"] else " (optional)"
         r = cell["newest"]
+        vendor = f"`{cell['vendor']}`" if cell["vendor"] else "-"
         if r is None:
-            out.append(f"| `{cell['suite']}` | `{cell['profile']}`{mark} | - | - | - | - | missing | - |")
+            out.append(f"| `{cell['suite']}` | `{cell['profile']}`{mark} | {vendor} | - | - | - | - "
+                       f"| missing | - |")
         else:
             cell_link = link(r["page"]) if r.get("page") else "(no page)"
-            out.append(f"| `{cell['suite']}` | `{cell['profile']}`{mark} | `{r['commit']}` | "
+            out.append(f"| `{cell['suite']}` | `{cell['profile']}`{mark} | {vendor} | `{r['commit']}` | "
                        f"{r['version'] or '-'} | {r['date']} | {r['coverage']} | {r['status']} | {cell_link} |")
     out += [
         "",
@@ -227,13 +230,14 @@ def render(pages, missing, reference, generated):
         "",
         "## All pages",
         "",
-        "| suite | profile | revision | version | date | coverage | status | page |",
-        "|---|---|---|---|---|---|---|---|",
+        "| suite | profile | vendor | revision | version | date | coverage | status | page |",
+        "|---|---|---|---|---|---|---|---|---|",
     ]
     for r in sorted(pages, key=lambda r: (r["suite"], r["profile"], r["sort_key"]), reverse=True):
         page_link = link(r["page"]) if r.get("page") else "(no page)"
-        out.append(f"| `{r['suite']}` | `{r['profile']}` | `{r['commit']}` | {r['version'] or '-'} | "
-                   f"{r['date']} | {r['coverage']} | {r['status']} | {page_link} |")
+        vendor = f"`{r['vendor']}`" if r["vendor"] else "-"
+        out.append(f"| `{r['suite']}` | `{r['profile']}` | {vendor} | `{r['commit']}` | "
+                   f"{r['version'] or '-'} | {r['date']} | {r['coverage']} | {r['status']} | {page_link} |")
     out.append("")
     return "\n".join(out).rstrip("\n") + "\n"
 
@@ -270,16 +274,24 @@ def main():
                         "(run scripts/setup_extern_deps.sh)")
     for cell in missing:
         if cell["required"]:
-            problems.append(f"required cell {cell['suite']}/{cell['profile']} has no run")
-    for r in published:
-        if not r["required"]:
+            arm = f"/{cell['vendor']}" if cell["vendor"] else ""
+            problems.append(f"required cell {cell['suite']}/{cell['profile']}{arm} has no run")
+    for cell in cells(pages, missing):
+        # The gate is the cell's own newest page, not every page ever published for it: a page
+        # kept for the record must not keep a cell failing after the cell has been re-measured.
+        r = cell["newest"]
+        if not cell["required"] or r is None:
             continue
+        arm = f"/{r['vendor']}" if r["vendor"] else ""
+        if r.get("unattributed"):
+            problems.append(f"{r['page']} carries no readable provenance header, so which run it "
+                            f"holds is unknown")
         if r["status"] == "dirty":
-            problems.append(f"required cell {r['suite']}/{r['profile']} was measured from a dirty checkout")
+            problems.append(f"required cell {r['suite']}/{r['profile']}{arm} was measured from a dirty checkout")
         elif r["status"] == "diverged":
-            problems.append(f"required cell {r['suite']}/{r['profile']} is not an ancestor of the reference")
+            problems.append(f"required cell {r['suite']}/{r['profile']}{arm} is not an ancestor of the reference")
         elif r["status"] == "stale" and args.fail_on_stale:
-            problems.append(f"required cell {r['suite']}/{r['profile']} is stale "
+            problems.append(f"required cell {r['suite']}/{r['profile']}{arm} is stale "
                             f"({r['behind']} invalidating commits > {r['stale_after']})")
 
     if args.write:

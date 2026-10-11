@@ -20,13 +20,12 @@ invalidated_by:
   - Cargo.toml
   - Cargo.lock
 stale_after: 20
-# No profile is required yet: the first real cell has to be recorded before one
-# can be, because a required cell with no run fails the index gate, and a run
-# requires the harness to exist at the pinned revision. The first recorded
-# (zen5-cpu, tlinalg-kernels) cell moves zen5-cpu here.
-required_profiles: []
-optional_profiles:
+# One profile at a time, and a cell is not optional once it has been recorded: the
+# first (zen5-cpu, tlinalg-kernels) cell exists, so this profile's absence is now an
+# error rather than an empty cell.
+required_profiles:
   - zen5-cpu
+optional_profiles: []
 
 # Family groups. A group is a set of families that are worth measuring on the
 # same shape grid; the runs below say which groups are measured per regime. The
@@ -78,6 +77,8 @@ workloads:
     - "Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope."
     - "Batch extents are declared per regime, so a cost proportional to batch elements is visible only where the regime says so."
     - "The providers are compared at the thread budgets declared here; a budget the vendor threads itself by, outside that set, is not covered."
+    - "A vendor arm records the vendor library, but only OpenBLAS reports the kernel its runtime dispatched to. MKL's manifest records its own version and the threading layer the harness pins; it names no kernel, because MKL exposes none to name."
+    - "The small and medium regimes give up the middle of their batch axis (small: batch 64 of 1, 64, 1024; medium: batch 16 of 1, 16, 128) and the medium regime also gives up n=64 of 32, 64, 128. A cost that is only visible in the middle of one of those ranges is not covered here. Large and tall declare every shape they measure."
 
 # One entry per engine name the harness emits. A result page explains every
 # column from this, so a reader needs no context beyond the page.
@@ -110,21 +111,44 @@ engines_doc:
       LAPACK and BLAS own their threading, so this row's thread budget is the
       vendor's, not the host pool's. Where a family has no LAPACK route the
       row is absent and the CSV says the case was skipped for it.
+  lapack-mkl:
+    provider: mkl
+    summary: >-
+      The same provider against Intel oneAPI MKL, linked from the installation
+      `MKLROOT` names. One binary links one vendor library, so this row is
+      measured by its own build of the harness and recorded as its own run; no
+      page carries two vendor arms. The interface and threading layers are pinned
+      by the harness before the first MKL call, because MKL otherwise lets the
+      environment choose them and the interface layer is an ABI.
+    identity: the MKL build recorded in this run's manifest (`providers[mkl]`)
+    caveat: >-
+      MKL reports no dispatched-kernel name and no processor count, so its
+      manifest records neither rather than inferring them. Its threading is
+      vendor-owned, as for OpenBLAS.
 
+# Populations are sampled at the ends of each axis rather than across it, where the axis has a
+# middle worth dropping. Priming is a fixed 0.5 s per engine row per case and does not scale with
+# the shape, so a middle point costs exactly what an end point costs while adding the least:
+# batch=1 is latency and batch=1024 is throughput, and the batch between them is neither. That is
+# what the small and medium regimes give up -- 120 + 60 cases instead of 180 + 135, so 248 cases for
+# the suite instead of 383, about 33 minutes of priming per arm instead of 51. The large and tall
+# regimes keep every shape they declare, because those are the shapes that were never measured at
+# all. This is a declared reduction, not a silently partial run: the grid below is the whole of
+# what a full-coverage page must cover.
 runs:
   - threads: [1, 4, 8]
     cpu_sets: ["4", "4-7", "4-11"]
     dtypes: [f64, c64]
-    engines: [faer-1lane, faer-pool, lapack-openblas]
+    engines: [faer-1lane, faer-pool, lapack-openblas, lapack-mkl]
     populations:
       - regime: small
         groups: [factor, decompose, heavy]
         n: ["4", "8", "16"]
-        batch: [1, 64, 1024]
+        batch: [1, 1024]
       - regime: medium
         groups: [factor, decompose]
-        n: ["32", "64", "128"]
-        batch: [1, 16, 128]
+        n: ["32", "128"]
+        batch: [1, 128]
       - regime: large
         groups: [factor, decompose]
         n: ["256", "512"]

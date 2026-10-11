@@ -2,6 +2,111 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-11 — the record moves to the merged revision
+
+`tlinalg-rs#39` is merged, as a merge commit (`7dbed2f`) rather than a squash, so the revision the
+first record was taken at stays reachable and its manifests keep resolving. The pin moves to that
+merge commit.
+
+`main` had meanwhile gained three commits this suite declares invalidating -- `fix(svd): give a
+values-only complex ?gesdd the pre-3.7 real workspace` and two strided-rs pin bumps -- so the first
+record read `3 behind` rather than `current`, and its `c64` SVD rows were measured before that fix.
+Both arms were therefore re-recorded at the new revision, one complete set each, and both cells now
+read `full` and `current`. The earlier pages are kept: a record that was correct when it was taken is
+not deleted because a later one exists, and the index still shows it, `3 behind`, with its own
+commit.
+
+What the two arms say at 8T on the large shapes, as a median of the MKL/OpenBLAS ratio over each
+family's four shapes: MKL is faster on most decompositions -- `householder_apply` 0.31,
+`householder_factor` 0.35, `qr` 0.66, `eigh` 0.68, `svd_thin` 0.70, `lu_factor` 0.73 -- and slower on
+`triangular_solve` (1.13) and `eigvalsh` (1.04). `rank_revealing_qr` is where the two disagree in the
+other direction, 1.01 in f64 and 2.13 in c64, and it is the one family whose MKL result would need a
+paired repeat before it is quoted. At 1T MKL is slower nearly everywhere (1.03-1.2 in f64, up to 1.5
+in c64), which is the opposite of what the 8T columns show and is consistent with OpenBLAS
+dispatching to a Cooperlake AVX-512 kernel while MKL's single-threaded path does not.
+
+## 2026-10-11 — MKL is a second vendor arm, and the grid is sampled at its ends
+
+**Why an arm and not an engine string.** MKL and OpenBLAS define the same BLAS/LAPACK symbols, so
+one process resolves them to one library: an arm is a *build*, and a run is one arm. The harness now
+names the LAPACK row after the library it linked (`lapack-mkl`, `lapack-openblas`) instead of after
+a literal, and `tlinalg-blas` refuses a build that asks for both vendors. Two arms at the same
+revision are two pages, compared side by side, each carrying its own faer rows and its own vendor
+identity. A single page carrying both was the other candidate; it was rejected because it would
+have needed the manifest to describe two builds' features, environments and result files at once,
+which is more provenance machinery than it saves, and because "one manifest is one build" is worth
+keeping. The consequence is deliberate: two arms mean two recorders run sequentially, and no page
+holds a vendor comparison that was not measured in one process.
+
+**What MKL needs that OpenBLAS does not.** The installed library, named by `MKLROOT`, not
+`blas-src`'s route through `intel-mkl-src` (which would fetch its own MKL tree, and whose features
+are additive with the OpenBLAS source this crate already activates). A `build.rs` in `tlinalg-blas`
+emits the library side, and one in `tlinalg-bench` -- the package the executable belongs to -- the
+final-link side, because `rustc-link-arg` does not reach another package's binary. That side is
+load-bearing: `libmkl_intel_thread.so` enters with an undefined `omp_get_num_procs`, and nothing
+references `libiomp5`'s symbols, so `--as-needed` drops it unless the link says otherwise; and
+`rustc` does not turn a search path into an `-rpath`, so without one the harness only runs with
+`LD_LIBRARY_PATH` arranged for it. MKL's interface layer is an ABI, and the environment can choose
+it, so the harness pins LP64 and the Intel OpenMP layer before its first MKL call and refuses to
+continue if the library will not take them. It reports no dispatched kernel and no processor count,
+so those stay empty in the manifest.
+
+**The grid is sampled at the ends, not across it.** Priming is 0.5 s per engine row per case and does
+not scale with the shape, so a middle point costs exactly what an end point costs while adding the
+least information: batch 1 is latency and batch 1024 is throughput, and the batch between them is
+neither, while n=8 sits between two sizes that are already there. Dropping the middle of each axis
+took the declared grid from 383 cases to 248 -- 3,968 engine rows per complete set per arm, about
+33 minutes of priming each, where the middle points alone were 135 cases. This is a declared
+reduction, not a partial run: the shape grid in the suite file *is* what a full-coverage page must
+cover, and the workload says in its own words that a cost visible only in the middle of a range is
+not covered.
+
+**The large end is affordable, which the earlier worklog flagged as a pilot rather than an
+assumption.** Measured on `zen5-cpu` at revision `6d55cb6f68bd` with the OpenBLAS arm (one repeat,
+200 ms priming, unpinned and therefore not a published number): `svd_thin` 512x512 batch 4 at 8T is
+182 / 129 / 166 ms for faer-1lane / faer-pool / lapack-openblas, and the whole `tall` regime at
+4096x256 batch 1 is 20-156 ms per row. The undeclared n=1024 costs 186-386 ms for the same families.
+The `large` and `tall` regimes are minutes of wall time; it is the number of rows, not the size of
+the matrix, that decides the session.
+
+**Fixed here, because the new records would otherwise be published wrongly.** A partial run no
+longer displaces a full-coverage page *without checking that the page it would displace is full*;
+the index reads which run a page was actually generated from instead of taking the newest manifest
+that would have written that path, so a run the publisher refused can no longer describe a page;
+a revision *ahead* of the pin is `current` rather than `diverged`; the validator's
+vendor-identity and commit-resolution checks now run even when the declaration has drifted, instead
+of being skipped with the declaration-derived ones; and a row the harness recorded as `failed` is no
+longer publishable, which the recorders previously accepted as a successful run. `zen5-cpu` is now
+a required profile, which the first recorded cell made due.
+
+**The review of this change found more than the change itself.** An independent review of the
+finished diff found one blocker and eight important items, and each one was checked against the
+source before it was acted on. The blocker was real: the declaration-drift early return still sat
+above both commit resolution and the new failed-row check, so a suite edit would have switched those
+off for every manifest in the tree -- the drift branch now skips only the declaration-derived checks,
+and a synthetic manifest with an unresolvable commit under a drifted declaration is rejected.
+The rest: the publisher decides fullness by the same content rule as the index rather than by the
+recorded flag, so the two can no longer disagree about what `full` means (and an edited sentence no
+longer reads as a moved declaration); a page whose provenance cannot be read is reported rather than
+attributed to the newest manifest, and is not overwritten by a partial run; the required-cell gate
+checks the cell's selected page instead of every page ever published for it; the report and the
+comparator read exactly the files the manifest names, so validation and publication consume the same
+evidence, and a hand-run publication now meets the same validate-first bar; `compare_runs.py`
+refuses to compare two different arms, keeps the engine in its family aggregation, and says which
+arm it compared; the MKL discovery loop sees every installation, records a resolved versioned path
+instead of a symlink, and the recorder reads the builder's `%q`-quoted output as shell words rather
+than stripping quotes from it; and the enumerated environment now covers the OpenMP placement and
+limit variables and `MKL_CBWR`, which the read-back of a thread count was never evidence about.
+
+Two findings were dismissed with reasons: `VENDOR_ARMS` (the build script would reject an unknown
+arm, but only after Cargo has been invoked, and the recorder's own vocabulary is worth the two
+lines) and the index's newest-manifest tie-break (page provenance is *reported* when it cannot be
+read, not required, so a tie is still possible).
+
+**Not done here.** The pin still names `8276e097c214`; it moves to the revision that contains the MKL
+arm once that is merged -- with a merge commit, so that the revision the two arms were recorded at
+stays reachable -- and both arms are already recorded against it.
+
 ## 2026-10-08 — the faer provider is named in the manifest
 
 tlinalg can now be built against tensor4all's fork of faer, published as

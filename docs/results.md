@@ -5,11 +5,11 @@
 
 ```text
 data/results/<profile>/<suite>/<timestamp>/     raw: run.yaml, verify-*.txt, run*.csv, *.guard, report.md
-result/<profile>/<suite>/<commit12>[-version][-dirty].md   one page per measured revision
+result/<profile>/<suite>/<commit12>[-version][-vendor][-dirty].md   one page per measured run
 result/INDEX.md                                 generated table of contents over those pages
 ```
 
-A result page is one `(suite, hardware profile, measured revision)`, and it
+A result page is one `(suite, hardware profile, measured revision, vendor arm)`, and it
 carries that revision and the hardware itself: commit, version when the measured
 project has one, features, harness commit, host CPU, logical CPU count, L3, OS
 and arch, the CPU set used at each thread count, the timing policy, the faer
@@ -17,6 +17,14 @@ crates the measured provider was built against, the vendor library and its
 kernel, and the guarantees. Measuring a new revision adds a page rather than
 replacing the previous one. A dirty checkout gets its own `-dirty` page, because
 those numbers are not comparable with a clean build of the same commit.
+
+**One vendor per page.** LAPACK and BLAS own their symbols, so a binary that
+links OpenBLAS and a binary that links MKL cannot be the same binary: an *arm* is
+a build, and a run is one arm. Two arms at the same revision are therefore two
+pages, compared side by side, each carrying its own faer rows and its own vendor
+identity. The vendor is in the page name because it is part of what was measured,
+and the engine rows are named after the vendor the binary actually linked --
+`lapack-mkl`, not a label chosen when the row was written.
 
 ## run.yaml
 
@@ -67,19 +75,35 @@ tell whether that cell reflects the current library.
 | `N behind` | N commits touching the suite's `invalidated_by` paths lie between the measured revision and the reference |
 | `stale` | as `behind`, but N exceeds the suite's `stale_after` |
 | `dirty` | the measured checkout had uncommitted changes; never comparable |
-| `diverged` | the measured revision is not an ancestor of the reference |
+| `diverged` | the measured revision is neither an ancestor nor a descendant of the reference |
 
 `behind` counts *invalidating* commits, not raw distance: a suite declaring only
-`crates/` is not out of date because a document changed. `coverage` is `full`
-when the cell was measured over the suite's whole declared spec and the
-declaration has not moved since, `partial` when it covered a subset, and
-`declaration-changed` when the declaration itself changed after the measurement,
-so the two have to be compared by hand. A partial run never displaces a full one.
+`crates/` is not out of date because a document changed. A revision *ahead* of the
+reference is `current` rather than `diverged`: it already contains everything the
+reference names.
+
+`coverage` is `full` when the cell was measured over the suite's whole declared spec
+*for that vendor arm* and the declaration has not moved since, `partial` when it
+covered a subset, and `declaration-changed` when the declaration itself changed after
+the measurement, so the two have to be compared by hand. "The whole declared spec for
+that arm" is the faer engines the declaration names plus that arm's own LAPACK row:
+vendor arms are mutually exclusive binaries, so no single run could measure two of
+them, and measuring the projection is what makes a vendor cell full instead of partial
+for ever. `scripts/campaign.py` holds that projection, and the recorder and the
+validator both call it, so the two cannot disagree about what coverage means. A
+partial or declaration-changed page never displaces a full-coverage one, and
+`publish_report.py` checks that the page already there really is full-coverage before
+it declines to replace it -- a page that only *would* have been written from the newest
+run is not the same thing as the run the page holds.
 
 ## Comparing two revisions
 
 A change is judged from two recorded pages, not from one run read twice. The procedure, which is
 also what the perf work on `tlinalg-rs#16`-`#25` follows:
+
+0. **One arm at a time**, chosen with `--vendor`, because one binary links one vendor library. A
+   vendor comparison is two pages at the same revision, not one page with two tables: the two arms
+   were built separately, and each page says what its own build linked.
 
 1. A **clean checkout per revision**, so neither is recorded dirty: `git worktree add --detach
    /tmp/tlinalg-base <before-commit>` (and one for the change), and no edits in either while it is

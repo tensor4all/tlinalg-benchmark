@@ -77,7 +77,10 @@ def render(manifest, suite, rows, run_dir):
     vendor = manifest.get("vendor") or {}
     faer = [p for p in manifest.get("providers", []) if p["name"] in FAER_PACKAGES]
     engines = manifest["run_spec"]["engines"]
-    row_names = [e for e in ["faer-1lane", "faer-pool", "lapack-openblas"] if e in engines]
+    # The columns are the engines this run recorded measuring, in the declaration's order: a page
+    # prints the arms it has, and a vendor arm has one LAPACK row because one binary links one
+    # vendor library.
+    row_names = list(engines)
     best, skipped = best_per_case(rows)
     out = [
         f"# `{manifest['suite_id']}` on `{manifest['target_profile']}`",
@@ -118,17 +121,19 @@ def render(manifest, suite, rows, run_dir):
             out.append(f"    Caveat: {doc['caveat']}")
         if engine in ("faer-1lane", "faer-pool") and faer:
             out.append("    As measured: " + "; ".join(provider_text(p) for p in faer))
-    if row_names and "lapack-openblas" in row_names:
-        parts = [f"linked {vendor.get('linkage', '?')}"]
-        if vendor.get("version"):
-            parts.append(f"OpenBLAS {vendor['version']}")
-        if vendor.get("corename"):
-            parts.append(f"kernel dispatched to `{vendor['corename']}`")
-        if vendor.get("parallel"):
-            parts.append(f"{vendor['parallel']} threading")
-        if vendor.get("config"):
-            parts.append(f"config `{vendor['config']}`")
-        out.append(f"    As measured: " + "; ".join(parts))
+        if engine == f"lapack-{vendor.get('name')}":
+            # From the identity the harness read out of the library it linked, never from the arm
+            # that was requested.
+            parts = [f"linked {vendor.get('linkage', '?')}", str(vendor.get("name"))]
+            if vendor.get("version"):
+                parts[-1] += f" {vendor['version']}"
+            parts.append(f"kernel dispatched to `{vendor['corename']}`" if vendor.get("corename")
+                         else "kernel not reported by the vendor")
+            if vendor.get("parallel"):
+                parts.append(f"{vendor['parallel']} threading")
+            if vendor.get("config"):
+                parts.append(f"config `{vendor['config']}`")
+            out.append("    As measured: " + "; ".join(parts))
     out += [
         "",
         "## Hardware",
@@ -202,7 +207,16 @@ def main():
     run_dir = pathlib.Path(args.run_dir).resolve()
     manifest = load(run_dir / "run.yaml")
     suite = load(ROOT / "benchmarks/suites" / f"{manifest['suite_id']}.yaml")
-    rows = read_rows(sorted(run_dir.glob("*.csv")))
+    # Exactly the files the manifest names, not every CSV that happens to be in the directory:
+    # the manifest is what the validator checked, and a report built from anything else would
+    # publish numbers nothing gated.
+    listed = manifest.get("result_files") or []
+    if not listed:
+        raise SystemExit(f"{run_dir}/run.yaml names no result files")
+    missing = [f for f in listed if not (run_dir / f).exists()]
+    if missing:
+        raise SystemExit(f"{run_dir}: result files named by the manifest are absent: {missing}")
+    rows = read_rows([run_dir / f for f in listed])
     (run_dir / "report.md").write_text(render(manifest, suite, rows, run_dir))
     print(f"wrote {run_dir}/report.md from {len(rows)} rows")
     return 0
