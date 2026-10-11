@@ -2,6 +2,44 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-11 — the harness measured its own fixture for seven rows; both arms are re-recorded
+
+**What the record said.** The first pages at `b135f0d` and `7dbed2f` showed faer's `eigvalsh` at
+8.2x slower than OpenBLAS (470.97 ms vs 57.21 ms at n=512 batch 4 f64 1T), values-only slower than
+faer's own `eigh`, and no scaling at 8T. An independent review of the 7dbed2f record was assigned to
+find why, and direct measurement of faer acquitted it: `self_adjoint_evd(A, s, None, ..)` at n=512 is
+1.9x *faster* than the same call with `Some(vectors)`, both with the harness's exact generated input
+and with a random symmetric one. faer's fork is untouched.
+
+**The defect.** `Prepared::faer` sent `svd_values`, `eigvalsh`, `eig` and `eigvals` to the generic
+`call::<T>` helper, and `Prepared::lapack` sent `svd_thin`, `svd_full`, `svd_values`, `eig` and
+`eigvals` to `call_lapack`. Both helpers rebuild their inputs and a fresh workspace **inside the
+timed region**; for `eigvalsh` the input is `Batch::hpd` = `B B^H + n I`, an n^3 product. The other
+families, and the LAPACK arm of the *same* family, measure the prepared `self.op` and `self.ws`. So
+what a row meant depended on the family and on the arm: the comparison that read "faer loses 8.2x" was
+a fixture build measured against a solve measured.
+
+**The fix**, `tensor4all/tlinalg-rs#41` -> `9e0796c` (merge commit), in
+`crates/tlinalg-bench/src/harness/rows.rs`: those seven rows now take the prepared fixture and, where
+the output type allows, the prepared buffers (`u`/`vt` into `out`/`out2`; singular values and `eig`'s
+outputs stay local because their `T::Real`/`T::Complex` types are not nameable for a generic `T` on
+the faer side, and on the vendor side they are nameable through `tlinalg_blas::symbols::Symbols` but
+preparing them is a documented follow-up). An independent review found no blocker; the rows that were
+already prepared are unchanged, which is the check the change only moved the delegating rows.
+
+**The retraction is published with this record.** At the same case, with the campaign's own protocol
+(n=512, batch 4, f64, 1T): `eigvalsh` is now faer 57.53 ms vs OpenBLAS 57.63 ms vs MKL 66.32 ms --
+parity with OpenBLAS, not an 8.2x loss. `eigh` (115.9 vs 121.9 vs 145.7), `qr`, `rank_revealing_qr`
+and `svd_thin` are faer-favourable or parity; `svd_values` is OpenBLAS-favourable by 1.2x, the
+remaining mild values-only gap. The rankings that used already-prepared rows -- the faer loss at 8T on
+`householder_factor`/`householder_apply` in c64, and the small-regime faer wins on batch throughput --
+are unchanged.
+
+Both arms are re-recorded at `9e0796c` (the fix is in the harness, so the whole cell was invalidated;
+a partial run would not have displaced the pages whose faer rows carried the fixture). The pages at
+`b135f0d` and `7dbed2f` stay as history and remain citable only for the rows that were prepared.
+The pin moves to `9e0796c`.
+
 ## 2026-10-11 — the record moves to the merged revision
 
 `tlinalg-rs#39` is merged, as a merge commit (`7dbed2f`) rather than a squash, so the revision the
