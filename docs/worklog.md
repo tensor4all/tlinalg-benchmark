@@ -70,6 +70,38 @@ against 0.35. That is faer's GEMM scaling on a tall panel rather than the blocki
 in f64 leads OpenBLAS, and every square c64 case leads -- so it is not a reason to reopen this
 change. It is an open item if the tall c64 cells are ever a target.
 
+**What the remaining tall gap is made of.** The pooled c64 tall cells are the one place the pair
+still loses, and it is worth recording where the time goes rather than calling it "faer's GEMM" and
+leaving it. Measured on this host at `6a873e6` with the blocked path's three phases separated by
+running the same call with the trailing update and then the whole block update switched off, for
+`householder_factor` 4096x256 b1 c64 (block 16):
+
+| phase | 1T | 8T pool | scaling | share of 8T |
+|---|---|---|---|---|
+| panel (16 reflectors against the panel, level-2) | 5.96 | 6.31 | 0.94x | 28% |
+| compact-WY factor `T` (level-3, 16x16 output) | 2.57 | 3.57 | 0.72x | 16% |
+| trailing block apply (level-3, 4096 x <=240 target) | 45.3 | 13.0 | 3.5x | 57% |
+| whole call | 53.8 | 22.9 | 2.4x | |
+
+So the pooled row is 43% *serial* work that is linear in the block width, and the remaining 57% is a
+level-3 update that only reaches 3.5x on eight threads. Isolated, that update is 8.72 ms at 1T and
+2.45 ms under faer's own eight-thread budget (3.56x); splitting its target columns ourselves into
+four two-thread calls gives 2.27 ms and into eight single-thread calls 2.25 ms -- 3.87x, which is
+where a caller-side split saturates. The eight threads of the `8T` cell are eight *physical* Zen 5c
+cores (CPUs 4-11, `core_id` 8-15) sharing 8 MiB of L3, and a 4096 x 240 c64 target is 16.8 MB, so
+that update is DRAM-bound and the ceiling is the kernel's packing, not the parallel decomposition.
+OpenBLAS reaches 5.5x on the same cores for the same factorization, and its rows are the evidence.
+
+Three tlinalg-side levers were measured and rejected: a block of 8 instead of 16 gains 5% on this
+shape at 8T and loses 12% at 1T (the grid has both); one level of panel blocking (leaf of 8 columns
+at block 16) gains 5% on tall and loses 6% on 512x512 at 8T; and handing `upgrade_householder_factor`
+`Par::Seq` rather than the row's budget is a wash (2.57 against 3.57 ms is a differencing artefact of
+the same noise the whole-call A/B does not reproduce). None of them is worth the churn, so the tall
+c64 cells stay as they are: `householder_factor` 4096x256 b1 c64 reads 0.78x OpenBLAS at 1T, 1.07x at
+4T and 1.55x at 8T, while its f64 sibling leads at every budget and every other family's tall c64
+rows are inside 1.6x. The shape and the phase split are the reproducer if this is ever pursued
+upstream in faer.
+
 **Not established here.** The blocked path's allocation count is deliberately not pinned: its
 trailing update goes through faer's GEMM, which costs the same two allocations per call from batch 1
 to 64 on `x86_64-linux` but about twelve per item on `aarch64-darwin`, inside `nano-gemm`'s packing.
