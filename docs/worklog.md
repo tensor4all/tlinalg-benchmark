@@ -2,6 +2,82 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-12 — the compact Householder pair is blocked; both arms are re-recorded at `6a873e6`
+
+**What the record said.** At `9e0796c` the faer rows lost `householder_factor` and
+`householder_apply` by more than any other family: at 8T, `householder_factor` 4096x256 b1 was
+127.8 ms in c64 against OpenBLAS's 12.5 (10.2x) and MKL's 11.15 (11.5x); the loss was there at 1T
+too (128.8 ms against 68.7, 1.9x), and it grew with the thread count rather than shrinking. The
+signature was in the page itself: `faer-pool` equalled `faer-1lane` to the digit at every shape and
+every thread budget -- a pooled row that used no threads at all.
+
+**The cause.** The two kernels applied one reflector at a time, each as a rank-one update, which is
+level-2 work over the whole matrix per reflector, where LAPACK's `?geqrf` is blocked and level-3.
+Nothing could parallelise it either: the single-reflector apply is faer's `N == 1` path, and that
+path does not read the `faer::Par` argument it is handed, so the thread budget reached the batch
+lane policy and stopped there.
+
+**The fix, in two steps.** `tensor4all/tlinalg-rs#44` moved both kernels to the compact-WY form: a
+panel of `recommended_block_size` columns is factored in place, `upgrade_householder_factor` builds
+`T` from the coefficients the panel leaves in the scratch diagonal, and one transpose-form block
+apply carries the whole panel to the trailing columns. The forward form is the wrong order -- QR
+applies `H_0` first, so the trailing columns take `H_(b-1) ... H_0` -- and is quietly wrong, which is
+why faer's own blocked QR uses the transpose form. The stored state is unchanged and the campaign's
+own `verify` gate passed it unchanged. `#45` then fixed a regression the first record of the change
+showed: at 32x32 faer recommends a block of 4 and the compact-WY factor costs more than the trailing
+update it buys, so `medium` 32x32 was 1.4x (batch 1) and 1.7x (batch 128) slower at 1T than before.
+Blocking is now off at or below `rows * cols == 48 * 48`, faer's own `QrParams::blocking_threshold`.
+That first record was taken at `74f07d3` and is **not published**: the page it would have carried is
+superseded by this one, and the revision is one commit behind the pin. Both arms below were measured
+from scratch at `6a873e6`.
+
+**What the pair says.** Median `faer-1lane` after/before over each regime's cells, 1T, with the
+OpenBLAS rows of the same two runs as the floor (an unchanged binary, so they measure the machine
+and nothing else):
+
+| regime | cells | faer median | faer p10-p90 | OpenBLAS median | OpenBLAS p10-p90 |
+|---|---|---|---|---|---|
+| `small` | 239 | 1.007 | 0.976-1.082 | 1.001 | 0.972-1.023 |
+| `medium` | 120 | 1.003 | 0.974-1.033 | 1.000 | 0.988-1.014 |
+| `large` | 120 | 0.998 | **0.624**-1.011 | 0.999 | 0.993-1.006 |
+| `tall` | 16 | 0.999 | **0.418**-1.003 | 0.999 | 0.991-1.008 |
+
+So the change is exactly where the work was aimed and nowhere else: the large and tall cells move
+by up to 2.4x and 2.4x at the fast end of their spread, every other regime's median is inside the
+floor its own vendor rows establish, and one small-regime tail (+8% at p90) is the extra call per
+reflector that the blocked path pays where it does not block. No small or medium cell loses to
+OpenBLAS.
+
+The cells themselves (`faer-1lane` at 1T, then `faer-pool` at 8T, against both vendors' same-run
+rows):
+
+| case (c64) | before 1T / 8T | after 1T / 8T | OpenBLAS 1T / 8T | MKL 1T / 8T |
+|---|---|---|---|---|
+| `householder_factor` 128x128 b1 | 0.46 / 0.46 | **0.35 / 0.28** | 0.44 / 0.38 | 0.54 / 0.18 |
+| `householder_factor` 512x512 b1 | 29.4 / 29.7 | **16.7 / 4.4** | 20.8 / 6.5 | 22.7 / 3.4 |
+| `householder_factor` 512x512 b4 | 119 / 119 | **67.3 / 17.8** | 83.6 / 26.2 | 92.2 / 13.4 |
+| `householder_factor` 1024x64 b1 | 1.34 / 1.32 | **0.99 / 0.67** | 1.06 / 0.35 | 1.32 / 0.48 |
+| `householder_factor` 4096x256 b1 | 128.8 / 127.7 | **53.9 / 19.3** | 69.2 / 12.5 | 66.1 / 11.1 |
+| `householder_apply` 512x512 b4 | 181 / 181 | **97.2 / 18.4** | 129 / 35.5 | 152 / 20.5 |
+
+`householder_factor` f64 reads the same way at 1T (4096x256 b1 42.0 -> 14.1 against OpenBLAS 23.3
+and MKL 17.5) and at 8T its pool now leads OpenBLAS (6.7 against 10.9) while MKL's 3.7 still leads
+faer.
+
+**What remains.** The tall c64 shapes are the only place the pooled rows still lose: 4096x256 b1 at
+8T is 19.3 ms against OpenBLAS's 12.5 (1.54x) and MKL's 11.1 (1.75x), and 1024x64 b1 at 8T is 0.67
+against 0.35. That is faer's GEMM scaling on a tall panel rather than the blocking -- the same shape
+in f64 leads OpenBLAS, and every square c64 case leads -- so it is not a reason to reopen this
+change. It is an open item if the tall c64 cells are ever a target.
+
+**Not established here.** The blocked path's allocation count is deliberately not pinned: its
+trailing update goes through faer's GEMM, which costs the same two allocations per call from batch 1
+to 64 on `x86_64-linux` but about twelve per item on `aarch64-darwin`, inside `nano-gemm`'s packing.
+That is the backend's count, not the crate's, and the record says so rather than pinning a number no
+other target would reproduce. The priming and guard behaviour of this revision is unchanged: the
+OpenBLAS rows of the two runs agree to 1.001 median, so the harness measured machine and nothing
+else.
+
 ## 2026-10-11 — the harness measured its own fixture for seven rows; both arms are re-recorded
 
 **What the record said.** The first pages at `b135f0d` and `7dbed2f` showed faer's `eigvalsh` at
