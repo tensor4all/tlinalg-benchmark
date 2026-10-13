@@ -2,6 +2,53 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-12 (later) — the fork's rank-one apply now honors `par`; both arms re-recorded at `5cb2430`
+
+**What the previous record left.** The tall c64 cells were the one place the blocked pair still lost
+(`householder_factor` 4096x256 b1 at 8T, 1.55x behind OpenBLAS). Separating that call into its phases
+showed the pooled row was 43% serial work -- the panel and the compact-WY factor, both linear in the
+block width -- and 57% a level-3 trailing update that reaches only 3.5x on eight threads. Isolating
+the vendors' own kernels settled which of the two was fixable: on the same cores, OpenBLAS's
+level-2 panel (`?gemv`/`?geru`, which is what a blocked QR's panel is) goes 5.97 ms at 1T to 2.58 ms
+at 8T, MKL's does not move at all (6.97 throughout), and faer's was 5.96 to 6.31 -- at parity at 1T
+and **no threading at all** at 8T. `?larfb` itself was not the deficit: the vendor trio on the same
+shapes is 1.83-2.14 ms at 8T against faer's 2.45.
+
+**The cause and the fix.** The `N == 1` arm of `apply_block_householder_on_the_left_in_place_generic`
+is one sequential rank-one update per target column -- its SIMD kernel -- and it never reads `par`.
+In `tensor4all/faer#3` (merged as `4f69133`) that arm is skipped when the caller asks for threads and
+the update is at least 8192 elements, so the generic path takes it: that path partitions the target's
+columns and threads its two products. `tensor4all/tlinalg-rs#47` moves the dependency to that
+revision; nothing else in this campaign changed. No OpenBLAS or MKL source was used or adapted -- the
+vendors' timings are the target, not the code -- and the fork's `PATCHSET.md` says so.
+
+**What the record moved.** Both arms were re-recorded from scratch, one complete set each, and both
+cells read `full` and `current`. Medians of `after / before` over each regime's cells, with the four
+vendor rows of the two pairs as the floor (unchanged binaries, so they measure the machine):
+
+| rows | `small` | `medium` | `large` | `tall` | vendor floor (1T / 8T) |
+|---|---|---|---|---|---|
+| `faer-1lane` at 1T | 0.993 | 0.999 | 0.998 | 1.003 | 1.000 / 1.000, p10-p90 0.988-1.014 |
+| `faer-pool` at 8T | 1.001 | 1.002 | 0.999 | 0.992 | 1.000 / 1.000, p10-p90 0.980-1.021 |
+
+Inside that floor the change is where it was aimed and nowhere else: at 8T, `householder_factor`
+4096x256 b1 is 6.73 -> 5.96 ms in f64 (`-11.5%`) and 19.31 -> 17.04 in c64 (`-11.8%`), with
+`svd_thin` c64 85.02 -> 76.95 (`-9.5%`) as a side effect of the same arm; the 1T rows of those cells
+do not move (14.14 -> 14.18 and 53.91 -> 55.10, within the floor), which is the check that the arm is
+only skipped when the call is threaded. The pooled c64 cell now reads 1.36x OpenBLAS (was 1.55x) and
+1.54x MKL; the f64 cell reads 0.53x OpenBLAS, i.e. 1.9x faster than it. `svd_thin` f64 at 8T moved
+the other way (32.55 -> 34.76, `+6.8%`), which is inside the tall pooled spread rather than a
+regression this change can explain: the arm it touches is the rank-one apply, and that row's 1T
+sibling is unchanged.
+
+**What remains.** The trailing update. It is 57% of that call at 8T and its own parallel ceiling is
+3.5-3.9x -- measured in isolation, faer's own threading reaches 3.56x and a hand-rolled split of its
+target columns 3.87x, so the ceiling is the kernel on a DRAM-bound tall panel, not the decomposition.
+The eight threads of the `8T` cell are eight physical Zen 5c cores sharing 8 MiB of L3, and a
+4096 x 240 c64 target is 16.8 MB. That is still the open item, and it is now the *only* one: with
+this record, the tall c64 `householder_factor` cell is the last place any faer row loses to OpenBLAS
+on this profile.
+
 ## 2026-10-12 — the compact Householder pair is blocked; both arms are re-recorded at `6a873e6`
 
 **What the record said.** At `9e0796c` the faer rows lost `householder_factor` and
