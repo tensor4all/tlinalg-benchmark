@@ -2,6 +2,31 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-13 (later still) — the gate is content only, and the smoke build is gone
+
+**What CI did.** Every PR ran two jobs: `index` (the declarations, every recorded manifest, the
+generated index) and `smoke`, which built the pinned harness the way the recorder does -- for this
+repository that meant a from-source OpenBLAS build behind a cache keyed by the pin, ten to sixteen
+minutes, and it ran twice on every push of a recording branch because the workflow fires on both
+`push` and `pull_request`. It duplicated work that has already happened by the time a PR exists:
+`scripts/record_run.py` builds, verifies and times that same revision on the host that owns the
+numbers, and publishes nothing unless all three succeed. The harness is also a workspace member of
+`tlinalg-rs`, whose own CI builds it with the vendor on Linux and without it on macOS for every PR
+there, so "the pinned harness builds" was gated twice and paid for here at the most expensive place.
+
+**What replaces it.** One job, `index`, on `ubuntu-slim`: the suites and profiles against their
+schemas, every `data/results/*/*/*/run.yaml` against `validate_run.py`, and `gen_index.py --check`
+(the index is what the generator produces, and the required cells are present). It is the only
+required status check on `main`, and auto-merge is enabled, so a recording or documentation PR merges
+by itself once the content is consistent -- seconds instead of minutes, and no round trip through a
+reviewer for a page that the recorder already refused to publish unless it was sound. Superseded runs
+on the same branch are cancelled instead of queued.
+
+**What this repository no longer checks.** That the pin builds. A pin moves only when a recording is
+made, and a recording requires a successful build of that exact revision, so the check was post hoc
+by construction; a pin moved by hand still shows up as a stale or missing cell in the index, which is
+the check that stays.
+
 ## 2026-10-13 (later) — the compact-WY factor's own reduction is split too; both arms re-recorded at `e6ee2d3`
 
 **What the previous record left.** With the block apply's reduction split, the tall c64
