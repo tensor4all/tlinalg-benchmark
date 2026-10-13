@@ -2,6 +2,74 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-13 — the fork's block apply splits the reduction's rows, gated on the reduction's shape; both arms re-recorded at `6180fb0`
+
+**What the previous record left.** With the rank-one apply fixed, the tall c64 cells were still behind
+OpenBLAS. Isolating the three steps of the trailing compact-WY update on the shapes the kernels see
+settled which one it was, and it was not the one assumed: `tmp = V^H C` -- an `N x K` output reduced
+over every row of a long target -- was 2.03 ms at 8T where OpenBLAS's `?gemm` on the same shape is
+0.53-0.71, while the other two were already fine or better (`C -= V tmp` 0.67 ms against
+OpenBLAS's 1.25-1.40, the solve 0.01 in both). The column split that faer's generic path uses caps at
+`min(par, K, 4)` and cannot use the depth, and inside one column task that reduction ran as one
+serial kernel.
+
+**The fix, two changes and one gate.** `tensor4all/faer#4` splits the rows of that reduction when the
+call is threaded and the target is tall: one `N x K` partial per thread, then the partials added.
+`tensor4all/faer#5` then gated it, because the first record of #4 showed what an ungated split costs
+-- `householder_factor` and `householder_apply` at 512x512 lost 4-6% at 8T. Splitting the reduction's
+rows is a split along the depth, and the split itself adds `threads` partials of `N x K` to write,
+read and add, so it pays only while the serial kernel it replaces is depth-bound. A sweep of the
+reduction alone over `M` against `K` at eight threads puts the crossover at `M ~ 2 K`: at
+`M = 4096, K = 240` it is 3.7x (2.04 -> 0.55 ms), and at `M = 512, K = 496` -- the 512x512 trailing
+update -- it is 0.14 -> 0.26. The gate is that one shape inequality plus a thread floor and a work
+floor. `tensor4all/tlinalg-rs#48` and `#49` consume the two revisions in turn.
+
+**What the record says.** Both arms were re-recorded from scratch at `6180fb0`, one complete set
+each, and both cells read `full` and `current`. Medians of `after / before` over each regime's cells,
+against the four vendor rows of the two pairs as the floor (unchanged binaries, ~490 cells each):
+
+| rows | `small` | `medium` | `large` | `tall` | vendor floor |
+|---|---|---|---|---|---|
+| `faer-1lane` at 1T | 1.000 | 0.997 | 1.001 | 1.000 | 1.000, p10-p90 0.984-1.014 |
+| `faer-pool` at 8T | 0.996 | 1.000 | 1.001 | 0.990 | 1.000, p10-p90 0.980-1.019 |
+
+The cells the row split serves, and the cells the gate protects, at 8T:
+
+| cell | before | after | OpenBLAS | MKL |
+|---|---|---|---|---|
+| `householder_factor` 4096x256 b1 c64 | 17.04 | **16.05** | 12.50 (1.28x) | 11.11 (1.44x) |
+| `householder_factor` 4096x256 b1 f64 | 5.96 | **5.63** | 10.95 (0.51x) | 3.74 (1.50x) |
+| `qr` 4096x256 b1 c64 | 46.33 | **42.76** | 25.57 (1.67x) | 29.81 (1.43x) |
+| `householder_factor` 512x512 b1 c64 | 4.47 | 4.49 (+0.5%) | 6.49 (0.69x) | 3.42 (1.31x) |
+| `householder_factor` 512x512 b1 f64 | 1.72 | 1.75 (+1.3%) | 4.07 (0.43x) | 1.30 (1.34x) |
+| `qr` 512x512 b1 c64 | 12.54 | 12.55 | 13.24 (0.95x) | 9.40 (1.34x) |
+
+Every 512x512 and 256x256 cell of the two householder families is within 3% of the previous record
+and mostly within 1% -- the ungated split's 4-6% cost is gone -- while the tall cells keep 5-8%. Every
+1T row is unchanged, which is the check that the split is only taken when the call is threaded.
+`svd_thin` c64 at 4096x256 reads 76.95 -> 84.77 here, which is the one cell that moves the wrong way
+and is inside the tall pooled spread rather than attributable: the same cell read 85.02 at `6a873e6`,
+76.95 at `5cb2430` and 85.06 in the unrecorded ungated run, and the isolated reduction it depends on
+is 3.7x faster.
+
+**How this class is prevented generally, which is the part worth keeping.** There is no version of a
+split-K decision without constants -- OpenBLAS and MKL both carry measured crossovers per kernel and
+architecture -- so "general" cannot mean "no numbers". It means (a) the decision is *one* inequality
+in the shape with a name that says what it is (depth against width, plus a work quantum and a thread
+floor), not a growing table of remembered shapes; (b) the constant comes from a sweep across the
+crossover (the table above) rather than from the cell that regressed; and (c) something *spans* the
+crossover so a wrong constant cannot pass unnoticed -- which is this grid, where `large` is `M ~ K`
+and is exactly how the 4-6% showed up before it was published. The overhead itself could also be made
+sub-linear in the thread count (a tree combine, and no zero fill of the partials) instead of being
+thresholded away; that changes the scratch story, so it is an open item rather than part of this.
+
+**What remains.** The `?larfb` trio is now within reach of the vendors' on the tall shape: faer's
+apply 2.42 ms at 8T against OpenBLAS's 1.83-2.14 before this change, and its two halves are 0.55 and
+0.67 against the vendors' 0.53-0.71 and 1.25-1.40. `householder_factor` tall c64 is 1.28x OpenBLAS and
+1.44x MKL, `qr` tall c64 1.67x OpenBLAS, and the rest of the tall family is in the same range; the
+remaining gap is the serial panel and the compact-WY factor build, which no vendor row exposes
+separately and which the `faer#5` ledger row leaves as "the scratch story" item.
+
 ## 2026-10-12 (later) — the fork's rank-one apply now honors `par`; both arms re-recorded at `5cb2430`
 
 **What the previous record left.** The tall c64 cells were the one place the blocked pair still lost
