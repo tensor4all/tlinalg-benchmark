@@ -2,6 +2,54 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-13 (later) — the compact-WY factor's own reduction is split too; both arms re-recorded at `e6ee2d3`
+
+**What the previous record left.** With the block apply's reduction split, the tall c64
+`householder_factor` cell was 16.05 ms against OpenBLAS's 12.50. Separating that call's three phases
+again showed 43% of the pooled row was still serial: the panel (5.0 ms, and it stops scaling at four
+threads) and the compact-WY factor build (2.7 ms, no scaling at all). The factor build was the same
+defect as the one just fixed, one layer up: `upgrade_householder_factor`'s flat branch computes
+`T = diag(tau) + strict_upper(V^H V)`, and its second product reduces over every row below the
+basis' diagonal with an `n x n` output -- one serial kernel per task, measured at 0.271 ms for
+`m = 4096, n = 16` at eight threads.
+
+**The fix.** `tensor4all/faer#6` splits that reduction's rows as well. Unlike the block apply's, it
+needs no depth-against-width gate: its partials are `n x n` each and only the strict upper triangle is
+stored (the diagonal is the caller's `tau`), so the split costs almost nothing at any size -- 6.7x at
+`m = 4096, n = 16`, 7.4x at `m = 8192`, 4.6x at `m = 1024`, and 3.0x at `m = 512`, where the previous
+gate would have refused it. `tensor4all/tlinalg-rs#50` consumes it.
+
+**What the record says.** Both arms were re-recorded from scratch at `e6ee2d3`, one complete set
+each, and both cells read `full` and `current`. Medians of `after / before` over each regime's cells,
+against the four vendor rows of the two pairs as the floor (unchanged binaries, ~490 cells each):
+
+| rows | `small` | `medium` | `large` | `tall` | vendor floor |
+|---|---|---|---|---|---|
+| `faer-1lane` at 1T | 1.005 | 1.004 | 1.001 | 0.999 | 1.001 / 1.000, p10-p90 0.987-1.021 |
+| `faer-pool` at 8T | 1.003 | 1.001 | 0.993 | **0.857** (p10 0.815) | 1.002 / 1.000, p10-p90 0.983-1.023 |
+
+The change is wider than the cell it was aimed at, because every blocked QR path builds this factor:
+at 8T, `householder_factor` 4096x256 b1 c64 16.05 -> **13.35 ms** (f64 5.63 -> 4.90), `qr` c64
+42.76 -> **36.87**, `rank_revealing_qr` c64 52.06 -> 44.78, `svd_thin` c64 84.77 -> 76.34 and f64
+34.38 -> **26.89**; and the `large` and `1024x64` cells improve with them (`householder_factor`
+512x512 b1 c64 4.49 -> 4.17, f64 1.75 -> 1.62, 256x256 c64 0.98 -> 0.92, `householder_apply`
+256x256 f64 1.71 -> 1.43). Every 1T row is unchanged, and the families that do not build a
+compact-WY factor (`lu_*`, `cholesky`, `eigh*`, `svd_values`, `triangular_solve`) are within the
+floor.
+
+**Where this leaves the family that started it.** `householder_factor` 4096x256 b1 was 10.2x behind
+OpenBLAS at 8T when this campaign first recorded it, 1.55x after the blocking, and is now **1.08x**
+in c64 and **0.46x** in f64, i.e. 2.2x faster than OpenBLAS. `svd_thin` f64 is 0.72x. The tall c64
+cells that still lose are `qr` (1.43x OpenBLAS, 1.23x MKL) and `rank_revealing_qr`, which do not go
+through tlinalg's kernels at all: they call faer's own blocked QR.
+
+**What remains.** The panel: about 5 ms of that cell's 13.4, and it stops scaling at four threads
+because its grain is one reflector (a `4096 x 15` rank-one update), where OpenBLAS's `?gemv`/`?geru`
+pair reaches 2.3x on the same cores against faer's 1.17x. That is two halves -- the unblocked panel
+is tlinalg's structure, the fine-grain dispatch is faer's (its per-call task spawn, the "thread
+policy" row of the fork's ledger) -- and the fork's `PATCHSET.md` carries it as the open item, with
+the phase split and the isolation numbers.
+
 ## 2026-10-13 — the fork's block apply splits the reduction's rows, gated on the reduction's shape; both arms re-recorded at `6180fb0`
 
 **What the previous record left.** With the rank-one apply fixed, the tall c64 cells were still behind
