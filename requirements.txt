@@ -1,2 +1,1 @@
-jsonschema>=4
-pyyaml>=6
+campaign-toolkit @ git+https://github.com/tensor4all/campaign-toolkit@a01f4cdc4075b55de069fc0eb68d9b52cb4d9557

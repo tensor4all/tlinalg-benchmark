@@ -28,7 +28,8 @@ and the engine rows are named after the vendor the binary actually linked --
 
 ## run.yaml
 
-Validated against `schemas/benchmark-run.schema.json` before it is written. It
+Validated against the run schema shipped by `campaign-toolkit`
+(`campaign_toolkit/schemas/benchmark-run.schema.json`) before it is written. It
 records:
 
 - the profile, suite, suite file and its hash, timestamp and the exact command;

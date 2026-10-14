@@ -41,6 +41,21 @@ run, because a single dynamic MKL and a static OpenBLAS cannot share a process,
 and each page therefore carries its own faer rows and its own vendor identity.
 BLIS is a later arm and needs its own linkage decision, since BLIS ships no LAPACK.
 
+## Tooling
+
+The seven `scripts/*.py` entry points are thin shims over
+[`campaign-toolkit`](https://github.com/tensor4all/campaign-toolkit), the shared
+package the campaigns now have in common. `requirements.txt` pins it by git
+revision; `benchmarks/campaign.yaml` is this campaign's descriptor, naming the
+measured project, the vendor arms and every other value the toolkit needs. The
+`schemas/` copies are gone: the toolkit supplies them.
+
+For local development, install the toolkit from a checkout instead of from git:
+
+```bash
+pip install -e ../campaign-toolkit
+```
+
 ## What this repository is not
 
 It is not the library's per-PR suite. tlinalg-rs keeps its own Criterion rows
