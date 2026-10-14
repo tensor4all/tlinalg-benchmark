@@ -1,0 +1,109 @@
+schema_version: 1
+id: tlinalg-benchmark
+
+# The measured project. The harness (`crates/tlinalg-bench`, binary `tlbench`) is
+# built out of this checkout, so the recorded commit describes both the library
+# and the harness that measured it.
+measured:
+  name: tlinalg-rs
+  url: https://github.com/tensor4all/tlinalg-rs
+  pin_file: pins/tlinalg-rs.rev
+  extern_dir: extern/tlinalg-rs
+  build_script: scripts/build_for_tlinalg_rev.sh
+  binary: tlbench
+  # One binary links one vendor library, so the arm decides the feature.
+  features:
+    openblas: tlinalg-bench/link-openblas-static
+    mkl: tlinalg-bench/link-mkl
+  # The faer crates the tlinalg provider links, read from the measured checkout's
+  # Cargo.lock and recorded as the provider's provenance.
+  provider_packages:
+    - faer
+    - faer-traits
+    - t4a-faer
+    - t4a-faer-traits
+  # The variable names scripts/build_for_tlinalg_rev.sh writes.
+  pin_env:
+    rev: TLINALG_REV
+    dirty: TLINALG_DIRTY
+    dir: TLINALG_DIR
+    features: BUILD_FEATURES
+    env: BUILD_ENV
+    bin_dir: BIN_DIR
+  # The timing protocol belongs to the measured checkout, not to this campaign.
+  protocol: measured
+
+# One measured revision: the library commit. No upstream baseline is recorded.
+identities: [library]
+
+profiles_file: benchmarks/profiles.yaml
+suites_dir: benchmarks/suites
+data_dir: data/results
+result_dir: result
+
+# Engine name the harness emits -> provider. A vendor arm names its vendor twice:
+# once here, and once in the engine string itself, because the harness derives it
+# from the vendor library it linked.
+engines:
+  faer-1lane: tlinalg
+  faer-pool: tlinalg
+  lapack-openblas: openblas
+  lapack-mkl: mkl
+
+# Providers that own the BLAS/LAPACK symbols; they are mutually exclusive in one
+# process, so they are the axis a run -- and a page -- is split on.
+vendor_providers: [openblas, mkl]
+
+page_name: "{library12}{version}{vendor}{dirty}"
+
+default_invalidated_by:
+  - crates/tlinalg/**
+  - crates/tlinalg-blas/**
+  - crates/tlinalg-bench/**
+  - crates/tlinalg-testkit/**
+  - benchmarks/scripts/**
+  - Cargo.toml
+  - Cargo.lock
+
+# Thread-budget and tuning variables that belong to a vendor library, not to the
+# measurement. The harness sets the budget from the row's thread count and reads
+# it back, so an inherited value must not reach the measured process.
+vendor_env:
+  - OPENBLAS_NUM_THREADS
+  - MKL_NUM_THREADS
+  - MKL_DOMAIN_NUM_THREADS
+  - MKL_INTERFACE_LAYER
+  - MKL_THREADING_LAYER
+  - MKL_DYNAMIC
+  - MKL_ENABLE_INSTRUCTIONS
+  - MKL_CBWR
+  - OMP_NUM_THREADS
+  - OMP_THREAD_LIMIT
+  - OMP_PROC_BIND
+  - OMP_PLACES
+  - KMP_AFFINITY
+  - GOMP_CPU_AFFINITY
+  - RAYON_NUM_THREADS
+
+# The columns tlbench's CSV carries, as the report and the comparison read them.
+csv_columns:
+  - regime
+  - family
+  - dtype
+  - m
+  - n
+  - batch
+  - row
+  - threads
+  - total_ms
+  - per_item_us
+  - status
+  - note
+
+# Strings the generated index and report headers print.
+report:
+  library_label: tlinalg-rs commit
+  provider_label: faer provider
+  harness_label: harness commit
+  index_generator: scripts/gen_index.py
+  setup_script: scripts/setup_extern_deps.sh
