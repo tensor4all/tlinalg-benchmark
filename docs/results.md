@@ -1,7 +1,10 @@
 # Result layout
 
 `suite_id` identifies the workload; `target_profile` identifies the machine
-(`benchmarks/profiles.yaml`). They are the two axes of every cell.
+(`benchmarks/profiles.yaml`). They are the two axes of every cell. The body of a
+profile is a fact about a machine, so it lives in `campaign-toolkit`
+(`campaign_toolkit/profiles/`); this repository's `profiles.yaml` names the
+profiles it measures.
 
 ```text
 data/results/<profile>/<suite>/<timestamp>/     raw: run.yaml, verify-*.txt, run*.csv, *.guard, report.md
