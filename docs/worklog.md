@@ -2,6 +2,59 @@
 
 Decisions, fixed failures and open items for this campaign. Newest first.
 
+## 2026-10-14 — the fork opens no parallel region below its compact factor's floor; both sides recorded at 8T
+
+**What the pair is.** `tensor4all/faer#9` (fork `6e8e178`) asks
+`upgrade_householder_factor`'s own shape floor once before opening anything: the predicate its
+products already use for their row split (deeper than `2 * n`, one row per thread, over the
+`8 * 1024` work floor). Below it the call takes `Par::Seq`; above it the caller's `par` is
+forwarded exactly as before, so nothing the tall shapes depend on moves. The pair is two
+checkouts of `tlinalg-rs` that differ only in the fork revision their `Cargo.toml` names —
+`bf88c0a` (fork `22f23cf`, the parent) and `7fdba8a` (fork `6e8e178`) — recorded with the MKL
+arm on this host, `--regimes medium,large,tall --threads 8 --families
+qr,householder_factor,householder_apply --dtypes f64,c64`, one complete set each. It is a
+**scan**, not a paired comparison: `--aa 1`, so the pooled rows carry no A/A spread and no
+single pooled cell is claimed.
+
+**What it says.** Medians of `after / before` per family (the four vendor rows of the pair are
+the floor; `lapack-mkl` is an unchanged binary and `faer-1lane` never threads):
+
+| family | row | dtype | cells | median | min | max |
+|---|---|---|---|---|---|---|
+| `qr` | `faer-pool` | f64 | 10 | **0.576** | 0.335 | 0.996 |
+| `qr` | `faer-pool` | c64 | 10 | **0.742** | 0.514 | 1.001 |
+| `householder_factor` | `faer-pool` | f64 | 10 | 0.984 | 0.538 | 1.028 |
+| `householder_apply` | `faer-pool` | f64 | 8 | 0.992 | 0.535 | 1.032 |
+| `qr` | `faer-1lane` | f64 / c64 | 10 / 10 | 0.988 / 1.003 | 0.971 | 1.022 |
+| `qr` | `lapack-mkl` | f64 / c64 | 10 / 10 | 1.002 / 0.999 | 0.984 | 1.022 |
+
+The cells that mattered, `faer-pool` at 8T, before -> after, against MKL on the same cores:
+
+| cell | before | after | MKL |
+|---|---|---|---|
+| `qr` 128x128 b1 f64 | 1.196 | **0.615** | 0.437 |
+| `qr` 128x128 b1 c64 | 0.942 | **0.316** | 0.243 |
+| `qr` 128x128 b128 c64 | 121.77 | **40.79** | 39.29 (3.10x behind -> **1.04x**) |
+| `qr` 256x256 b1 c64 | 2.374 | **1.157** | 1.002 (2.4x -> **1.15x**) |
+| `qr` 512x512 b4 c64 | 27.67 | **18.40** | 21.46 (**0.86x**, ahead) |
+| `qr` 1024x64 b1 c64 | 0.990 | **0.772** | 0.483 |
+| `qr` 4096x256 b1 f64 / c64 | 15.199 / 36.880 | 15.124 / 36.620 | 11.33 / 28.45 (unchanged) |
+| `householder_factor` 4096x256 b1 c64 | 13.431 | 13.586 | 11.05 (unchanged, 1.012) |
+
+The tall shapes the ledger's other rows serve are untouched in the direction that matters
+(`qr` 4096x256 and `householder_factor` 4096x256 within 1.2%, and both `faer-1lane` columns
+within the floor), because their reductions are above the floor.
+
+**One cell moves the wrong way and is not attributed.** `householder_apply` 32x32 b128 f64
+`faer-pool` reads 0.246 -> 0.472 (+92%) in this pair. That shape fans the batch out over lanes
+with a sequential inner call (item dimension 32 is below tlinalg's fan-out ceiling), so the
+fork change is not in that path at all; the pooled row of a batched small case is exactly the
+kind the timing policy says needs an A/A pair, and this run has one complete set.
+
+**Where the rest of the gap is.** The remaining `qr` gap at 128x128 (0.615 against MKL's 0.437,
+f64) is the serial panel, which is `tlinalg-rs#46`'s open item, not this one: the fork's change
+removes a per-block region, it does not thread the level-2 panel.
+
 ## 2026-10-13 (later still) — the gate is content only, and the smoke build is gone
 
 **What CI did.** Every PR ran two jobs: `index` (the declarations, every recorded manifest, the

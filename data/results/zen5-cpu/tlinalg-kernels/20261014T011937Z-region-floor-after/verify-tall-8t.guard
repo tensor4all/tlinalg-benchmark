@@ -1,0 +1,10 @@
+pinned.sh: cpus=4-11 idle_window=3s max_busy=0.05 retries=3
+f64 qr 1024x64xb1
+f64 qr 4096x256xb1
+f64 householder_factor 1024x64xb1
+f64 householder_factor 4096x256xb1
+c64 qr 1024x64xb1
+c64 qr 4096x256xb1
+c64 householder_factor 1024x64xb1
+c64 householder_factor 4096x256xb1
+pinned.sh: cpus 4-11 idle before and after (attempt 1)
