@@ -1,0 +1,106 @@
+schema_version: 1
+id: tlinalg-benchmark
+
+# The measured project. The harness (`tlbench`) lives in the measured checkout
+# (`crates/tlinalg-bench`), links that checkout's crates by path, and selects the vendor arm with
+# `BENCH_VENDOR` (the recorder always exports it), so there is no cargo feature to declare.
+measured:
+  name: tlinalg
+  url: https://github.com/tensor4all/tlinalg-rs
+  pin_file: pins/tlinalg-rs.rev
+  extern_dir: extern/tlinalg-rs
+  build_script: scripts/build_for_tlinalg_rev.sh
+  binary: tlbench
+  build_argv:
+    - "{build_script}"
+    - "{checkout}"
+    - "{out}"
+    - "{binary}"
+  pin_env:
+    rev: TLINALG_REV
+    dirty: TLINALG_DIRTY
+    dir: TLINALG_DIR
+    features: BUILD_FEATURES
+    env: BUILD_ENV
+    bin_dir: BIN_DIR
+  # The pinned timing protocol belongs to the measured checkout, which owns benchmarks/scripts.
+  protocol: measured
+
+identities: [library]
+
+profiles_file: benchmarks/profiles.yaml
+suites_dir: benchmarks/suites
+data_dir: data/results
+result_dir: result
+
+# Engine name the harness emits -> provider. The two faer-backed rows are the same library measured
+# with a one-lane region and with its pool, so they share the `tlinalg` provider; the vendor rows name
+# the library the binary linked.
+engines:
+  faer-1lane: tlinalg
+  faer-pool: tlinalg
+  lapack-openblas: openblas
+  lapack-mkl: mkl
+
+vendor_providers: [openblas, mkl]
+
+page_name: "{library12}{vendor}{dirty}{timing}"
+
+default_invalidated_by:
+  - crates/tlinalg/**
+  - crates/tlinalg-blas/**
+  - crates/tlinalg-bench/**
+  - crates/tlinalg-testkit/**
+  - benchmarks/scripts/**
+  - Cargo.toml
+  - Cargo.lock
+
+vendor_env:
+  - OPENBLAS_NUM_THREADS
+  - MKL_NUM_THREADS
+  - MKL_DOMAIN_NUM_THREADS
+  - MKL_INTERFACE_LAYER
+  - MKL_THREADING_LAYER
+  - MKL_DYNAMIC
+  - MKL_ENABLE_INSTRUCTIONS
+  - MKL_CBWR
+  - OMP_NUM_THREADS
+  - OMP_THREAD_LIMIT
+  - OMP_PROC_BIND
+  - OMP_PLACES
+  - KMP_AFFINITY
+  - GOMP_CPU_AFFINITY
+  - RAYON_NUM_THREADS
+
+csv_columns:
+  - regime
+  - family
+  - dtype
+  - m
+  - n
+  - batch
+  - row
+  - threads
+  - total_ms
+  - per_item_us
+  - status
+  - note
+
+# Explicit v2 opt-in: chronological samples, a verification census and a validated median. The
+# campaign declares no order axis, because tlinalg's cells are identified by shape, batch and dtype.
+timing:
+  version: 2
+
+case_label: "`{family}/{dims}/b{batch}` @{threads}T {row}"
+
+report:
+  library_label: tlinalg-rs (measured) commit
+  provider_label: tlinalg rows
+  harness_label: harness commit
+  index_generator: scripts/gen_index.py
+  setup_script: scripts/setup_extern_deps.sh
+  verify_note: |
+    Every row below passed `{binary} verify` on the same grid before timing: each provider's results
+    are checked against that provider's own documented contract (residual, reconstruction, no NaN),
+    never against another provider's floating-point output. Times are milliseconds per case and
+    engine row, with the median of chronological calls and the spread the page prints beside it.
