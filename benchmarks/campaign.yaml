@@ -54,7 +54,7 @@ engines:
 # process, so they are the axis a run -- and a page -- is split on.
 vendor_providers: [openblas, mkl]
 
-page_name: "{library12}{version}{vendor}{dirty}"
+page_name: "{library12}{version}{vendor}{dirty}{timing}"
 
 default_invalidated_by:
   - crates/tlinalg/**
@@ -107,3 +107,8 @@ report:
   harness_label: harness commit
   index_generator: scripts/gen_index.py
   setup_script: scripts/setup_extern_deps.sh
+
+# Explicit timing-v2 opt-in: chronological samples, complete process sets, a verification census and
+# a validated median, which is what the published pages of this campaign now record.
+timing:
+  version: 2

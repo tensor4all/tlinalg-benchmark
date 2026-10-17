@@ -1,0 +1,51 @@
+{
+  "pin": {
+    "TLINALG_REV": "f44d1f5c8bf88379d822b06cd8a87fff827fd74a",
+    "TLINALG_DIRTY": "false",
+    "TLINALG_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs",
+    "BIN_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/f44d1f5c8bf8-mkl/release",
+    "BUILD_FEATURES": "tlinalg-bench/link-mkl",
+    "BUILD_ENV": "MKLROOT=/opt/intel/oneapi/mkl/2026.1 MKL_THREADING_LIB=/opt/intel/oneapi/compiler/2026.1/lib/libiomp5.so",
+    "BUILD_VENDOR": "mkl"
+  },
+  "admission": {
+    "harness": {
+      "commit": "4d94a25d48772fe5e3334149e24f1343e83f7570",
+      "dirty": false
+    },
+    "toolkit": {
+      "commit": "d950c2d3a5543e290e6e532c86fa8885e6bb62af",
+      "dirty": false,
+      "measured_path": "/home/shinaoka/projects/tensor4all/campaign-toolkit"
+    },
+    "argv": [
+      "scripts/record_run.py",
+      "zen5-cpu",
+      "tlinalg-kernels",
+      "--vendor",
+      "mkl",
+      "--regimes",
+      "small",
+      "--threads",
+      "1",
+      "--dtypes",
+      "f64",
+      "--reps",
+      "2",
+      "--aa",
+      "3",
+      "--prime-ms",
+      "250",
+      "--label",
+      "latest-smoke-mkl",
+      "--no-publish"
+    ]
+  },
+  "binary": {
+    "path": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/f44d1f5c8bf8-mkl/release/tlbench",
+    "sha256": "1dec8d9fafb6c1e9b00e1b767128b16ad1e57b320594a6e5fa13c8be44235831"
+  },
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "env": {}
+}

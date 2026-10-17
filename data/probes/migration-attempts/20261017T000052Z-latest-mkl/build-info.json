@@ -1,0 +1,44 @@
+{
+  "pin": {
+    "TLINALG_REV": "ffd9f0ad1bb6502a02f3cc7d7c856301d36d1f3f",
+    "TLINALG_DIRTY": "false",
+    "TLINALG_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs",
+    "BIN_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/ffd9f0ad1bb6-mkl/release",
+    "BUILD_FEATURES": "tlinalg-bench/link-mkl",
+    "BUILD_ENV": "MKLROOT=/opt/intel/oneapi/mkl/2026.1 MKL_THREADING_LIB=/opt/intel/oneapi/compiler/2026.1/lib/libiomp5.so",
+    "BUILD_VENDOR": "mkl"
+  },
+  "admission": {
+    "harness": {
+      "commit": "c89da3d3b240c1d0e1fa7353155e8d27b3441482",
+      "dirty": false
+    },
+    "toolkit": {
+      "commit": "40781a1c28b4431fbdb52237d49dcc0113fe23b9",
+      "dirty": false,
+      "measured_path": "/home/shinaoka/projects/tensor4all/campaign-toolkit"
+    },
+    "argv": [
+      "scripts/record_run.py",
+      "zen5-cpu",
+      "tlinalg-kernels",
+      "--vendor",
+      "mkl",
+      "--reps",
+      "5",
+      "--aa",
+      "3",
+      "--prime-ms",
+      "250",
+      "--label",
+      "latest-mkl"
+    ]
+  },
+  "binary": {
+    "path": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/ffd9f0ad1bb6-mkl/release/tlbench",
+    "sha256": "211fb041a90937b59d8d235efc11106bc7532d50ae33aa03c61538a5a498bc2b"
+  },
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "env": {}
+}

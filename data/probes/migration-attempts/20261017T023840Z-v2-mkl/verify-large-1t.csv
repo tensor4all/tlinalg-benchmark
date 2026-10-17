@@ -1,0 +1,361 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+large,lu_factor,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,f64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,f64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,f64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,f64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_solve_prepared,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_solve_prepared,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu_factor_solve,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu_factor_solve,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,solve,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,solve,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,lu,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,lu,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,cholesky,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,cholesky,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,triangular_solve,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,triangular_solve,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_values,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_values,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,qr,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,qr,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,rank_revealing_qr,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,rank_revealing_qr,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,svd_thin,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,svd_thin,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigh,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigh,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,eigvalsh,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,eigvalsh,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_factor,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_factor,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,256,256,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,256,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,c64,256,256,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,256,256,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,256,256,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,c64,256,256,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,512,512,4,faer-1lane,1,0.000000,0.000000,ok,,"[]",1,1
+large,householder_apply,c64,512,512,4,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+large,householder_apply,c64,512,512,4,lapack-mkl,1,0.000000,0.000000,ok,,"[]",1,1
