@@ -1,0 +1,43 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+canary-decompose,qr,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,qr,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,qr,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,rank_revealing_qr,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,rank_revealing_qr,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,rank_revealing_qr,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,svd_thin,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,svd_thin,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,svd_thin,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigh,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigh,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,eigh,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigvalsh,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigvalsh,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,eigvalsh,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_factor,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_factor,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,householder_factor,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_apply,f64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_apply,f64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,householder_apply,f64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,qr,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,qr,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,qr,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,rank_revealing_qr,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,rank_revealing_qr,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,rank_revealing_qr,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,svd_thin,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,svd_thin,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,svd_thin,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigh,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigh,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,eigh,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigvalsh,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,eigvalsh,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,eigvalsh,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_factor,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_factor,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,householder_factor,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_apply,c64,512,512,1,faer-1lane,1,0.000000,0.000000,ok,,"",1,1
+canary-decompose,householder_apply,c64,512,512,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-decompose,householder_apply,c64,512,512,1,lapack-mkl,1,0.000000,0.000000,ok,,"",1,1

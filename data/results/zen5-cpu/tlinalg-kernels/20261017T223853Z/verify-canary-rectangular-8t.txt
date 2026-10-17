@@ -1,0 +1,9 @@
+OK svd_thin f64 4096x256xb1 residual=2.814e-12 provider_residual=7.390e-13
+OK qr f64 4096x256xb1 residual=1.705e-13 provider_residual=3.467e-13
+OK rank_revealing_qr f64 4096x256xb1 residual=1.023e-12 provider_residual=2.615e-12
+OK householder_factor f64 4096x256xb1 residual=1.547e-13 provider_residual=1.547e-13
+OK svd_thin c64 4096x256xb1 residual=2.359e-12 provider_residual=4.832e-13
+OK qr c64 4096x256xb1 residual=2.274e-13 provider_residual=3.695e-13
+OK rank_revealing_qr c64 4096x256xb1 residual=8.555e-13 provider_residual=1.364e-12
+OK householder_factor c64 4096x256xb1 residual=6.795e-14 provider_residual=6.861e-14
+all comparisons within tolerance

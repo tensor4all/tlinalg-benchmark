@@ -75,7 +75,9 @@ workloads:
     matrices and a rerun is reproducible.
   known_blind_spots:
     - "Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope."
-    - "Batch extents are declared per regime, so a cost proportional to batch elements is visible only where the regime says so."
+    - "The 2026-10-17 trim narrowed the suite to the batched small regime plus three single-shape canaries (factor at 128, decompose at 512, rectangular at 4096x256, each at batch 1). The medium, large and tall grids are no longer measured here: faer-benchmark measures that geometry directly with the same backends these rows wrap, so a cost that appears only at those sizes has to be read from that campaign's page."
+    - "The small regime declares batch 1 and 1024 and gives up the middle of the axis, so a cost that appears only at an intermediate batch is not covered."
+    - "The thread axis is 1T and 8T; a budget between them (4T) is not measured, so a scaling curve cannot be read off this page."
     - "The providers are compared at the thread budgets declared here; a budget the vendor threads itself by, outside that set, is not covered."
     - "A vendor arm records the vendor library, but only OpenBLAS reports the kernel its runtime dispatched to. MKL's manifest records its own version and the threading layer the harness pins; it names no kernel, because MKL exposes none to name."
     - "The small and medium regimes give up the middle of their batch axis (small: batch 64 of 1, 64, 1024; medium: batch 16 of 1, 16, 128) and the medium regime also gives up n=64 of 32, 64, 128. A cost that is only visible in the middle of one of those ranges is not covered here. Large and tall declare every shape they measure."
@@ -126,34 +128,35 @@ engines_doc:
       manifest records neither rather than inferring them. Its threading is
       vendor-owned, as for OpenBLAS.
 
-# Populations are sampled at the ends of each axis rather than across it, where the axis has a
-# middle worth dropping. Priming is a fixed 0.5 s per engine row per case and does not scale with
-# the shape, so a middle point costs exactly what an end point costs while adding the least:
-# batch=1 is latency and batch=1024 is throughput, and the batch between them is neither. That is
-# what the small and medium regimes give up -- 120 + 60 cases instead of 180 + 135, so 248 cases for
-# the suite instead of 383, about 33 minutes of priming per arm instead of 51. The large and tall
-# regimes keep every shape they declare, because those are the shapes that were never measured at
-# all. This is a declared reduction, not a silently partial run: the grid below is the whole of
-# what a full-coverage page must cover.
+# Sampling, after the 2026-10-17 trim: the suite exists to publish the *batched* small-matrix
+# question and to catch porting mistakes, not to re-measure geometry the faer campaign already
+# covers. The body is the small regime along the batch axis (n = 4/8/16 at batch 1 and 1024,
+# which is the pair that makes a batch-direction cost visible) over every family group; the
+# medium, large and tall regimes are gone, because their shapes are the ones faer-benchmark
+# measures directly with the same backends `faer-1lane`/`faer-pool`/`lapack-*` wrap. Three
+# single-shape canary populations remain (one factor, one decompose, one rectangular case) so a
+# mis-port that breaks a provider at a size the small regime does not reach still shows up. The
+# thread axis keeps the serial baseline and the largest budget (1T, 8T): the middle budget told
+# neither the per-item cost nor the batch-parallel story.
 runs:
-  - threads: [1, 4, 8]
-    cpu_sets: ["4", "4-7", "4-11"]
+  - threads: [1, 8]
+    cpu_sets: ["4", "4-11"]
     dtypes: [f64, c64]
     engines: [faer-1lane, faer-pool, lapack-openblas, lapack-mkl]
     populations:
-      - regime: small
+      - regime: batch-small
         groups: [factor, decompose, heavy]
         n: ["4", "8", "16"]
         batch: [1, 1024]
-      - regime: medium
-        groups: [factor, decompose]
-        n: ["32", "128"]
-        batch: [1, 128]
-      - regime: large
-        groups: [factor, decompose]
-        n: ["256", "512"]
-        batch: [1, 4]
-      - regime: tall
+      - regime: canary-factor
+        groups: [factor]
+        n: ["128"]
+        batch: [1]
+      - regime: canary-decompose
+        groups: [decompose]
+        n: ["512"]
+        batch: [1]
+      - regime: canary-rectangular
         groups: [rectangular]
-        n: ["1024x64", "4096x256"]
+        n: ["4096x256"]
         batch: [1]
