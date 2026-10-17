@@ -1,0 +1,49 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+tall,svd_thin,f64,1024,64,1,faer-1lane,1,2.419528,2419.528000,ok,,"[2.417334, 2.417564, 2.419528, 2.419798, 2.427863]",1,1
+tall,svd_thin,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,f64,1024,64,1,lapack-openblas,1,3.306053,3306.053000,ok,,"[3.288009, 3.289412, 3.306053, 3.324588, 3.335929]",1,1
+tall,svd_thin,f64,4096,256,1,faer-1lane,1,114.004265,114004.265000,ok,,"[113.626399, 113.896574, 114.004265, 114.105143, 114.770386]",1,1
+tall,svd_thin,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,f64,4096,256,1,lapack-openblas,1,121.943258,121943.258000,ok,,"[121.516191, 121.753504, 121.943258, 121.998672, 122.038606]",1,1
+tall,qr,f64,1024,64,1,faer-1lane,1,1.642327,1642.327000,ok,,"[1.638780, 1.640032, 1.642327, 1.642757, 1.643889]",1,1
+tall,qr,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,f64,1024,64,1,lapack-openblas,1,1.794140,1794.140000,ok,,"[1.792106, 1.793449, 1.794140, 1.794300, 1.796344]",1,1
+tall,qr,f64,4096,256,1,faer-1lane,1,66.413384,66413.384000,ok,,"[66.302758, 66.361578, 66.413384, 66.425097, 66.432090]",1,1
+tall,qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,f64,4096,256,1,lapack-openblas,1,76.089552,76089.552000,ok,,"[76.029428, 76.033837, 76.089552, 76.142400, 76.176685]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,faer-1lane,1,1.618001,1618.001000,ok,,"[1.612832, 1.614625, 1.618001, 1.618432, 1.619173]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,lapack-openblas,1,1.950231,1950.231000,ok,,"[1.945672, 1.950021, 1.950231, 1.958858, 1.962725]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,faer-1lane,1,100.056362,100056.362000,ok,,"[100.021536, 100.041914, 100.056362, 100.110773, 100.489129]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,lapack-openblas,1,92.100015,92100.015000,ok,,"[90.752699, 91.904060, 92.100015, 92.426404, 92.774305]",1,1
+tall,householder_factor,f64,1024,64,1,faer-1lane,1,0.554174,554.174000,ok,,"[0.549516, 0.551399, 0.554174, 0.554315, 0.555748]",1,1
+tall,householder_factor,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,f64,1024,64,1,lapack-openblas,1,0.923334,923.334000,ok,,"[0.921240, 0.922543, 0.923334, 0.923474, 0.924345]",1,1
+tall,householder_factor,f64,4096,256,1,faer-1lane,1,23.150436,23150.436000,ok,,"[23.122693, 23.149855, 23.150436, 23.162579, 23.171244]",1,1
+tall,householder_factor,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,f64,4096,256,1,lapack-openblas,1,38.168125,38168.125000,ok,,"[38.120547, 38.146816, 38.168125, 38.264155, 38.688968]",1,1
+tall,svd_thin,c64,1024,64,1,faer-1lane,1,5.901980,5901.980000,ok,,"[5.890248, 5.899085, 5.901980, 5.910055, 5.914774]",1,1
+tall,svd_thin,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,c64,1024,64,1,lapack-openblas,1,6.634147,6634.147000,ok,,"[6.627124, 6.633626, 6.634147, 6.642874, 6.643705]",1,1
+tall,svd_thin,c64,4096,256,1,faer-1lane,1,368.065845,368065.845000,ok,,"[359.660061, 367.434667, 368.065845, 368.099317, 368.414446]",1,1
+tall,svd_thin,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,c64,4096,256,1,lapack-openblas,1,350.255028,350255.028000,ok,,"[349.902079, 349.970808, 350.255028, 350.498394, 351.197258]",1,1
+tall,qr,c64,1024,64,1,faer-1lane,1,4.765739,4765.739000,ok,,"[4.759256, 4.765628, 4.765739, 4.773312, 4.773553]",1,1
+tall,qr,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,c64,1024,64,1,lapack-openblas,1,3.433681,3433.681000,ok,,"[3.432189, 3.432559, 3.433681, 3.435585, 3.443911]",1,1
+tall,qr,c64,4096,256,1,faer-1lane,1,236.138746,236138.746000,ok,,"[235.967115, 236.129058, 236.138746, 236.176626, 236.909564]",1,1
+tall,qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,c64,4096,256,1,lapack-openblas,1,218.313523,218313.523000,ok,,"[217.671584, 217.873541, 218.313523, 218.628691, 219.057452]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,faer-1lane,1,4.758064,4758.064000,ok,,"[4.756271, 4.757232, 4.758064, 4.758224, 4.760628]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,lapack-openblas,1,3.757055,3757.055000,ok,,"[3.754059, 3.756985, 3.757055, 3.757726, 3.760752]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,faer-1lane,1,340.846218,340846.218000,ok,,"[339.902466, 340.125412, 340.846218, 340.937477, 341.154663]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,lapack-openblas,1,250.581060,250581.060000,ok,,"[249.876003, 250.205168, 250.581060, 250.835114, 251.974541]",1,1
+tall,householder_factor,c64,1024,64,1,faer-1lane,1,1.666512,1666.512000,ok,,"[1.664388, 1.664427, 1.666512, 1.668666, 1.669047]",1,1
+tall,householder_factor,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,c64,1024,64,1,lapack-openblas,1,1.766649,1766.649000,ok,,"[1.761399, 1.764945, 1.766649, 1.766688, 1.769394]",1,1
+tall,householder_factor,c64,4096,256,1,faer-1lane,1,84.612183,84612.183000,ok,,"[84.554555, 84.576956, 84.612183, 84.625107, 84.642048]",1,1
+tall,householder_factor,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,c64,4096,256,1,lapack-openblas,1,108.858314,108858.314000,ok,,"[108.716098, 108.793733, 108.858314, 108.877059, 108.967066]",1,1

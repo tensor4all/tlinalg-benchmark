@@ -1,0 +1,3 @@
+pinned.sh: cpus=4 idle_window=3s max_busy=0.05 retries=8
+usage: tlbench info | verify --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] | run --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] [--regime LABEL] [--reps M] [--prime-ms MS] [--csv PATH]
+usage: tlbench info | verify --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] | run --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] [--regime LABEL] [--reps M] [--prime-ms MS] [--csv PATH]

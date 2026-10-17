@@ -1,0 +1,49 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+tall,svd_thin,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,f64,1024,64,1,lapack-mkl,1,2.757526,2757.526000,ok,,"[2.752216, 2.757315, 2.757526, 2.759109, 2.767204]",1,1
+tall,svd_thin,f64,1024,64,1,faer-1lane,1,2.421870,2421.870000,ok,,"[2.419897, 2.421550, 2.421870, 2.423154, 2.423684]",1,1
+tall,svd_thin,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,f64,4096,256,1,lapack-mkl,1,109.080528,109080.528000,ok,,"[108.859106, 108.990400, 109.080528, 109.101337, 109.180023]",1,1
+tall,svd_thin,f64,4096,256,1,faer-1lane,1,114.496005,114496.005000,ok,,"[114.273520, 114.453605, 114.496005, 114.726173, 115.587727]",1,1
+tall,qr,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,f64,1024,64,1,lapack-mkl,1,1.526413,1526.413000,ok,,"[1.525251, 1.525341, 1.526413, 1.528357, 1.536592]",1,1
+tall,qr,f64,1024,64,1,faer-1lane,1,1.633392,1633.392000,ok,,"[1.628012, 1.631740, 1.633392, 1.636438, 1.636738]",1,1
+tall,qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,f64,4096,256,1,lapack-mkl,1,68.119606,68119.606000,ok,,"[68.086144, 68.095852, 68.119606, 68.121840, 68.128453]",1,1
+tall,qr,f64,4096,256,1,faer-1lane,1,66.132836,66132.836000,ok,,"[66.068225, 66.130111, 66.132836, 66.219277, 67.259383]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,lapack-mkl,1,1.966112,1966.112000,ok,,"[1.963557, 1.964088, 1.966112, 1.966593, 1.968076]",1,1
+tall,rank_revealing_qr,f64,1024,64,1,faer-1lane,1,1.614187,1614.187000,ok,,"[1.608236, 1.609868, 1.614187, 1.614277, 1.616501]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,lapack-mkl,1,99.111982,99111.982000,ok,,"[97.562816, 98.653837, 99.111982, 99.202931, 99.243226]",1,1
+tall,rank_revealing_qr,f64,4096,256,1,faer-1lane,1,100.032325,100032.325000,ok,,"[99.647388, 99.934082, 100.032325, 100.056981, 101.283996]",1,1
+tall,householder_factor,f64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,f64,1024,64,1,lapack-mkl,1,0.738376,738.376000,ok,,"[0.735820, 0.737073, 0.738376, 0.742453, 0.743074]",1,1
+tall,householder_factor,f64,1024,64,1,faer-1lane,1,0.549353,549.353000,ok,,"[0.545226, 0.546338, 0.549353, 0.550585, 0.552800]",1,1
+tall,householder_factor,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,f64,4096,256,1,lapack-mkl,1,28.592715,28592.715000,ok,,"[28.527424, 28.573750, 28.592715, 28.641296, 28.697050]",1,1
+tall,householder_factor,f64,4096,256,1,faer-1lane,1,22.802391,22802.391000,ok,,"[22.734975, 22.746757, 22.802391, 22.905923, 23.656151]",1,1
+tall,svd_thin,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,c64,1024,64,1,lapack-mkl,1,8.154648,8154.648000,ok,,"[8.150350, 8.152113, 8.154648, 8.154658, 8.157974]",1,1
+tall,svd_thin,c64,1024,64,1,faer-1lane,1,5.879651,5879.651000,ok,,"[5.868720, 5.869502, 5.879651, 5.882838, 5.899138]",1,1
+tall,svd_thin,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,svd_thin,c64,4096,256,1,lapack-mkl,1,349.787037,349787.037000,ok,,"[349.188122, 349.705275, 349.787037, 351.044089, 351.165956]",1,1
+tall,svd_thin,c64,4096,256,1,faer-1lane,1,367.925291,367925.291000,ok,,"[358.180099, 367.817941, 367.925291, 368.356042, 368.667082]",1,1
+tall,qr,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,c64,1024,64,1,lapack-mkl,1,4.734648,4734.648000,ok,,"[4.725372, 4.732595, 4.734648, 4.739377, 5.936898]",1,1
+tall,qr,c64,1024,64,1,faer-1lane,1,4.726364,4726.364000,ok,,"[4.720172, 4.720362, 4.726364, 4.743135, 4.743245]",1,1
+tall,qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,qr,c64,4096,256,1,lapack-mkl,1,219.205162,219205.162000,ok,,"[218.952391, 219.158164, 219.205162, 219.232904, 219.535918]",1,1
+tall,qr,c64,4096,256,1,faer-1lane,1,236.232126,236232.126000,ok,,"[236.070845, 236.071798, 236.232126, 236.240171, 236.247505]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,lapack-mkl,1,6.390032,6390.032000,ok,,"[6.383019, 6.385514, 6.390032, 6.396564, 6.421250]",1,1
+tall,rank_revealing_qr,c64,1024,64,1,faer-1lane,1,4.772939,4772.939000,ok,,"[4.767109, 4.768903, 4.772939, 4.773912, 4.777017]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,lapack-mkl,1,280.972638,280972.638000,ok,,"[279.916180, 280.868295, 280.972638, 281.508106, 282.557650]",1,1
+tall,rank_revealing_qr,c64,4096,256,1,faer-1lane,1,341.788171,341788.171000,ok,,"[341.311773, 341.429804, 341.788171, 341.999715, 342.629388]",1,1
+tall,householder_factor,c64,1024,64,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,c64,1024,64,1,lapack-mkl,1,2.190991,2190.991000,ok,,"[2.186583, 2.188887, 2.190991, 2.194056, 2.194727]",1,1
+tall,householder_factor,c64,1024,64,1,faer-1lane,1,1.668377,1668.377000,ok,,"[1.667766, 1.667857, 1.668377, 1.668858, 1.673607]",1,1
+tall,householder_factor,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"[]",1,1
+tall,householder_factor,c64,4096,256,1,lapack-mkl,1,102.834676,102834.676000,ok,,"[102.747333, 102.757382, 102.834676, 102.856277, 103.374702]",1,1
+tall,householder_factor,c64,4096,256,1,faer-1lane,1,84.701401,84701.401000,ok,,"[84.582831, 84.694509, 84.701401, 84.746335, 84.777604]",1,1
