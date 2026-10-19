@@ -1,1 +1,1 @@
-campaign-toolkit @ git+https://github.com/tensor4all/campaign-toolkit@e84714bb4c92b1529114428f02ef5931445e8885
+campaign-toolkit @ git+https://github.com/tensor4all/campaign-toolkit@95caeefa9ae7c8461ccdf75d3b65455d4ed799b0
