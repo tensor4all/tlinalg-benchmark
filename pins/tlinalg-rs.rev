@@ -1,1 +1,5 @@
-06466b166453c1efd06940ef48ec8f0b711fb677
+
+# main (4dcd35f) from 2026-10-19: the newest revision, seven commits past the previous
+# pin. The last release tag v0.2.0 (58ad340) is sixteen commits *behind* the previous
+# pin, so pinning the tag would have been a downgrade.
+4dcd35f080a6b4fd6b1423871af66a33fd398482
