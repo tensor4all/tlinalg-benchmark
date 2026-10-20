@@ -102,6 +102,7 @@ csv_columns:
 
 # Strings the generated index and report headers print.
 report:
+  subject: tlinalg
   library_label: tlinalg-rs commit
   provider_label: faer provider
   harness_label: harness commit
