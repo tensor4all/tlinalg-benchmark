@@ -1,0 +1,49 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+canary-factor,lu_factor,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_factor,f64,128,128,1,lapack-mkl,1,0.121577,121.577000,ok,,"[0.121296, 0.121437, 0.121577, 0.121616, 0.124172]",1,1
+canary-factor,lu_factor,f64,128,128,1,faer-1lane,1,0.094286,94.286000,ok,,"[0.094246, 0.094276, 0.094286, 0.094296, 0.094456]",1,1
+canary-factor,lu_solve_prepared,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_solve_prepared,f64,128,128,1,lapack-mkl,1,0.020839,20.839000,ok,,"[0.020378, 0.020609, 0.020839, 0.020899, 0.023844]",1,1
+canary-factor,lu_solve_prepared,f64,128,128,1,faer-1lane,1,0.009868,9.868000,ok,,"[0.009819, 0.009858, 0.009868, 0.010009, 0.010068]",1,1
+canary-factor,lu_factor_solve,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_factor_solve,f64,128,128,1,lapack-mkl,1,0.142235,142.235000,ok,,"[0.141924, 0.142206, 0.142235, 0.142325, 0.142545]",1,1
+canary-factor,lu_factor_solve,f64,128,128,1,faer-1lane,1,0.104615,104.615000,ok,,"[0.104244, 0.104525, 0.104615, 0.104796, 0.108051]",1,1
+canary-factor,solve,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,solve,f64,128,128,1,lapack-mkl,1,0.146283,146.283000,ok,,"[0.146023, 0.146193, 0.146283, 0.146584, 0.148828]",1,1
+canary-factor,solve,f64,128,128,1,faer-1lane,1,0.112400,112.400000,ok,,"[0.112379, 0.112380, 0.112400, 0.112400, 0.112850]",1,1
+canary-factor,lu,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu,f64,128,128,1,lapack-mkl,1,0.137025,137.025000,ok,,"[0.136755, 0.136965, 0.137025, 0.137306, 0.140412]",1,1
+canary-factor,lu,f64,128,128,1,faer-1lane,1,0.148217,148.217000,ok,,"[0.147876, 0.147966, 0.148217, 0.148267, 0.148547]",1,1
+canary-factor,cholesky,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,cholesky,f64,128,128,1,lapack-mkl,1,0.092462,92.462000,ok,,"[0.091931, 0.092383, 0.092462, 0.092463, 0.092642]",1,1
+canary-factor,cholesky,f64,128,128,1,faer-1lane,1,0.066474,66.474000,ok,,"[0.066424, 0.066464, 0.066474, 0.066614, 0.069019]",1,1
+canary-factor,triangular_solve,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,triangular_solve,f64,128,128,1,lapack-mkl,1,0.011651,11.651000,ok,,"[0.011642, 0.011642, 0.011651, 0.011802, 0.011812]",1,1
+canary-factor,triangular_solve,f64,128,128,1,faer-1lane,1,0.007003,7.003000,ok,,"[0.006873, 0.006933, 0.007003, 0.007043, 0.007154]",1,1
+canary-factor,svd_values,f64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,svd_values,f64,128,128,1,lapack-mkl,1,1.164061,1164.061000,ok,,"[1.159893, 1.162288, 1.164061, 1.165544, 1.167237]",1,1
+canary-factor,svd_values,f64,128,128,1,faer-1lane,1,2.344984,2344.984000,ok,,"[2.341147, 2.344343, 2.344984, 2.353359, 2.354531]",1,1
+canary-factor,lu_factor,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_factor,c64,128,128,1,lapack-mkl,1,0.415625,415.625000,ok,,"[0.412439, 0.414202, 0.415625, 0.416096, 0.419583]",1,1
+canary-factor,lu_factor,c64,128,128,1,faer-1lane,1,0.262610,262.610000,ok,,"[0.261428, 0.261769, 0.262610, 0.263642, 0.266067]",1,1
+canary-factor,lu_solve_prepared,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_solve_prepared,c64,128,128,1,lapack-mkl,1,0.051296,51.296000,ok,,"[0.051276, 0.051296, 0.051296, 0.051386, 0.054773]",1,1
+canary-factor,lu_solve_prepared,c64,128,128,1,faer-1lane,1,0.031088,31.088000,ok,,"[0.031008, 0.031068, 0.031088, 0.031158, 0.031559]",1,1
+canary-factor,lu_factor_solve,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu_factor_solve,c64,128,128,1,lapack-mkl,1,0.469185,469.185000,ok,,"[0.466069, 0.466850, 0.469185, 0.470748, 0.470798]",1,1
+canary-factor,lu_factor_solve,c64,128,128,1,faer-1lane,1,0.292866,292.866000,ok,,"[0.292226, 0.292405, 0.292866, 0.296022, 0.298667]",1,1
+canary-factor,solve,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,solve,c64,128,128,1,lapack-mkl,1,0.480406,480.406000,ok,,"[0.479505, 0.480315, 0.480406, 0.482740, 0.483342]",1,1
+canary-factor,solve,c64,128,128,1,faer-1lane,1,0.305489,305.489000,ok,,"[0.305139, 0.305409, 0.305489, 0.307965, 0.308195]",1,1
+canary-factor,lu,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,lu,c64,128,128,1,lapack-mkl,1,0.454778,454.778000,ok,,"[0.450199, 0.452354, 0.454778, 0.455980, 0.459027]",1,1
+canary-factor,lu,c64,128,128,1,faer-1lane,1,0.328082,328.082000,ok,,"[0.327210, 0.327672, 0.328082, 0.330607, 0.330747]",1,1
+canary-factor,cholesky,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,cholesky,c64,128,128,1,lapack-mkl,1,0.407480,407.480000,ok,,"[0.406478, 0.407190, 0.407480, 0.408252, 0.411087]",1,1
+canary-factor,cholesky,c64,128,128,1,faer-1lane,1,0.181438,181.438000,ok,,"[0.181138, 0.181408, 0.181438, 0.181479, 0.181909]",1,1
+canary-factor,triangular_solve,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,triangular_solve,c64,128,128,1,lapack-mkl,1,0.025567,25.567000,ok,,"[0.025368, 0.025537, 0.025567, 0.025598, 0.028924]",1,1
+canary-factor,triangular_solve,c64,128,128,1,faer-1lane,1,0.018495,18.495000,ok,,"[0.018415, 0.018475, 0.018495, 0.018504, 0.018705]",1,1
+canary-factor,svd_values,c64,128,128,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-factor,svd_values,c64,128,128,1,lapack-mkl,1,2.654151,2654.151000,ok,,"[2.643361, 2.647689, 2.654151, 2.656304, 2.668828]",1,1
+canary-factor,svd_values,c64,128,128,1,faer-1lane,1,3.124959,3124.959000,ok,,"[3.119429, 3.123025, 3.124959, 3.125630, 3.126942]",1,1
