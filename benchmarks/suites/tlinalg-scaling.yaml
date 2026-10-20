@@ -170,8 +170,3 @@ runs:
         n: ["4096x256"]
         batch: [1]
 
-# The verify recomputes every case with its residual checks, and one pass over the whole
-# batched grid costs as much as the timing it guards. The shapes it runs on are narrowed; the
-# budgets are not, because a timed cell at a budget the verify skipped is an unchecked number.
-verify:
-  n: ["4", "8", "16"]
