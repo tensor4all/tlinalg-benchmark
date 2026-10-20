@@ -1,0 +1,17 @@
+regime,family,dtype,m,n,batch,row,threads,total_ms,per_item_us,status,note,samples_ms,rayon_threads,vendor_threads
+canary-rectangular,svd_thin,f64,4096,256,1,faer-1lane,1,103.437919,103437.919000,ok,,"[103.434583, 103.435155, 103.437919, 103.462726, 103.504653]",1,1
+canary-rectangular,svd_thin,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,qr,f64,4096,256,1,faer-1lane,1,66.114860,66114.860000,ok,,"[66.082320, 66.085876, 66.114860, 66.127494, 66.140928]",1,1
+canary-rectangular,qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,rank_revealing_qr,f64,4096,256,1,faer-1lane,1,100.735413,100735.413000,ok,,"[100.383431, 100.710768, 100.735413, 100.755361, 101.381161]",1,1
+canary-rectangular,rank_revealing_qr,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,householder_factor,f64,4096,256,1,faer-1lane,1,22.864635,22864.635000,ok,,"[22.811237, 22.842394, 22.864635, 22.873462, 22.966034]",1,1
+canary-rectangular,householder_factor,f64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,svd_thin,c64,4096,256,1,faer-1lane,1,366.754524,366754.524000,ok,,"[366.207682, 366.620468, 366.754524, 366.985987, 367.047339]",1,1
+canary-rectangular,svd_thin,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,qr,c64,4096,256,1,faer-1lane,1,238.179492,238179.492000,ok,,"[237.329726, 238.152663, 238.179492, 238.357732, 238.830709]",1,1
+canary-rectangular,qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,rank_revealing_qr,c64,4096,256,1,faer-1lane,1,350.889011,350889.011000,ok,,"[349.744993, 350.445248, 350.889011, 351.130621, 352.307710]",1,1
+canary-rectangular,rank_revealing_qr,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
+canary-rectangular,householder_factor,c64,4096,256,1,faer-1lane,1,85.126995,85126.995000,ok,,"[84.841996, 84.993046, 85.126995, 85.782460, 85.819969]",1,1
+canary-rectangular,householder_factor,c64,4096,256,1,faer-pool,1,0.000000,0.000000,skipped,a 1-thread run does not measure the pool row,"",1,1
