@@ -102,7 +102,6 @@ csv_columns:
 
 # Strings the generated index and report headers print.
 report:
-  subject: tlinalg
   row_labels:
     faer-1lane: tlinalg-1lane
     faer-pool: tlinalg-pool
