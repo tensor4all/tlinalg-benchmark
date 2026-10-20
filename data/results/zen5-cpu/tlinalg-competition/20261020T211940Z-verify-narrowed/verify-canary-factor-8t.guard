@@ -1,3 +1,0 @@
-pinned.sh: cpus=4-11 idle_window=3s max_busy=0.05 retries=3
-invalid shape ""
-usage: tlbench info | verify --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] [--regime LABEL] [--rows ROWS] [--rotate-rows K] [--csv PATH] | run --threads N --n LIST [--batch LIST] [--dtype LIST] [--family LIST] [--regime LABEL] [--rows ROWS] [--rotate-rows K] [--reps M] [--prime-ms MS] [--statistic best|median] [--csv PATH]
