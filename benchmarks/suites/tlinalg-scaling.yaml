@@ -78,6 +78,7 @@ workloads:
     Inputs are seeded from the case, so `verify` and `run` measure the same
     matrices and a rerun is reproducible.
   known_blind_spots:
+    - "The batched regime stops at n=32: at batch 1024 the harness's verify recomputes every case with its residual checks, and n=64 pushed one verify pass past 45 minutes on this host (measured 2026-10-20). n=64 returns when verify can run on a declared grid of its own (campaign-toolkit#28), not as part of the timing run."
     - "Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope."
     - "The 2026-10-17 trim narrowed the suite to the batched small regime plus three single-shape canaries (factor at 128, decompose at 512, rectangular at 4096x256, each at batch 1). The medium, large and tall grids are no longer measured here: faer-benchmark measures that geometry directly with the same backends these rows wrap, so a cost that appears only at those sizes has to be read from that campaign's page."
     - "The small regime declares batch 1 and 1024 and gives up the middle of the axis, so a cost that appears only at an intermediate batch is not covered."
@@ -150,7 +151,7 @@ runs:
     populations:
       - regime: batch-small
         groups: [factor, decompose, heavy]
-        n: ["4", "8", "16", "32", "64"]
+        n: ["4", "8", "16", "32"]
         batch: [1024]
       - regime: canary-factor
         groups: [factor]
