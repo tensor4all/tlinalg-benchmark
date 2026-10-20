@@ -1,26 +1,26 @@
-<!-- generated from data/results/zen5-cpu/tlinalg-competition/20261020T175935Z-pub-mkl-corefixed/report.md by scripts/publish_report.py; the report below is the source of truth -->
+<!-- generated from data/results/zen5-cpu/tlinalg-competition/20261020T215232Z-verify-narrowed/report.md by scripts/publish_report.py; the report below is the source of truth -->
 
 # `tlinalg-competition` on `zen5-cpu`
 
 - tlinalg-rs commit: `4dcd35f080a6b4fd6b1423871af66a33fd398482`
 - features: `tlinalg-bench/link-mkl`
 - faer provider: `faer` 0.24.4 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `faer-traits` 0.24.0 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `t4a-faer` 0.24.6 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `t4a-faer-traits` 0.24.0 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index)
-- harness commit: `2f14740fac770401de0fc4c087051ccdbaacb651`
-- toolkit commit: `b30708eaa5b5f288c9d4ec8ff9c0bda2389125d3`
+- harness commit: `8c1287010fb00be27de2ff72dfafa0e3a51c7ab4`
+- toolkit commit: `e9760430705cfd3024a5da0d37502e80ec428059`
 - measured binary SHA-256: `1cc3ca9b16c76de0b3c25d4c027be838f28ec38f401c14c3a62df4b7006e20ec`
 - hardware profile: `zen5-cpu`
 - host role: `development` — **provisional**: recorded on a development host, superseded by the measurement host's dataset
-- timestamp: `2026-10-20T18:30:29.448736Z`
+- timestamp: `2026-10-20T22:17:12.814671Z`
 - timing policy: v2, median of 5 reps, priming 250 ms (time-based, identical on every row)
 - guards: idle window 3 s, max busy 5.0% including SMT siblings, 3 attempts
-- command: `scripts/record_run.py zen5-cpu tlinalg-competition --vendor mkl --aa 4 --reps 5 --prime-ms 250 --label pub-mkl-corefixed`
-- raw data: `data/results/zen5-cpu/tlinalg-competition/20261020T175935Z-pub-mkl-corefixed/`
+- command: `scripts/record_run.py zen5-cpu tlinalg-competition --vendor mkl --aa 4 --reps 5 --prime-ms 250 --label verify-narrowed`
+- raw data: `data/results/zen5-cpu/tlinalg-competition/20261020T215232Z-verify-narrowed/`
 
 ## What was measured
 
 - **Workload** — Square and rectangular dense matrices in a batch: one call per batch over a rank-2+B descriptor, `n x n` or `m x n` per item. Sizes are the matrix dimension, not a memory budget, so a case name says exactly what was factored; the batch extent is a separate axis and is never collapsed.
   Source: The library's own kernel inventory (crates/tlinalg/src, crates/tlinalg-blas/src). Inputs are seeded from the case, so `verify` and `run` measure the same matrices and a rerun is reproducible.
-  Known blind spot: The batched regime stops at n=32: at batch 1024 the harness's verify recomputes every case with its residual checks, and n=64 pushed one verify pass past 45 minutes on this host (measured 2026-10-20). n=64 returns when verify can run on a declared grid of its own (campaign-toolkit#28), not as part of the timing run.
+  Known blind spot: The batched regime stops at n=32 by choice: batch 1024 is the regime this campaign is about, and the four shapes up to 32 already separate the rows by four to nine times, so larger matrices would add cells without changing the answer. Above that size faer-benchmark measures the same backends. (Recorded while the grid still held 64: one verify pass at n=64 ran past 45 minutes because the harness recomputes every case, which made the last shape cost far more than it added.)
   Known blind spot: Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope.
   Known blind spot: The 2026-10-17 trim narrowed the suite to the batched small regime plus three single-shape canaries (factor at 128, decompose at 512, rectangular at 4096x256, each at batch 1). The medium, large and tall grids are no longer measured here: faer-benchmark measures that geometry directly with the same backends these rows wrap, so a cost that appears only at those sizes has to be read from that campaign's page.
   Known blind spot: The small regime declares batch 1 and 1024 and gives up the middle of the axis, so a cost that appears only at an intermediate batch is not covered.
@@ -53,7 +53,7 @@ Each cell is median of process medians ± sample SD of those medians; W is the m
 within-process sample SD. All values are milliseconds. These are descriptive spreads,
 not confidence intervals. The between-process spread includes the rotating-order schedule.
 Each process retains 5 chronological calls; 4 complete process sets are recorded.
-Spread guide (computed from this run's own rows): per-engine between-start range median 1.55%, worst 104.89% among cells of 1 us or more (a sub-microsecond row is timer and scheduler jitter, not kernel time); 70 of 396 engine cells exceed 5% and carry `!`; median within-process relative SD 0.48%. A cell whose `±`, `!` or `p` is as large as the difference you are reading is not evidence of a regression.
+Spread guide (computed from this run's own rows): per-engine between-start range median 1.45%, worst 95.69% among cells of 1 us or more (a sub-microsecond row is timer and scheduler jitter, not kernel time); 70 of 396 engine cells exceed 5% and carry `!`; median within-process relative SD 0.47%. A cell whose `±`, `!` or `p` is as large as the difference you are reading is not evidence of a regression.
 The `vs tlinalg-pool` column is the rotation-averaged ratio
 exp(mean over starts of log(engine median / tlinalg-pool median)),
 with the per-start ratios beside it: `R > 1`
@@ -79,238 +79,238 @@ These describe the recorded revisions; they are not a regression claim.
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `cholesky/n16/b1024` | 0.12276 ± 0.038072 (W 0.00162189) | 1.06652 ± 0.00912005 (W 0.00239685) | 🔵 tlinalg-pool 8.69× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `cholesky/n32/b1024` | 0.470547 ± 0.0140421 (W 0.00725289) | 3.69057 ± 0.0500625 (W 0.026662) | 🔵 tlinalg-pool 7.84× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `cholesky/n4/b1024` | 0.030046 ± 0.000444955 (W 0.000606569) | 0.122115 ± 0.00164579 (W 0.00122663) | 🔵 tlinalg-pool 4.06× faster than `lapack-mkl` |  |
-| `cholesky/n8/b1024` | 0.0531695 ± 0.000445763 (W 0.000508365) | 0.322819 ± 0.00824485 (W 0.00241682) | 🔵 tlinalg-pool 6.07× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `eig/n16/b1024` | 11.927 ± 0.0403538 (W 0.0465504) | 52.9043 ± 0.0650311 (W 0.0464826) | 🔵 tlinalg-pool 4.44× faster than `lapack-mkl` |  |
-| `eig/n32/b1024` | 54.1599 ± 13.1113 (W 0.5141) | 284.271 ± 0.629282 (W 0.413017) | 🔵 tlinalg-pool 5.25× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `eig/n4/b1024` | 0.784099 ± 0.00507472 (W 0.00330654) | 2.83596 ± 0.00652393 (W 0.00496057) | 🔵 tlinalg-pool 3.62× faster than `lapack-mkl` |  |
-| `eig/n8/b1024` | 2.95128 ± 0.00746645 (W 0.00472654) | 11.7127 ± 0.0513809 (W 0.0202346) | 🔵 tlinalg-pool 3.97× faster than `lapack-mkl` |  |
-| `eigh/n16/b1024` | 3.74117 ± 0.0236769 (W 0.00626081) | 23.45 ± 0.029123 (W 0.023591) | 🔵 tlinalg-pool 6.27× faster than `lapack-mkl` |  |
-| `eigh/n32/b1024` | 14.3456 ± 0.0180845 (W 0.0362957) | 100.491 ± 0.383975 (W 0.046744) | 🔵 tlinalg-pool 7.00× faster than `lapack-mkl` |  |
-| `eigh/n4/b1024` | 0.31942 ± 0.00292232 (W 0.00191156) | 2.79224 ± 0.0303417 (W 0.00682503) | 🔵 tlinalg-pool 8.74× faster than `lapack-mkl` |  |
-| `eigh/n8/b1024` | 1.0725 ± 0.00793258 (W 0.00241542) | 7.72627 ± 0.0138862 (W 0.0132638) | 🔵 tlinalg-pool 7.20× faster than `lapack-mkl` |  |
-| `eigvals/n16/b1024` | 8.174 ± 0.05106 (W 0.0157612) | 36.4501 ± 0.0678256 (W 0.222931) | 🔵 tlinalg-pool 4.46× faster than `lapack-mkl` |  |
-| `eigvals/n32/b1024` | 36.2856 ± 0.0444592 (W 0.0602832) | 169.447 ± 0.170364 (W 0.244445) | 🔵 tlinalg-pool 4.67× faster than `lapack-mkl` |  |
-| `eigvals/n4/b1024` | 0.410172 ± 0.00841306 (W 0.00304164) | 2.10636 ± 0.00164287 (W 0.00256714) | 🔵 tlinalg-pool 5.14× faster than `lapack-mkl` |  |
-| `eigvals/n8/b1024` | 1.93071 ± 0.00294126 (W 0.0020621) | 8.97997 ± 0.0303228 (W 0.0289784) | 🔵 tlinalg-pool 4.65× faster than `lapack-mkl` |  |
-| `eigvalsh/n16/b1024` | 2.79215 ± 0.0359172 (W 0.00461599) | 12.9534 ± 0.0234297 (W 0.0270214) | 🔵 tlinalg-pool 4.64× faster than `lapack-mkl` |  |
-| `eigvalsh/n32/b1024` | 10.9249 ± 0.0168719 (W 0.0386942) | 43.0858 ± 0.0645802 (W 0.0520674) | 🔵 tlinalg-pool 3.94× faster than `lapack-mkl` |  |
-| `eigvalsh/n4/b1024` | 0.25397 ± 0.00106625 (W 0.00284596) | 1.44779 ± 0.00294292 (W 0.00227395) | 🔵 tlinalg-pool 5.70× faster than `lapack-mkl` |  |
-| `eigvalsh/n8/b1024` | 0.858805 ± 0.00349265 (W 0.00384307) | 4.40172 ± 0.00823763 (W 0.00687978) | 🔵 tlinalg-pool 5.13× faster than `lapack-mkl` |  |
-| `full_piv_lu/n16/b1024` | 0.47607 ± 0.00333019 (W 0.00591496) | 3.86814 ± 0.0265456 (W 0.00786037) | 🔵 tlinalg-pool 8.13× faster than `lapack-mkl` |  |
-| `full_piv_lu/n32/b1024` | 1.99493 ± 0.0232258 (W 0.0318182) | 26.2636 ± 0.0727789 (W 0.138736) | 🔵 tlinalg-pool 13.17× faster than `lapack-mkl` |  |
-| `full_piv_lu/n4/b1024` | 0.082185 ± 0.00108636 (W 0.00249055) | 0.402778 ± 0.0037201 (W 0.00192127) | 🔵 tlinalg-pool 4.90× faster than `lapack-mkl` |  |
-| `full_piv_lu/n8/b1024` | 0.164994 ± 0.0026383 (W 0.00303356) | 0.972226 ± 0.0143659 (W 0.00214171) | 🔵 tlinalg-pool 5.89× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n16/b1024` | 0.459816 ± 0.00785186 (W 0.00316492) | 5.81096 ± 0.0409797 (W 0.0142124) | 🔵 tlinalg-pool 12.64× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n32/b1024` | 1.50617 ± 0.0290535 (W 0.00771586) | 29.7131 ± 0.130293 (W 0.0321304) | 🔵 tlinalg-pool 19.73× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n4/b1024` | 0.0746 ± 0.00209381 (W 0.00076866) | 1.11515 ± 0.00882419 (W 0.00362106) | 🔵 tlinalg-pool 14.95× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `full_piv_lu_solve/n8/b1024` | 0.17635 ± 0.0018782 (W 0.00242167) | 1.96185 ± 0.0252513 (W 0.00684394) | 🔵 tlinalg-pool 11.12× faster than `lapack-mkl` |  |
-| `householder_apply/n16/b1024` | 0.608844 ± 0.0244564 (W 0.00281046) | 2.71009 ± 0.0456661 (W 0.0220863) | 🔵 tlinalg-pool 4.45× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_apply/n32/b1024` | 2.48673 ± 0.0683522 (W 0.0168131) | 13.209 ± 0.341262 (W 0.0679007) | 🔵 tlinalg-pool 5.31× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_apply/n4/b1024` | 0.0527995 ± 0.00142094 (W 0.000506823) | 0.323726 ± 0.0021642 (W 0.0026494) | 🔵 tlinalg-pool 6.13× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_apply/n8/b1024` | 0.171376 ± 0.00974799 (W 0.00157056) | 0.796727 ± 0.00831383 (W 0.0111358) | 🔵 tlinalg-pool 4.65× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_factor/n16/b1024` | 0.490409 ± 0.0151369 (W 0.0035615) | 2.96303 ± 0.0141281 (W 0.00542626) | 🔵 tlinalg-pool 6.04× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_factor/n32/b1024` | 1.67126 ± 0.022802 (W 0.00908655) | 12.3354 ± 0.0918934 (W 0.0290936) | 🔵 tlinalg-pool 7.38× faster than `lapack-mkl` |  |
-| `householder_factor/n4/b1024` | 0.063755 ± 0.00109281 (W 0.00147602) | 0.30652 ± 0.00105262 (W 0.00133245) | 🔵 tlinalg-pool 4.81× faster than `lapack-mkl` |  |
-| `householder_factor/n8/b1024` | 0.16783 ± 0.00354927 (W 0.00114997) | 0.845263 ± 0.00382859 (W 0.00264689) | 🔵 tlinalg-pool 5.04× faster than `lapack-mkl` |  |
-| `lu/n16/b1024` | 0.36793 ± 0.00452255 (W 0.00503507) | 1.76424 ± 0.0501802 (W 0.00857052) | 🔵 tlinalg-pool 4.80× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu/n32/b1024` | 1.32623 ± 0.0526449 (W 0.0190267) | 11.9124 ± 0.116667 (W 0.0325315) | 🔵 tlinalg-pool 8.98× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu/n4/b1024` | 0.076218 ± 0.00105608 (W 0.00341667) | 0.167033 ± 0.00102226 (W 0.0018079) | 🔵 tlinalg-pool 2.19× faster than `lapack-mkl` |  |
-| `lu/n8/b1024` | 0.14935 ± 0.00528518 (W 0.00378102) | 0.51046 ± 0.0187172 (W 0.00309239) | 🔵 tlinalg-pool 3.42× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_factor/n16/b1024` | 0.265439 ± 0.000931109 (W 0.00378268) | 1.15492 ± 0.0428383 (W 0.00234865) | 🔵 tlinalg-pool 4.35× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_factor/n32/b1024` | 0.753126 ± 0.0047915 (W 0.0052194) | 8.97607 ± 0.0415868 (W 0.0299781) | 🔵 tlinalg-pool 11.92× faster than `lapack-mkl` |  |
-| `lu_factor/n4/b1024` | 0.0621265 ± 0.000898938 (W 0.00130227) | 0.0657085 ± 0.00071793 (W 0.00214573) | 🔵 tlinalg-pool 1.06× faster than `lapack-mkl` |  |
-| `lu_factor/n8/b1024` | 0.111119 ± 0.00213004 (W 0.00177144) | 0.262333 ± 0.0006303 (W 0.00205867) | 🔵 tlinalg-pool 2.36× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n16/b1024` | 0.335338 ± 0.00489649 (W 0.00191024) | 2.32495 ± 0.00475253 (W 0.00524251) | 🔵 tlinalg-pool 6.93× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n32/b1024` | 0.892638 ± 0.00630802 (W 0.00371891) | 13.7828 ± 0.1565 (W 0.0113793) | 🔵 tlinalg-pool 15.44× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n4/b1024` | 0.064577 ± 0.00135247 (W 0.0019585) | 0.181061 ± 0.00141806 (W 0.00205604) | 🔵 tlinalg-pool 2.80× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n8/b1024` | 0.130169 ± 0.00362869 (W 0.00480269) | 0.826369 ± 0.00375561 (W 0.00224291) | 🔵 tlinalg-pool 6.35× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_solve_prepared/n16/b1024` | 0.130785 ± 0.000974345 (W 0.00144641) | 1.06872 ± 0.00615697 (W 0.00518017) | 🔵 tlinalg-pool 8.17× faster than `lapack-mkl` |  |
-| `lu_solve_prepared/n32/b1024` | 0.313843 ± 0.0122362 (W 0.0132955) | 4.51435 ± 0.105988 (W 0.0103864) | 🔵 tlinalg-pool 14.38× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_solve_prepared/n4/b1024` | 0.0330265 ± 0.00104736 (W 0.000836053) | 0.133356 ± 0.00141391 (W 0.00112711) | 🔵 tlinalg-pool 4.04× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_solve_prepared/n8/b1024` | 0.0553335 ± 0.000607214 (W 0.000619482) | 0.587515 ± 0.00115457 (W 0.00231495) | 🔵 tlinalg-pool 10.62× faster than `lapack-mkl` |  |
-| `qr/n16/b1024` | 1.13941 ± 0.0192032 (W 0.00308949) | 5.26943 ± 0.0736761 (W 0.0151336) | 🔵 tlinalg-pool 4.62× faster than `lapack-mkl` |  |
-| `qr/n32/b1024` | 4.50263 ± 0.0167041 (W 0.011701) | 21.2 ± 0.0927276 (W 0.0827579) | 🔵 tlinalg-pool 4.71× faster than `lapack-mkl` |  |
-| `qr/n4/b1024` | 0.105708 ± 0.00112229 (W 0.00087872) | 0.723452 ± 0.0446376 (W 0.00277295) | 🔵 tlinalg-pool 6.84× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `qr/n8/b1024` | 0.319414 ± 0.00501954 (W 0.00249357) | 1.70532 ± 0.0342946 (W 0.00451374) | 🔵 tlinalg-pool 5.34× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n16/b1024` | 1.31468 ± 0.0808588 (W 0.00675199) | 8.36527 ± 0.0612889 (W 0.0534111) | 🔵 tlinalg-pool 6.36× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `rank_revealing_qr/n32/b1024` | 4.59964 ± 0.0273336 (W 0.012053) | 31.2784 ± 0.114079 (W 0.0673225) | 🔵 tlinalg-pool 6.80× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n4/b1024` | 0.15831 ± 0.00018362 (W 0.00159683) | 1.22586 ± 0.0387475 (W 0.00376725) | 🔵 tlinalg-pool 7.74× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `rank_revealing_qr/n8/b1024` | 0.418285 ± 0.00680902 (W 0.00207268) | 2.93498 ± 0.0301822 (W 0.00577135) | 🔵 tlinalg-pool 7.02× faster than `lapack-mkl` |  |
-| `solve/n16/b1024` | 0.35216 ± 0.00530586 (W 0.00495616) | 2.44867 ± 0.0544339 (W 0.0052741) | 🔵 tlinalg-pool 6.95× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `solve/n32/b1024` | 0.942222 ± 0.0160339 (W 0.00391288) | 13.6841 ± 0.279476 (W 0.0200333) | 🔵 tlinalg-pool 14.52× faster than `lapack-mkl` |  |
-| `solve/n4/b1024` | 0.055008 ± 0.0285815 (W 0.000582692) | 0.229638 ± 0.00212644 (W 0.0021756) | 🔵 tlinalg-pool 4.17× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `solve/n8/b1024` | 0.131578 ± 0.00345137 (W 0.00243084) | 0.888525 ± 0.0123193 (W 0.00175641) | 🔵 tlinalg-pool 6.75× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_full/n16/b1024` | 7.12465 ± 0.100236 (W 0.0159416) | 51.5408 ± 0.158107 (W 0.0404379) | 🔵 tlinalg-pool 7.23× faster than `lapack-mkl` |  |
-| `svd_full/n32/b1024` | 25.68 ± 1.2532 (W 0.31697) | 195.408 ± 0.784409 (W 0.298293) | 🔵 tlinalg-pool 7.61× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_full/n4/b1024` | 0.559603 ± 0.0234668 (W 0.00287938) | 6.11763 ± 0.0335963 (W 0.0389055) | 🔵 tlinalg-pool 10.93× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_full/n8/b1024` | 1.94047 ± 0.0251406 (W 0.010574) | 18.576 ± 0.0514726 (W 0.0214354) | 🔵 tlinalg-pool 9.57× faster than `lapack-mkl` |  |
-| `svd_thin/n16/b1024` | 7.2453 ± 0.19651 (W 0.0728173) | 51.4432 ± 0.152097 (W 0.0660463) | 🔵 tlinalg-pool 7.10× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_thin/n32/b1024` | 27.5104 ± 1.69299 (W 0.0372225) | 195.312 ± 0.946067 (W 0.166638) | 🔵 tlinalg-pool 7.10× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_thin/n4/b1024` | 0.55727 ± 0.00685259 (W 0.00232723) | 6.10455 ± 0.048546 (W 0.00911423) | 🔵 tlinalg-pool 10.95× faster than `lapack-mkl` |  |
-| `svd_thin/n8/b1024` | 1.97185 ± 0.0163361 (W 0.0223358) | 18.5895 ± 0.0273376 (W 0.0496887) | 🔵 tlinalg-pool 9.43× faster than `lapack-mkl` |  |
-| `svd_values/n16/b1024` | 5.2428 ± 0.104837 (W 0.019588) | 19.2897 ± 0.0390806 (W 0.031287) | 🔵 tlinalg-pool 3.68× faster than `lapack-mkl` |  |
-| `svd_values/n32/b1024` | 20.0506 ± 0.0338124 (W 0.046468) | 64.6236 ± 0.126986 (W 0.0357893) | 🔵 tlinalg-pool 3.22× faster than `lapack-mkl` |  |
-| `svd_values/n4/b1024` | 0.418254 ± 0.0118027 (W 0.00536) | 2.67359 ± 0.0490119 (W 0.0054135) | 🔵 tlinalg-pool 6.39× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_values/n8/b1024` | 1.45114 ± 0.0204991 (W 0.00983844) | 6.6852 ± 0.0582931 (W 0.00952085) | 🔵 tlinalg-pool 4.61× faster than `lapack-mkl` |  |
-| `triangular_solve/n16/b1024` | 0.085911 ± 0.000562596 (W 0.00292045) | 0.585171 ± 0.0015084 (W 0.00504206) | 🔵 tlinalg-pool 6.81× faster than `lapack-mkl` |  |
-| `triangular_solve/n32/b1024` | 0.199089 ± 0.013611 (W 0.00653743) | 2.52341 ± 0.1206 (W 0.00739785) | 🔵 tlinalg-pool 12.67× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `triangular_solve/n4/b1024` | 0.018965 ± 0.00025652 (W 0.000489368) | 0.294289 ± 0.0131102 (W 0.00204269) | 🔵 tlinalg-pool 15.52× faster than `lapack-mkl` | `!` between-start range over 5%; dispatch-dominated (row under 20 us) |
-| `triangular_solve/n8/b1024` | 0.035361 ± 0.00029726 (W 0.00113018) | 0.394197 ± 0.00493122 (W 0.00361856) | 🔵 tlinalg-pool 11.15× faster than `lapack-mkl` |  |
+| `cholesky/n16/b1024` | 0.121606 ± 0.00237869 (W 0.00154702) | 1.056 ± 0.00499906 (W 0.00262263) | 🔵 tlinalg-pool 8.68× faster than `lapack-mkl` |  |
+| `cholesky/n32/b1024` | 0.462256 ± 0.213866 (W 0.0122161) | 3.68226 ± 0.017886 (W 0.0182962) | 🔵 tlinalg-pool 7.97× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `cholesky/n4/b1024` | 0.030006 ± 0.000192588 (W 0.000887028) | 0.120394 ± 0.00426816 (W 0.00142392) | 🔵 tlinalg-pool 4.01× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `cholesky/n8/b1024` | 0.0536445 ± 0.000393714 (W 0.00103241) | 0.322405 ± 0.00308103 (W 0.00208426) | 🔵 tlinalg-pool 6.01× faster than `lapack-mkl` |  |
+| `eig/n16/b1024` | 11.9316 ± 0.0168178 (W 0.0272405) | 52.7762 ± 0.0626004 (W 0.067591) | 🔵 tlinalg-pool 4.42× faster than `lapack-mkl` |  |
+| `eig/n32/b1024` | 53.2071 ± 0.117634 (W 0.188094) | 283.706 ± 0.949039 (W 0.188217) | 🔵 tlinalg-pool 5.33× faster than `lapack-mkl` |  |
+| `eig/n4/b1024` | 0.785547 ± 0.0200052 (W 0.00521261) | 2.83342 ± 0.00299599 (W 0.00551067) | 🔵 tlinalg-pool 3.61× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `eig/n8/b1024` | 2.94833 ± 0.0362855 (W 0.00737106) | 11.675 ± 0.067638 (W 0.0301321) | 🔵 tlinalg-pool 3.96× faster than `lapack-mkl` |  |
+| `eigh/n16/b1024` | 3.74781 ± 0.0152911 (W 0.00567988) | 23.4827 ± 0.0893444 (W 0.0540381) | 🔵 tlinalg-pool 6.27× faster than `lapack-mkl` |  |
+| `eigh/n32/b1024` | 14.3294 ± 0.0779087 (W 0.0212585) | 100.663 ± 0.325364 (W 0.352732) | 🔵 tlinalg-pool 7.02× faster than `lapack-mkl` |  |
+| `eigh/n4/b1024` | 0.318563 ± 0.0028685 (W 0.0019919) | 2.82322 ± 0.0118562 (W 0.00700393) | 🔵 tlinalg-pool 8.86× faster than `lapack-mkl` |  |
+| `eigh/n8/b1024` | 1.07701 ± 0.00623048 (W 0.00257358) | 7.73299 ± 0.0295757 (W 0.0157157) | 🔵 tlinalg-pool 7.18× faster than `lapack-mkl` |  |
+| `eigvals/n16/b1024` | 8.16946 ± 0.047101 (W 0.0165768) | 36.5073 ± 0.0826389 (W 0.0472979) | 🔵 tlinalg-pool 4.47× faster than `lapack-mkl` |  |
+| `eigvals/n32/b1024` | 36.3321 ± 0.0349917 (W 0.099252) | 169.323 ± 0.205683 (W 0.0950808) | 🔵 tlinalg-pool 4.66× faster than `lapack-mkl` |  |
+| `eigvals/n4/b1024` | 0.409017 ± 0.00415587 (W 0.00245429) | 2.10652 ± 0.00777113 (W 0.00432676) | 🔵 tlinalg-pool 5.15× faster than `lapack-mkl` |  |
+| `eigvals/n8/b1024` | 1.94011 ± 0.00572955 (W 0.00547737) | 8.92663 ± 0.0588898 (W 0.0172059) | 🔵 tlinalg-pool 4.60× faster than `lapack-mkl` |  |
+| `eigvalsh/n16/b1024` | 2.79746 ± 0.00933589 (W 0.00420352) | 12.9566 ± 0.0118618 (W 0.0178961) | 🔵 tlinalg-pool 4.63× faster than `lapack-mkl` |  |
+| `eigvalsh/n32/b1024` | 10.8985 ± 0.0421512 (W 0.0345427) | 43.0437 ± 0.0572277 (W 0.0275762) | 🔵 tlinalg-pool 3.95× faster than `lapack-mkl` |  |
+| `eigvalsh/n4/b1024` | 0.263185 ± 0.0120034 (W 0.00214293) | 1.45673 ± 0.00545739 (W 0.00458291) | 🔵 tlinalg-pool 5.54× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `eigvalsh/n8/b1024` | 0.858198 ± 0.00135313 (W 0.00237775) | 4.39312 ± 0.00777091 (W 0.00964448) | 🔵 tlinalg-pool 5.12× faster than `lapack-mkl` |  |
+| `full_piv_lu/n16/b1024` | 0.483691 ± 0.00730585 (W 0.007675) | 3.91803 ± 0.0507473 (W 0.00812744) | 🔵 tlinalg-pool 8.10× faster than `lapack-mkl` |  |
+| `full_piv_lu/n32/b1024` | 2.00754 ± 0.0334886 (W 0.022313) | 26.2629 ± 0.0668475 (W 0.0341475) | 🔵 tlinalg-pool 13.08× faster than `lapack-mkl` |  |
+| `full_piv_lu/n4/b1024` | 0.0831855 ± 0.000814367 (W 0.00241145) | 0.40023 ± 0.0019237 (W 0.0029399) | 🔵 tlinalg-pool 4.81× faster than `lapack-mkl` |  |
+| `full_piv_lu/n8/b1024` | 0.162934 ± 0.00161981 (W 0.00352367) | 0.984033 ± 0.00918252 (W 0.00253502) | 🔵 tlinalg-pool 6.04× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n16/b1024` | 0.45119 ± 0.00839727 (W 0.00437766) | 5.77847 ± 0.028728 (W 0.0108206) | 🔵 tlinalg-pool 12.81× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n32/b1024` | 1.47911 ± 0.0196214 (W 0.0160905) | 29.6368 ± 0.0897295 (W 0.0630729) | 🔵 tlinalg-pool 20.04× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n4/b1024` | 0.0748145 ± 0.00103573 (W 0.00294667) | 1.11298 ± 0.00477068 (W 0.0062395) | 🔵 tlinalg-pool 14.88× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n8/b1024` | 0.172626 ± 0.00632894 (W 0.00389568) | 1.93897 ± 0.0107034 (W 0.00453228) | 🔵 tlinalg-pool 11.23× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_apply/n16/b1024` | 0.616158 ± 0.00625151 (W 0.00357615) | 2.66743 ± 0.014905 (W 0.0184974) | 🔵 tlinalg-pool 4.33× faster than `lapack-mkl` |  |
+| `householder_apply/n32/b1024` | 2.46837 ± 0.0548104 (W 0.00771775) | 13.0572 ± 0.151938 (W 0.0751233) | 🔵 tlinalg-pool 5.29× faster than `lapack-mkl` |  |
+| `householder_apply/n4/b1024` | 0.0544015 ± 0.00130761 (W 0.000547492) | 0.323087 ± 0.00211473 (W 0.00268647) | 🔵 tlinalg-pool 5.94× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_apply/n8/b1024` | 0.167156 ± 0.00166951 (W 0.00169292) | 0.802088 ± 0.00313458 (W 0.00838076) | 🔵 tlinalg-pool 4.80× faster than `lapack-mkl` |  |
+| `householder_factor/n16/b1024` | 0.483381 ± 0.00571188 (W 0.00282935) | 2.95332 ± 0.0107464 (W 0.00609265) | 🔵 tlinalg-pool 6.11× faster than `lapack-mkl` |  |
+| `householder_factor/n32/b1024` | 1.68564 ± 0.0151862 (W 0.010412) | 12.3122 ± 0.0795421 (W 0.0377682) | 🔵 tlinalg-pool 7.30× faster than `lapack-mkl` |  |
+| `householder_factor/n4/b1024` | 0.0646655 ± 0.0133385 (W 0.000502017) | 0.306296 ± 0.000843377 (W 0.0019344) | 🔵 tlinalg-pool 4.74× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `householder_factor/n8/b1024` | 0.16671 ± 0.00164425 (W 0.00170395) | 0.844823 ± 0.00193488 (W 0.00165113) | 🔵 tlinalg-pool 5.07× faster than `lapack-mkl` |  |
+| `lu/n16/b1024` | 0.360947 ± 0.00620923 (W 0.00791757) | 1.74714 ± 0.054895 (W 0.0095497) | 🔵 tlinalg-pool 4.84× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu/n32/b1024` | 1.2934 ± 0.0476024 (W 0.0202452) | 11.7919 ± 0.03303 (W 0.0252065) | 🔵 tlinalg-pool 9.12× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu/n4/b1024` | 0.072881 ± 0.00237852 (W 0.00279209) | 0.167577 ± 0.000955277 (W 0.000798285) | 🔵 tlinalg-pool 2.30× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu/n8/b1024` | 0.143387 ± 0.00242898 (W 0.00249593) | 0.499109 ± 0.00880948 (W 0.00261349) | 🔵 tlinalg-pool 3.48× faster than `lapack-mkl` |  |
+| `lu_factor/n16/b1024` | 0.261622 ± 0.00142314 (W 0.00181453) | 1.19426 ± 0.0321788 (W 0.00235867) | 🔵 tlinalg-pool 4.56× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor/n32/b1024` | 0.754455 ± 0.00237821 (W 0.00461927) | 8.97074 ± 0.0369859 (W 0.0243152) | 🔵 tlinalg-pool 11.89× faster than `lapack-mkl` |  |
+| `lu_factor/n4/b1024` | 0.0616795 ± 0.00135633 (W 0.00192381) | 0.0665495 ± 0.00332041 (W 0.00142339) | 🔵 tlinalg-pool 1.08× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor/n8/b1024` | 0.108051 ± 0.000605489 (W 0.00147) | 0.26352 ± 0.00205984 (W 0.00216778) | 🔵 tlinalg-pool 2.44× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n16/b1024` | 0.335093 ± 0.00297363 (W 0.00233134) | 2.38985 ± 0.0301702 (W 0.0114445) | 🔵 tlinalg-pool 7.13× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n32/b1024` | 0.913478 ± 0.00754984 (W 0.00402883) | 13.9445 ± 0.0495587 (W 0.0415731) | 🔵 tlinalg-pool 15.27× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n4/b1024` | 0.0653015 ± 0.00175172 (W 0.00263859) | 0.182671 ± 0.00175467 (W 0.00148126) | 🔵 tlinalg-pool 2.80× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor_solve/n8/b1024` | 0.130684 ± 0.00482292 (W 0.00142943) | 0.828128 ± 0.00331211 (W 0.00223364) | 🔵 tlinalg-pool 6.34× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_solve_prepared/n16/b1024` | 0.130608 ± 0.000986676 (W 0.000902833) | 1.06414 ± 0.0220334 (W 0.00546557) | 🔵 tlinalg-pool 8.15× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n32/b1024` | 0.314947 ± 0.00505309 (W 0.0102524) | 4.56719 ± 0.0320861 (W 0.0273012) | 🔵 tlinalg-pool 14.50× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n4/b1024` | 0.032581 ± 0.00154034 (W 0.00101987) | 0.133524 ± 0.000917668 (W 0.000760623) | 🔵 tlinalg-pool 4.10× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_solve_prepared/n8/b1024` | 0.055568 ± 0.000468844 (W 0.00136576) | 0.586542 ± 0.00201042 (W 0.0026807) | 🔵 tlinalg-pool 10.56× faster than `lapack-mkl` |  |
+| `qr/n16/b1024` | 1.14411 ± 0.0229985 (W 0.0047767) | 5.26367 ± 0.0203896 (W 0.0138891) | 🔵 tlinalg-pool 4.60× faster than `lapack-mkl` |  |
+| `qr/n32/b1024` | 4.52839 ± 0.0387685 (W 0.0281934) | 21.0132 ± 0.0528052 (W 0.0365718) | 🔵 tlinalg-pool 4.64× faster than `lapack-mkl` |  |
+| `qr/n4/b1024` | 0.105401 ± 0.000586171 (W 0.000607712) | 0.724506 ± 0.0303314 (W 0.00325838) | 🔵 tlinalg-pool 6.87× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `qr/n8/b1024` | 0.309922 ± 0.016623 (W 0.00184263) | 1.68542 ± 0.0108696 (W 0.0042348) | 🔵 tlinalg-pool 5.44× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `rank_revealing_qr/n16/b1024` | 1.30287 ± 0.0216488 (W 0.00418838) | 8.3419 ± 0.0566898 (W 0.0185861) | 🔵 tlinalg-pool 6.40× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n32/b1024` | 4.60245 ± 0.0765412 (W 0.0209092) | 31.0211 ± 0.0431944 (W 0.0591707) | 🔵 tlinalg-pool 6.74× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n4/b1024` | 0.160384 ± 0.00231577 (W 0.00177472) | 1.22276 ± 0.0111805 (W 0.00330205) | 🔵 tlinalg-pool 7.62× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n8/b1024` | 0.420799 ± 0.00417054 (W 0.00337789) | 2.91399 ± 0.00612433 (W 0.00714062) | 🔵 tlinalg-pool 6.92× faster than `lapack-mkl` |  |
+| `solve/n16/b1024` | 0.354386 ± 0.00362849 (W 0.00236981) | 2.42507 ± 0.0211184 (W 0.00504438) | 🔵 tlinalg-pool 6.84× faster than `lapack-mkl` |  |
+| `solve/n32/b1024` | 0.944541 ± 0.00723642 (W 0.0148452) | 13.4746 ± 0.0472758 (W 0.0210078) | 🔵 tlinalg-pool 14.27× faster than `lapack-mkl` |  |
+| `solve/n4/b1024` | 0.054887 ± 0.000824336 (W 0.0010276) | 0.23129 ± 0.00364693 (W 0.00205204) | 🔵 tlinalg-pool 4.21× faster than `lapack-mkl` |  |
+| `solve/n8/b1024` | 0.132221 ± 0.0020718 (W 0.00268931) | 0.89272 ± 0.00278028 (W 0.00248544) | 🔵 tlinalg-pool 6.75× faster than `lapack-mkl` |  |
+| `svd_full/n16/b1024` | 7.11742 ± 0.504694 (W 0.112523) | 51.5429 ± 0.100078 (W 0.0559778) | 🔵 tlinalg-pool 7.24× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_full/n32/b1024` | 26.8402 ± 1.04279 (W 0.329673) | 194.433 ± 0.372513 (W 0.2389) | 🔵 tlinalg-pool 7.24× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_full/n4/b1024` | 0.565664 ± 0.0194703 (W 0.0236725) | 6.09128 ± 0.0189407 (W 0.0133952) | 🔵 tlinalg-pool 10.77× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_full/n8/b1024` | 1.98392 ± 0.181571 (W 0.0126685) | 18.5901 ± 0.0397399 (W 0.0315521) | 🔵 tlinalg-pool 9.37× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_thin/n16/b1024` | 7.22998 ± 0.130381 (W 0.104104) | 51.3581 ± 0.0924534 (W 0.0548919) | 🔵 tlinalg-pool 7.10× faster than `lapack-mkl` |  |
+| `svd_thin/n32/b1024` | 25.8891 ± 0.212137 (W 0.0939896) | 194.618 ± 0.555514 (W 0.202059) | 🔵 tlinalg-pool 7.52× faster than `lapack-mkl` |  |
+| `svd_thin/n4/b1024` | 0.583554 ± 0.0427739 (W 0.00269515) | 6.08683 ± 0.00901789 (W 0.00629693) | 🔵 tlinalg-pool 10.43× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_thin/n8/b1024` | 1.9441 ± 0.183939 (W 0.00483177) | 18.5729 ± 0.0566969 (W 0.0323642) | 🔵 tlinalg-pool 9.55× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_values/n16/b1024` | 5.18946 ± 0.0467734 (W 0.0253505) | 19.2555 ± 0.0360632 (W 0.0245227) | 🔵 tlinalg-pool 3.71× faster than `lapack-mkl` |  |
+| `svd_values/n32/b1024` | 20.1271 ± 0.0597423 (W 0.0193201) | 64.7517 ± 0.0929919 (W 0.227805) | 🔵 tlinalg-pool 3.22× faster than `lapack-mkl` |  |
+| `svd_values/n4/b1024` | 0.412333 ± 0.00215029 (W 0.00532137) | 2.67339 ± 0.0108872 (W 0.00613369) | 🔵 tlinalg-pool 6.48× faster than `lapack-mkl` |  |
+| `svd_values/n8/b1024` | 1.45567 ± 0.0159755 (W 0.00597205) | 6.68622 ± 0.0128886 (W 0.012011) | 🔵 tlinalg-pool 4.59× faster than `lapack-mkl` |  |
+| `triangular_solve/n16/b1024` | 0.0854245 ± 0.00087811 (W 0.00254948) | 0.594836 ± 0.00797623 (W 0.00376138) | 🔵 tlinalg-pool 6.96× faster than `lapack-mkl` |  |
+| `triangular_solve/n32/b1024` | 0.189663 ± 0.00263774 (W 0.00563782) | 2.44578 ± 0.0179001 (W 0.0130905) | 🔵 tlinalg-pool 12.90× faster than `lapack-mkl` |  |
+| `triangular_solve/n4/b1024` | 0.0189505 ± 0.00709933 (W 0.000805262) | 0.294478 ± 0.00747112 (W 0.00254375) | 🔵 tlinalg-pool 15.54× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5%; dispatch-dominated (row under 20 us) |
+| `triangular_solve/n8/b1024` | 0.03496 ± 0.000188229 (W 0.000623236) | 0.397275 ± 0.00448465 (W 0.00289698) | 🔵 tlinalg-pool 11.36× faster than `lapack-mkl` |  |
 
 ## batch-small, c64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `cholesky/n16/b1024` | 0.174202 ± 0.00164984 (W 0.00237378) | 1.82676 ± 0.00924939 (W 0.00844036) | 🔵 tlinalg-pool 10.49× faster than `lapack-mkl` |  |
-| `cholesky/n32/b1024` | 0.814971 ± 0.00102433 (W 0.0105677) | 8.85274 ± 0.086585 (W 0.0309765) | 🔵 tlinalg-pool 10.86× faster than `lapack-mkl` |  |
-| `cholesky/n4/b1024` | 0.032656 ± 0.000340869 (W 0.000420276) | 0.177021 ± 0.000181992 (W 0.00156802) | 🔵 tlinalg-pool 5.42× faster than `lapack-mkl` |  |
-| `cholesky/n8/b1024` | 0.0605335 ± 0.00107836 (W 0.000618184) | 0.471269 ± 0.0124106 (W 0.00302621) | 🔵 tlinalg-pool 7.79× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `eig/n16/b1024` | 16.5046 ± 0.144671 (W 0.085372) | 175.242 ± 0.218263 (W 0.0948532) | 🔵 tlinalg-pool 10.62× faster than `lapack-mkl` |  |
-| `eig/n32/b1024` | 67.3092 ± 0.104663 (W 0.0682735) | 791.567 ± 2.68529 (W 2.3457) | 🔵 tlinalg-pool 11.76× faster than `lapack-mkl` |  |
-| `eig/n4/b1024` | 1.32108 ± 0.0269827 (W 0.00905802) | 12.4359 ± 0.0275516 (W 0.0239668) | 🔵 tlinalg-pool 9.41× faster than `lapack-mkl` |  |
-| `eig/n8/b1024` | 4.46289 ± 0.0332416 (W 0.0186923) | 43.3132 ± 0.0968693 (W 0.050637) | 🔵 tlinalg-pool 9.71× faster than `lapack-mkl` |  |
-| `eigh/n16/b1024` | 4.06712 ± 0.0371524 (W 0.0178531) | 32.2539 ± 0.119767 (W 0.0460727) | 🔵 tlinalg-pool 7.93× faster than `lapack-mkl` |  |
-| `eigh/n32/b1024` | 17.959 ± 0.0545537 (W 0.0377201) | 151.992 ± 0.235019 (W 0.232285) | 🔵 tlinalg-pool 8.46× faster than `lapack-mkl` |  |
-| `eigh/n4/b1024` | 0.378375 ± 0.00100055 (W 0.00234623) | 2.81605 ± 0.00276294 (W 0.00238315) | 🔵 tlinalg-pool 7.44× faster than `lapack-mkl` |  |
-| `eigh/n8/b1024` | 1.15469 ± 0.00963141 (W 0.00570283) | 8.90632 ± 0.0123291 (W 0.0208292) | 🔵 tlinalg-pool 7.71× faster than `lapack-mkl` |  |
-| `eigvals/n16/b1024` | 9.68124 ± 1.15095 (W 0.0283146) | 124.796 ± 0.0771748 (W 0.255371) | 🔵 tlinalg-pool 12.89× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `eigvals/n32/b1024` | 42.7161 ± 0.548281 (W 0.184322) | 522.534 ± 0.445274 (W 0.37991) | 🔵 tlinalg-pool 12.23× faster than `lapack-mkl` |  |
-| `eigvals/n4/b1024` | 0.615769 ± 0.00809607 (W 0.00897475) | 9.54884 ± 0.0167252 (W 0.0168789) | 🔵 tlinalg-pool 15.51× faster than `lapack-mkl` |  |
-| `eigvals/n8/b1024` | 2.49934 ± 0.00252289 (W 0.0722688) | 34.331 ± 0.034112 (W 0.0460916) | 🔵 tlinalg-pool 13.74× faster than `lapack-mkl` |  |
-| `eigvalsh/n16/b1024` | 3.01575 ± 0.00836091 (W 0.0101348) | 18.3656 ± 0.0510458 (W 0.0211311) | 🔵 tlinalg-pool 6.09× faster than `lapack-mkl` |  |
-| `eigvalsh/n32/b1024` | 11.9619 ± 0.0492143 (W 0.0465142) | 77.2988 ± 0.110441 (W 0.217681) | 🔵 tlinalg-pool 6.46× faster than `lapack-mkl` |  |
-| `eigvalsh/n4/b1024` | 0.310411 ± 0.000970936 (W 0.00272973) | 1.79366 ± 0.0169092 (W 0.00250881) | 🔵 tlinalg-pool 5.78× faster than `lapack-mkl` |  |
-| `eigvalsh/n8/b1024` | 0.928155 ± 0.0012975 (W 0.00288029) | 5.54375 ± 0.00208933 (W 0.00502783) | 🔵 tlinalg-pool 5.97× faster than `lapack-mkl` |  |
-| `full_piv_lu/n16/b1024` | 0.626299 ± 0.00211748 (W 0.0116043) | 5.52569 ± 0.117801 (W 0.0158046) | 🔵 tlinalg-pool 8.82× faster than `lapack-mkl` |  |
-| `full_piv_lu/n32/b1024` | 3.02888 ± 0.0164596 (W 0.0281782) | 27.044 ± 0.176619 (W 0.0453273) | 🔵 tlinalg-pool 8.93× faster than `lapack-mkl` |  |
-| `full_piv_lu/n4/b1024` | 0.08792 ± 0.00303092 (W 0.00161632) | 0.526079 ± 0.00844896 (W 0.00301314) | 🔵 tlinalg-pool 5.98× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `full_piv_lu/n8/b1024` | 0.190046 ± 0.00392488 (W 0.003996) | 1.29855 ± 0.0140796 (W 0.00396396) | 🔵 tlinalg-pool 6.83× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n16/b1024` | 0.69575 ± 0.00155285 (W 0.00717871) | 8.4601 ± 0.0300722 (W 0.0172349) | 🔵 tlinalg-pool 12.16× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n32/b1024` | 2.68445 ± 0.0155922 (W 0.0129069) | 34.5265 ± 0.0332116 (W 0.0548382) | 🔵 tlinalg-pool 12.86× faster than `lapack-mkl` |  |
-| `full_piv_lu_solve/n4/b1024` | 0.107587 ± 0.00419942 (W 0.00203256) | 1.5916 ± 0.00417433 (W 0.00535655) | 🔵 tlinalg-pool 14.79× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `full_piv_lu_solve/n8/b1024` | 0.260954 ± 0.00120787 (W 0.00198655) | 3.1428 ± 0.0127677 (W 0.00595994) | 🔵 tlinalg-pool 12.04× faster than `lapack-mkl` |  |
-| `householder_apply/n16/b1024` | 0.636219 ± 0.0187762 (W 0.0100889) | 6.26488 ± 0.0563461 (W 0.0302138) | 🔵 tlinalg-pool 9.85× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_apply/n32/b1024` | 3.61805 ± 0.0834117 (W 0.0163708) | 38.2981 ± 0.454986 (W 0.0607453) | 🔵 tlinalg-pool 10.59× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_apply/n4/b1024` | 0.050515 ± 0.00396938 (W 0.000729713) | 0.426877 ± 0.012251 (W 0.00242629) | 🔵 tlinalg-pool 8.45× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `householder_apply/n8/b1024` | 0.15461 ± 0.00485033 (W 0.00199165) | 1.26918 ± 0.0299225 (W 0.00374129) | 🔵 tlinalg-pool 8.21× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_factor/n16/b1024` | 0.602761 ± 0.0222793 (W 0.0117983) | 6.29721 ± 0.0153825 (W 0.011668) | 🔵 tlinalg-pool 10.45× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `householder_factor/n32/b1024` | 2.65463 ± 0.0588728 (W 0.0217303) | 27.4353 ± 0.0705817 (W 0.0506714) | 🔵 tlinalg-pool 10.33× faster than `lapack-mkl` |  |
-| `householder_factor/n4/b1024` | 0.0758175 ± 0.000557755 (W 0.000822267) | 0.515738 ± 0.00318087 (W 0.00326444) | 🔵 tlinalg-pool 6.80× faster than `lapack-mkl` |  |
-| `householder_factor/n8/b1024` | 0.197213 ± 0.0330459 (W 0.00586135) | 1.48186 ± 0.00377617 (W 0.00250016) | 🔵 tlinalg-pool 7.51× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `lu/n16/b1024` | 0.440518 ± 0.0206881 (W 0.00952734) | 3.58903 ± 0.0656098 (W 0.0158435) | 🔵 tlinalg-pool 8.15× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu/n32/b1024` | 2.20695 ± 0.815619 (W 0.0188356) | 19.5292 ± 0.0406915 (W 0.0464827) | 🔵 tlinalg-pool 8.85× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `lu/n4/b1024` | 0.0705425 ± 0.00110184 (W 0.00136127) | 0.283382 ± 0.00104334 (W 0.00245351) | 🔵 tlinalg-pool 4.02× faster than `lapack-mkl` |  |
-| `lu/n8/b1024` | 0.155456 ± 0.0135477 (W 0.00367465) | 0.882927 ± 0.00680675 (W 0.00294924) | 🔵 tlinalg-pool 5.68× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `lu_factor/n16/b1024` | 0.292565 ± 0.0286391 (W 0.00302085) | 2.63366 ± 0.00866427 (W 0.00676497) | 🔵 tlinalg-pool 9.00× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_factor/n32/b1024` | 1.26761 ± 0.0214309 (W 0.015748) | 15.4335 ± 0.0469116 (W 0.0256861) | 🔵 tlinalg-pool 12.18× faster than `lapack-mkl` |  |
-| `lu_factor/n4/b1024` | 0.067803 ± 0.00204463 (W 0.00221913) | 0.183084 ± 0.000451232 (W 0.00153341) | 🔵 tlinalg-pool 2.70× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_factor/n8/b1024` | 0.112675 ± 0.00219808 (W 0.00492463) | 0.621142 ± 0.00354873 (W 0.00240554) | 🔵 tlinalg-pool 5.51× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n16/b1024` | 0.50737 ± 0.0567163 (W 0.00500003) | 5.29157 ± 0.0267222 (W 0.0169236) | 🔵 tlinalg-pool 10.43× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `lu_factor_solve/n32/b1024` | 1.77574 ± 0.00392616 (W 0.0226239) | 20.9463 ± 0.217565 (W 0.0462709) | 🔵 tlinalg-pool 11.80× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n4/b1024` | 0.081483 ± 0.000576142 (W 0.00198849) | 0.416593 ± 0.00152176 (W 0.00263276) | 🔵 tlinalg-pool 5.11× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n8/b1024` | 0.170353 ± 0.0131723 (W 0.00225578) | 1.66805 ± 0.0101348 (W 0.00268443) | 🔵 tlinalg-pool 9.79× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_solve_prepared/n16/b1024` | 0.19451 ± 0.00320324 (W 0.00163129) | 2.62297 ± 0.0140519 (W 0.00842217) | 🔵 tlinalg-pool 13.49× faster than `lapack-mkl` |  |
-| `lu_solve_prepared/n32/b1024` | 0.875331 ± 0.0340872 (W 0.0193248) | 5.66136 ± 0.124322 (W 0.0653185) | 🔵 tlinalg-pool 6.47× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu_solve_prepared/n4/b1024` | 0.0455055 ± 0.000638487 (W 0.000694609) | 0.242665 ± 0.00118296 (W 0.0014087) | 🔵 tlinalg-pool 5.33× faster than `lapack-mkl` |  |
-| `lu_solve_prepared/n8/b1024` | 0.0874645 ± 0.00120784 (W 0.000778548) | 1.072 ± 0.00269872 (W 0.000849653) | 🔵 tlinalg-pool 12.26× faster than `lapack-mkl` |  |
-| `qr/n16/b1024` | 1.39962 ± 0.00829831 (W 0.00741024) | 10.5526 ± 0.0212086 (W 0.0182856) | 🔵 tlinalg-pool 7.54× faster than `lapack-mkl` |  |
-| `qr/n32/b1024` | 9.32213 ± 0.0319635 (W 0.0395684) | 49.3847 ± 0.133958 (W 0.0354345) | 🔵 tlinalg-pool 5.30× faster than `lapack-mkl` |  |
-| `qr/n4/b1024` | 0.117655 ± 0.000810541 (W 0.00267834) | 0.926465 ± 0.00290115 (W 0.00288917) | 🔵 tlinalg-pool 7.87× faster than `lapack-mkl` |  |
-| `qr/n8/b1024` | 0.344117 ± 0.00396023 (W 0.00354361) | 2.63474 ± 0.00680363 (W 0.00543303) | 🔵 tlinalg-pool 7.66× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n16/b1024` | 1.5677 ± 0.0031106 (W 0.00412455) | 15.7948 ± 0.0508535 (W 0.0366451) | 🔵 tlinalg-pool 10.08× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n32/b1024` | 8.64768 ± 0.0833925 (W 0.0408756) | 69.4229 ± 0.0836977 (W 0.0243181) | 🔵 tlinalg-pool 8.03× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n4/b1024` | 0.186881 ± 0.00188853 (W 0.000690299) | 1.75345 ± 0.00769268 (W 0.00673606) | 🔵 tlinalg-pool 9.38× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n8/b1024` | 0.483581 ± 0.00309787 (W 0.0048684) | 4.74255 ± 0.00353651 (W 0.01208) | 🔵 tlinalg-pool 9.81× faster than `lapack-mkl` |  |
-| `solve/n16/b1024` | 0.523739 ± 0.0157628 (W 0.00522227) | 5.55159 ± 0.00678659 (W 0.00990703) | 🔵 tlinalg-pool 10.60× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `solve/n32/b1024` | 1.82911 ± 0.00775964 (W 0.00808283) | 21.5439 ± 0.187972 (W 0.0342291) | 🔵 tlinalg-pool 11.78× faster than `lapack-mkl` |  |
-| `solve/n4/b1024` | 0.076202 ± 0.000994484 (W 0.00316539) | 0.479227 ± 0.00275998 (W 0.00235691) | 🔵 tlinalg-pool 6.29× faster than `lapack-mkl` |  |
-| `solve/n8/b1024` | 0.200024 ± 0.0829449 (W 0.00282758) | 1.75052 ± 0.0107112 (W 0.00329612) | 🔵 tlinalg-pool 8.75× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
-| `svd_full/n16/b1024` | 7.78184 ± 0.55475 (W 0.0441712) | 67.537 ± 0.109172 (W 0.057594) | 🔵 tlinalg-pool 8.68× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_full/n32/b1024` | 33.5593 ± 1.50185 (W 0.160811) | 285.699 ± 0.272201 (W 0.428934) | 🔵 tlinalg-pool 8.51× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_full/n4/b1024` | 0.643854 ± 0.0113495 (W 0.00406886) | 7.39802 ± 0.020326 (W 0.0548511) | 🔵 tlinalg-pool 11.49× faster than `lapack-mkl` |  |
-| `svd_full/n8/b1024` | 2.14014 ± 0.0323489 (W 0.0170106) | 22.1825 ± 0.0599964 (W 0.0289401) | 🔵 tlinalg-pool 10.36× faster than `lapack-mkl` |  |
-| `svd_thin/n16/b1024` | 7.78071 ± 0.0427699 (W 0.0454594) | 67.288 ± 0.116441 (W 0.0536766) | 🔵 tlinalg-pool 8.65× faster than `lapack-mkl` |  |
-| `svd_thin/n32/b1024` | 33.4523 ± 0.786409 (W 0.117447) | 285.171 ± 0.264888 (W 0.531407) | 🔵 tlinalg-pool 8.52× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_thin/n4/b1024` | 0.645985 ± 0.0147216 (W 0.0109046) | 7.39576 ± 0.0268522 (W 0.0162034) | 🔵 tlinalg-pool 11.45× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_thin/n8/b1024` | 2.15511 ± 0.0919479 (W 0.0393001) | 22.1929 ± 0.0560997 (W 0.0291011) | 🔵 tlinalg-pool 10.30× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_values/n16/b1024` | 5.73688 ± 0.115069 (W 0.0180708) | 28.1256 ± 0.0734747 (W 0.0231249) | 🔵 tlinalg-pool 4.90× faster than `lapack-mkl` |  |
-| `svd_values/n32/b1024` | 22.4576 ± 0.0925623 (W 0.0398708) | 105.893 ± 0.105035 (W 0.193673) | 🔵 tlinalg-pool 4.72× faster than `lapack-mkl` |  |
-| `svd_values/n4/b1024` | 0.491084 ± 0.000850279 (W 0.00174623) | 3.50855 ± 0.00530734 (W 0.00827875) | 🔵 tlinalg-pool 7.14× faster than `lapack-mkl` |  |
-| `svd_values/n8/b1024` | 1.65244 ± 0.00318777 (W 0.00935285) | 9.11677 ± 0.0208259 (W 0.0107838) | 🔵 tlinalg-pool 5.52× faster than `lapack-mkl` |  |
-| `triangular_solve/n16/b1024` | 0.139081 ± 0.00603995 (W 0.0049335) | 1.3415 ± 0.0203422 (W 0.00372393) | 🔵 tlinalg-pool 9.65× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `triangular_solve/n32/b1024` | 0.56926 ± 0.0368866 (W 0.0076637) | 3.44807 ± 0.15306 (W 0.0101506) | 🔵 tlinalg-pool 6.06× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `triangular_solve/n4/b1024` | 0.0282235 ± 0.000279968 (W 0.000471824) | 0.301376 ± 0.000289027 (W 0.00237529) | 🔵 tlinalg-pool 10.68× faster than `lapack-mkl` |  |
-| `triangular_solve/n8/b1024` | 0.067186 ± 0.00244603 (W 0.00178709) | 0.580185 ± 0.00324697 (W 0.00298612) | 🔵 tlinalg-pool 8.64× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `cholesky/n16/b1024` | 0.173364 ± 0.00322754 (W 0.00303411) | 1.79841 ± 0.0172309 (W 0.0143502) | 🔵 tlinalg-pool 10.37× faster than `lapack-mkl` |  |
+| `cholesky/n32/b1024` | 0.808486 ± 0.0162844 (W 0.0042831) | 8.8493 ± 0.025694 (W 0.0252183) | 🔵 tlinalg-pool 10.95× faster than `lapack-mkl` |  |
+| `cholesky/n4/b1024` | 0.032721 ± 0.000564251 (W 0.000453778) | 0.178227 ± 0.000737568 (W 0.00165621) | 🔵 tlinalg-pool 5.45× faster than `lapack-mkl` |  |
+| `cholesky/n8/b1024` | 0.0604275 ± 0.00157147 (W 0.000936475) | 0.470487 ± 0.0119452 (W 0.00302609) | 🔵 tlinalg-pool 7.79× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `eig/n16/b1024` | 16.4433 ± 0.0333485 (W 0.0737915) | 175.394 ± 0.193957 (W 0.311316) | 🔵 tlinalg-pool 10.67× faster than `lapack-mkl` |  |
+| `eig/n32/b1024` | 67.3984 ± 0.33371 (W 0.181206) | 793.593 ± 1.13117 (W 1.05096) | 🔵 tlinalg-pool 11.77× faster than `lapack-mkl` |  |
+| `eig/n4/b1024` | 1.30493 ± 0.0100795 (W 0.0141901) | 12.4539 ± 0.0223056 (W 0.0203771) | 🔵 tlinalg-pool 9.54× faster than `lapack-mkl` |  |
+| `eig/n8/b1024` | 4.46184 ± 0.0311922 (W 0.0172622) | 43.2435 ± 0.0674282 (W 0.0401267) | 🔵 tlinalg-pool 9.69× faster than `lapack-mkl` |  |
+| `eigh/n16/b1024` | 4.06105 ± 0.477726 (W 0.0313327) | 32.2381 ± 0.184573 (W 0.0279093) | 🔵 tlinalg-pool 7.94× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `eigh/n32/b1024` | 17.9443 ± 0.0691245 (W 0.0270159) | 152.062 ± 0.405791 (W 0.233277) | 🔵 tlinalg-pool 8.47× faster than `lapack-mkl` |  |
+| `eigh/n4/b1024` | 0.378531 ± 0.004092 (W 0.00184677) | 2.82244 ± 0.0347823 (W 0.00542107) | 🔵 tlinalg-pool 7.46× faster than `lapack-mkl` |  |
+| `eigh/n8/b1024` | 1.15495 ± 0.00335156 (W 0.00213873) | 8.91985 ± 0.00959031 (W 0.0137286) | 🔵 tlinalg-pool 7.72× faster than `lapack-mkl` |  |
+| `eigvals/n16/b1024` | 9.69366 ± 0.0161279 (W 0.0276532) | 124.922 ± 0.0316303 (W 0.0808156) | 🔵 tlinalg-pool 12.89× faster than `lapack-mkl` |  |
+| `eigvals/n32/b1024` | 42.4887 ± 0.0728142 (W 0.183488) | 523.51 ± 0.365211 (W 0.538437) | 🔵 tlinalg-pool 12.32× faster than `lapack-mkl` |  |
+| `eigvals/n4/b1024` | 0.613599 ± 0.0114077 (W 0.010526) | 9.56403 ± 0.00625228 (W 0.0156493) | 🔵 tlinalg-pool 15.59× faster than `lapack-mkl` |  |
+| `eigvals/n8/b1024` | 2.54607 ± 0.237655 (W 0.00853226) | 34.3614 ± 0.0444391 (W 0.0257885) | 🔵 tlinalg-pool 13.50× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `eigvalsh/n16/b1024` | 3.03481 ± 0.0573121 (W 0.00798423) | 18.3868 ± 0.00784189 (W 0.0193171) | 🔵 tlinalg-pool 6.06× faster than `lapack-mkl` |  |
+| `eigvalsh/n32/b1024` | 11.917 ± 0.0806169 (W 0.0555404) | 77.4789 ± 0.0173485 (W 0.0355516) | 🔵 tlinalg-pool 6.50× faster than `lapack-mkl` |  |
+| `eigvalsh/n4/b1024` | 0.309251 ± 0.00172078 (W 0.00172928) | 1.78252 ± 0.00409837 (W 0.00334899) | 🔵 tlinalg-pool 5.76× faster than `lapack-mkl` |  |
+| `eigvalsh/n8/b1024` | 0.929762 ± 0.00357479 (W 0.00270853) | 5.58392 ± 0.00774665 (W 0.00911304) | 🔵 tlinalg-pool 6.01× faster than `lapack-mkl` |  |
+| `full_piv_lu/n16/b1024` | 0.621653 ± 0.00834721 (W 0.00762647) | 5.57642 ± 0.117981 (W 0.0150546) | 🔵 tlinalg-pool 8.97× faster than `lapack-mkl` |  |
+| `full_piv_lu/n32/b1024` | 3.04533 ± 0.0328277 (W 0.0378511) | 27.0181 ± 0.140721 (W 0.047077) | 🔵 tlinalg-pool 8.87× faster than `lapack-mkl` |  |
+| `full_piv_lu/n4/b1024` | 0.088395 ± 0.000742232 (W 0.00212617) | 0.519534 ± 0.00426149 (W 0.00283793) | 🔵 tlinalg-pool 5.88× faster than `lapack-mkl` |  |
+| `full_piv_lu/n8/b1024` | 0.196401 ± 0.002794 (W 0.00379327) | 1.31036 ± 0.0233579 (W 0.00324217) | 🔵 tlinalg-pool 6.67× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n16/b1024` | 0.701342 ± 0.176973 (W 0.00814064) | 8.44998 ± 0.0416518 (W 0.0205723) | 🔵 tlinalg-pool 12.05× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `full_piv_lu_solve/n32/b1024` | 2.65749 ± 0.0112326 (W 0.00627269) | 34.5518 ± 0.0364858 (W 0.0415497) | 🔵 tlinalg-pool 13.00× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n4/b1024` | 0.106182 ± 0.0025064 (W 0.00257367) | 1.59675 ± 0.00427573 (W 0.00519253) | 🔵 tlinalg-pool 15.04× faster than `lapack-mkl` |  |
+| `full_piv_lu_solve/n8/b1024` | 0.264273 ± 0.00136225 (W 0.00229533) | 3.15822 ± 0.0202753 (W 0.00481074) | 🔵 tlinalg-pool 11.95× faster than `lapack-mkl` |  |
+| `householder_apply/n16/b1024` | 0.636 ± 0.0192611 (W 0.0102557) | 6.19001 ± 0.0893384 (W 0.0229932) | 🔵 tlinalg-pool 9.73× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_apply/n32/b1024` | 3.52716 ± 0.030043 (W 0.0208449) | 37.8521 ± 0.188014 (W 0.0757596) | 🔵 tlinalg-pool 10.73× faster than `lapack-mkl` |  |
+| `householder_apply/n4/b1024` | 0.0503635 ± 0.00414148 (W 0.00152745) | 0.416065 ± 0.00209416 (W 0.00543492) | 🔵 tlinalg-pool 8.26× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_apply/n8/b1024` | 0.156632 ± 0.00337081 (W 0.00370772) | 1.27306 ± 0.0137394 (W 0.00453788) | 🔵 tlinalg-pool 8.13× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_factor/n16/b1024` | 0.580852 ± 0.00487671 (W 0.00416013) | 6.29767 ± 0.0306936 (W 0.0103353) | 🔵 tlinalg-pool 10.84× faster than `lapack-mkl` |  |
+| `householder_factor/n32/b1024` | 2.6052 ± 0.0334947 (W 0.0218756) | 27.4504 ± 0.08103 (W 0.031061) | 🔵 tlinalg-pool 10.54× faster than `lapack-mkl` |  |
+| `householder_factor/n4/b1024` | 0.075135 ± 0.000446439 (W 0.000542159) | 0.516177 ± 0.00301964 (W 0.00236094) | 🔵 tlinalg-pool 6.87× faster than `lapack-mkl` |  |
+| `householder_factor/n8/b1024` | 0.196511 ± 0.000678453 (W 0.00175495) | 1.4871 ± 0.00611152 (W 0.00344517) | 🔵 tlinalg-pool 7.57× faster than `lapack-mkl` |  |
+| `lu/n16/b1024` | 0.44003 ± 0.00484161 (W 0.00809407) | 3.57708 ± 0.211586 (W 0.0175123) | 🔵 tlinalg-pool 8.13× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu/n32/b1024` | 2.15443 ± 0.0445072 (W 0.0183997) | 19.7081 ± 0.125036 (W 0.0438559) | 🔵 tlinalg-pool 9.15× faster than `lapack-mkl` |  |
+| `lu/n4/b1024` | 0.070622 ± 0.0010373 (W 0.00144865) | 0.28456 ± 0.0433377 (W 0.00231896) | 🔵 tlinalg-pool 4.03× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `lu/n8/b1024` | 0.155469 ± 0.000494925 (W 0.00390492) | 0.893088 ± 0.0907577 (W 0.00195389) | 🔵 tlinalg-pool 5.74× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor/n16/b1024` | 0.293417 ± 0.00674373 (W 0.0116637) | 2.65038 ± 0.0092202 (W 0.0049128) | 🔵 tlinalg-pool 9.03× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor/n32/b1024` | 1.27303 ± 0.0177549 (W 0.0212376) | 15.5367 ± 0.0449932 (W 0.0310101) | 🔵 tlinalg-pool 12.20× faster than `lapack-mkl` |  |
+| `lu_factor/n4/b1024` | 0.069199 ± 0.00233399 (W 0.000857185) | 0.182981 ± 0.00053724 (W 0.00175373) | 🔵 tlinalg-pool 2.64× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor/n8/b1024` | 0.116241 ± 0.00142189 (W 0.00252596) | 0.621463 ± 0.00166102 (W 0.00267804) | 🔵 tlinalg-pool 5.35× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n16/b1024` | 0.476187 ± 0.00763988 (W 0.00877875) | 5.2816 ± 0.0125948 (W 0.00806216) | 🔵 tlinalg-pool 11.09× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n32/b1024` | 1.84965 ± 0.0445352 (W 0.0265043) | 21.1286 ± 0.0843237 (W 0.0736158) | 🔵 tlinalg-pool 11.42× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor_solve/n4/b1024` | 0.080315 ± 0.00247729 (W 0.00109621) | 0.415484 ± 0.00354636 (W 0.00256839) | 🔵 tlinalg-pool 5.17× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_factor_solve/n8/b1024` | 0.172837 ± 0.0018201 (W 0.00143852) | 1.66619 ± 0.00791159 (W 0.00250563) | 🔵 tlinalg-pool 9.64× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n16/b1024` | 0.207797 ± 0.0171933 (W 0.00654444) | 2.6259 ± 0.0135436 (W 0.010536) | 🔵 tlinalg-pool 12.64× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_solve_prepared/n32/b1024` | 0.867197 ± 0.01092 (W 0.0172731) | 5.66791 ± 0.125035 (W 0.0996096) | 🔵 tlinalg-pool 6.54× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `lu_solve_prepared/n4/b1024` | 0.0455955 ± 0.000540081 (W 0.00161651) | 0.241335 ± 0.00113386 (W 0.00132768) | 🔵 tlinalg-pool 5.29× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n8/b1024` | 0.0876935 ± 0.00148239 (W 0.000997389) | 1.07515 ± 0.00232468 (W 0.00176766) | 🔵 tlinalg-pool 12.26× faster than `lapack-mkl` |  |
+| `qr/n16/b1024` | 1.4044 ± 0.0122321 (W 0.00593186) | 10.5538 ± 0.0564987 (W 0.0202349) | 🔵 tlinalg-pool 7.51× faster than `lapack-mkl` |  |
+| `qr/n32/b1024` | 9.33379 ± 0.039464 (W 0.0193785) | 49.5435 ± 0.14507 (W 0.0342353) | 🔵 tlinalg-pool 5.31× faster than `lapack-mkl` |  |
+| `qr/n4/b1024` | 0.117885 ± 0.000417618 (W 0.0010384) | 0.92321 ± 0.00364486 (W 0.00247312) | 🔵 tlinalg-pool 7.83× faster than `lapack-mkl` |  |
+| `qr/n8/b1024` | 0.341927 ± 0.00588858 (W 0.00379584) | 2.66796 ± 0.0514307 (W 0.00640667) | 🔵 tlinalg-pool 7.80× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n16/b1024` | 1.58768 ± 0.0780705 (W 0.0522101) | 15.8708 ± 0.0828307 (W 0.0238319) | 🔵 tlinalg-pool 10.00× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `rank_revealing_qr/n32/b1024` | 8.61367 ± 0.0102682 (W 0.0483492) | 69.4617 ± 0.153003 (W 0.0629084) | 🔵 tlinalg-pool 8.06× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n4/b1024` | 0.185044 ± 0.0019961 (W 0.00134591) | 1.7521 ± 0.00401051 (W 0.00707548) | 🔵 tlinalg-pool 9.47× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n8/b1024` | 0.483617 ± 0.00874206 (W 0.00251864) | 4.73709 ± 0.0260353 (W 0.00983401) | 🔵 tlinalg-pool 9.80× faster than `lapack-mkl` |  |
+| `solve/n16/b1024` | 0.518392 ± 0.00956028 (W 0.0161653) | 5.58063 ± 0.0289174 (W 0.00865029) | 🔵 tlinalg-pool 10.77× faster than `lapack-mkl` |  |
+| `solve/n32/b1024` | 1.81743 ± 0.0097747 (W 0.0101357) | 21.4786 ± 0.025381 (W 0.0252269) | 🔵 tlinalg-pool 11.82× faster than `lapack-mkl` |  |
+| `solve/n4/b1024` | 0.077113 ± 0.00272944 (W 0.0021663) | 0.477595 ± 0.00211723 (W 0.00236312) | 🔵 tlinalg-pool 6.19× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `solve/n8/b1024` | 0.18553 ± 0.00102222 (W 0.00180009) | 1.76741 ± 0.0190619 (W 0.00302924) | 🔵 tlinalg-pool 9.53× faster than `lapack-mkl` |  |
+| `svd_full/n16/b1024` | 7.81511 ± 0.0717807 (W 0.0633612) | 67.551 ± 0.0903696 (W 0.060876) | 🔵 tlinalg-pool 8.64× faster than `lapack-mkl` |  |
+| `svd_full/n32/b1024` | 33.3445 ± 0.106819 (W 0.0274504) | 285.392 ± 0.975622 (W 0.593116) | 🔵 tlinalg-pool 8.56× faster than `lapack-mkl` |  |
+| `svd_full/n4/b1024` | 0.642908 ± 0.00984228 (W 0.00184133) | 7.39152 ± 0.0152648 (W 0.0165202) | 🔵 tlinalg-pool 11.50× faster than `lapack-mkl` |  |
+| `svd_full/n8/b1024` | 2.18547 ± 0.0258755 (W 0.0796521) | 22.1487 ± 0.0264823 (W 0.0292237) | 🔵 tlinalg-pool 10.13× faster than `lapack-mkl` |  |
+| `svd_thin/n16/b1024` | 8.12453 ± 0.596378 (W 0.113471) | 67.3997 ± 0.100529 (W 0.0890074) | 🔵 tlinalg-pool 8.30× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `svd_thin/n32/b1024` | 33.3332 ± 0.747337 (W 0.044308) | 286.197 ± 1.04957 (W 0.288326) | 🔵 tlinalg-pool 8.59× faster than `lapack-mkl` |  |
+| `svd_thin/n4/b1024` | 0.641545 ± 0.0103913 (W 0.00232642) | 7.38461 ± 0.0145112 (W 0.0188571) | 🔵 tlinalg-pool 11.51× faster than `lapack-mkl` |  |
+| `svd_thin/n8/b1024` | 2.16662 ± 0.0540666 (W 0.00577077) | 22.1473 ± 0.0353436 (W 0.024648) | 🔵 tlinalg-pool 10.22× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_values/n16/b1024` | 5.80778 ± 0.10072 (W 0.0172) | 28.2591 ± 0.0803377 (W 0.0466292) | 🔵 tlinalg-pool 4.87× faster than `lapack-mkl` |  |
+| `svd_values/n32/b1024` | 22.3648 ± 0.0194513 (W 0.0290461) | 105.96 ± 0.249328 (W 0.0438984) | 🔵 tlinalg-pool 4.74× faster than `lapack-mkl` |  |
+| `svd_values/n4/b1024` | 0.492733 ± 0.00233315 (W 0.00233874) | 3.51227 ± 0.00825161 (W 0.00640414) | 🔵 tlinalg-pool 7.13× faster than `lapack-mkl` |  |
+| `svd_values/n8/b1024` | 1.65043 ± 0.00453485 (W 0.00628035) | 9.11357 ± 0.0273703 (W 0.0182357) | 🔵 tlinalg-pool 5.52× faster than `lapack-mkl` |  |
+| `triangular_solve/n16/b1024` | 0.142841 ± 0.00384874 (W 0.00740819) | 1.33724 ± 0.0384065 (W 0.00366983) | 🔵 tlinalg-pool 9.36× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `triangular_solve/n32/b1024` | 0.539736 ± 0.252901 (W 0.0113826) | 3.56187 ± 0.030996 (W 0.0255159) | 🔵 tlinalg-pool 6.60× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `triangular_solve/n4/b1024` | 0.0280625 ± 0.000659926 (W 0.000936743) | 0.302073 ± 0.000953517 (W 0.00210788) | 🔵 tlinalg-pool 10.76× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `triangular_solve/n8/b1024` | 0.065492 ± 0.00046021 (W 0.00110029) | 0.584052 ± 0.00559501 (W 0.00344394) | 🔵 tlinalg-pool 8.92× faster than `lapack-mkl` |  |
 
 ## canary-factor, f64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `cholesky/n128/b1` | 0.0663495 ± 0.000135924 (W 0.000159693) | 0.0942715 ± 0.000688672 (W 0.000950236) | 🔵 tlinalg-pool 1.42× faster than `lapack-mkl` |  |
-| `lu/n128/b1` | 0.185593 ± 0.00342469 (W 0.0037275) | 0.135713 ± 0.000664529 (W 0.00188522) | 🔴 tlinalg-pool 1.37× slower than `lapack-mkl` |  |
-| `lu_factor/n128/b1` | 0.125741 ± 0.00127619 (W 0.00529209) | 0.120887 ± 0.000234598 (W 0.00122752) | · |  |
-| `lu_factor_solve/n128/b1` | 0.135609 ± 0.00188152 (W 0.00415897) | 0.143488 ± 0.000243154 (W 0.00143961) | 🔵 tlinalg-pool 1.06× faster than `lapack-mkl` |  |
-| `lu_solve_prepared/n128/b1` | 0.0099085 ± 0.000479568 (W 7.7852e-05) | 0.0165815 ± 0.000136052 (W 0.000265316) | 🔵 tlinalg-pool 1.67× faster than `lapack-mkl` | `!` between-start range over 5%; dispatch-dominated (row under 20 us) |
-| `solve/n128/b1` | 0.146269 ± 0.00126918 (W 0.00402788) | 0.150131 ± 0.000512986 (W 0.0015629) | · |  |
-| `svd_values/n128/b1` | 2.38788 ± 0.00237538 (W 0.00425833) | 1.13146 ± 0.00253791 (W 0.00218134) | 🔴 tlinalg-pool 2.11× slower than `lapack-mkl` |  |
-| `triangular_solve/n128/b1` | 0.0068425 ± 6.72824e-05 (W 6.20949e-05) | 0.009958 ± 0.000276507 (W 0.000165556) | 🔵 tlinalg-pool 1.46× faster than `lapack-mkl` | `!` between-start range over 5%; dispatch-dominated (row under 20 us) |
+| `cholesky/n128/b1` | 0.066459 ± 0.000630893 (W 0.000138984) | 0.0941155 ± 0.000481287 (W 0.0010573) | 🔵 tlinalg-pool 1.42× faster than `lapack-mkl` |  |
+| `lu/n128/b1` | 0.185446 ± 0.00385348 (W 0.0062456) | 0.136149 ± 0.000407392 (W 0.00112943) | 🔴 tlinalg-pool 1.36× slower than `lapack-mkl` |  |
+| `lu_factor/n128/b1` | 0.126771 ± 0.00120733 (W 0.00284903) | 0.12106 ± 0.000175549 (W 0.00095346) | · |  |
+| `lu_factor_solve/n128/b1` | 0.134817 ± 0.0011646 (W 0.00429039) | 0.144019 ± 0.000851477 (W 0.00167171) | 🔵 tlinalg-pool 1.07× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n128/b1` | 0.009928 ± 3.90758e-05 (W 0.000120485) | 0.016556 ± 5.25198e-05 (W 0.000297585) | 🔵 tlinalg-pool 1.67× faster than `lapack-mkl` | dispatch-dominated (row under 20 us) |
+| `solve/n128/b1` | 0.149193 ± 0.00187656 (W 0.00452737) | 0.150891 ± 0.000601184 (W 0.00119282) | · |  |
+| `svd_values/n128/b1` | 2.38738 ± 0.00651744 (W 0.00262694) | 1.13233 ± 0.00443002 (W 0.00302846) | 🔴 tlinalg-pool 2.11× slower than `lapack-mkl` |  |
+| `triangular_solve/n128/b1` | 0.0068575 ± 7.90907e-05 (W 7.45264e-05) | 0.0104045 ± 0.000504383 (W 0.000240707) | 🔵 tlinalg-pool 1.52× faster than `lapack-mkl` | `!` between-start range over 5%; dispatch-dominated (row under 20 us) |
 
 ## canary-factor, c64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `cholesky/n128/b1` | 0.186549 ± 9.19601e-05 (W 0.00224601) | 0.407656 ± 0.015792 (W 0.00377794) | 🔵 tlinalg-pool 2.19× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `lu/n128/b1` | 0.342833 ± 0.00286199 (W 0.00639094) | 0.454094 ± 0.00131364 (W 0.00290096) | 🔵 tlinalg-pool 1.32× faster than `lapack-mkl` |  |
-| `lu_factor/n128/b1` | 0.260937 ± 0.0012001 (W 0.0042623) | 0.416297 ± 0.00218452 (W 0.00268092) | 🔵 tlinalg-pool 1.60× faster than `lapack-mkl` |  |
-| `lu_factor_solve/n128/b1` | 0.292233 ± 0.00273264 (W 0.00393066) | 0.445875 ± 0.00423011 (W 0.00177571) | 🔵 tlinalg-pool 1.53× faster than `lapack-mkl` |  |
-| `lu_solve_prepared/n128/b1` | 0.0314185 ± 0.000146402 (W 0.000122738) | 0.0251825 ± 6.072e-05 (W 0.000175494) | 🔴 tlinalg-pool 1.25× slower than `lapack-mkl` |  |
-| `solve/n128/b1` | 0.317769 ± 0.00229734 (W 0.00385444) | 0.463577 ± 0.000900065 (W 0.00202758) | 🔵 tlinalg-pool 1.46× faster than `lapack-mkl` |  |
-| `svd_values/n128/b1` | 3.15531 ± 0.0101037 (W 0.00541577) | 1.9236 ± 0.0122541 (W 0.00381005) | 🔴 tlinalg-pool 1.64× slower than `lapack-mkl` |  |
-| `triangular_solve/n128/b1` | 0.0186345 ± 6.95e-05 (W 9.71765e-05) | 0.01309 ± 3.5805e-05 (W 7.77472e-05) | 🔴 tlinalg-pool 1.42× slower than `lapack-mkl` | dispatch-dominated (row under 20 us) |
+| `cholesky/n128/b1` | 0.187138 ± 0.000541455 (W 0.00239505) | 0.409728 ± 0.00170022 (W 0.00333755) | 🔵 tlinalg-pool 2.19× faster than `lapack-mkl` |  |
+| `lu/n128/b1` | 0.342293 ± 0.00224635 (W 0.00467664) | 0.451326 ± 0.0014239 (W 0.00285133) | 🔵 tlinalg-pool 1.32× faster than `lapack-mkl` |  |
+| `lu_factor/n128/b1` | 0.262019 ± 0.00149553 (W 0.00305705) | 0.415199 ± 0.00127375 (W 0.00298318) | 🔵 tlinalg-pool 1.58× faster than `lapack-mkl` |  |
+| `lu_factor_solve/n128/b1` | 0.28965 ± 0.00207095 (W 0.00283012) | 0.446241 ± 0.00193535 (W 0.00205305) | 🔵 tlinalg-pool 1.54× faster than `lapack-mkl` |  |
+| `lu_solve_prepared/n128/b1` | 0.0312485 ± 0.000162574 (W 0.00011645) | 0.0251265 ± 0.000131226 (W 9.79448e-05) | 🔴 tlinalg-pool 1.24× slower than `lapack-mkl` |  |
+| `solve/n128/b1` | 0.316584 ± 0.00320948 (W 0.00515612) | 0.463139 ± 0.000578367 (W 0.00276384) | 🔵 tlinalg-pool 1.46× faster than `lapack-mkl` |  |
+| `svd_values/n128/b1` | 3.15856 ± 0.00961659 (W 0.00540219) | 1.92098 ± 0.00552202 (W 0.00562493) | 🔴 tlinalg-pool 1.64× slower than `lapack-mkl` |  |
+| `triangular_solve/n128/b1` | 0.01864 ± 0.000108152 (W 0.000121584) | 0.013009 ± 6.89704e-05 (W 9.18845e-05) | 🔴 tlinalg-pool 1.43× slower than `lapack-mkl` | dispatch-dominated (row under 20 us) |
 
 ## canary-decompose, f64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `eigh/n512/b1` | 23.6104 ± 0.0416166 (W 0.104426) | 14.9753 ± 0.0633745 (W 0.0765529) | 🔴 tlinalg-pool 1.58× slower than `lapack-mkl` |  |
-| `eigvalsh/n512/b1` | 18.5608 ± 0.0388776 (W 0.0274262) | 12.7365 ± 0.0189465 (W 0.030795) | 🔴 tlinalg-pool 1.46× slower than `lapack-mkl` |  |
-| `householder_apply/n512/b1` | 2.76048 ± 0.0396463 (W 0.0705592) | 3.15194 ± 0.0133426 (W 0.0141868) | 🔵 tlinalg-pool 1.14× faster than `lapack-mkl` |  |
-| `householder_factor/n512/b1` | 2.68198 ± 0.166805 (W 0.0480482) | 2.13774 ± 0.00370018 (W 0.00389845) | 🔴 tlinalg-pool 1.25× slower than `lapack-mkl` | `!` between-start range over 5% |
-| `qr/n512/b1` | 7.79468 ± 0.0524703 (W 0.108022) | 8.74482 ± 0.02037 (W 0.0139792) | 🔵 tlinalg-pool 1.12× faster than `lapack-mkl` |  |
-| `rank_revealing_qr/n512/b1` | 9.63445 ± 0.0598353 (W 0.0953914) | 24.5995 ± 0.264089 (W 0.0284812) | 🔵 tlinalg-pool 2.55× faster than `lapack-mkl` |  |
-| `svd_thin/n512/b1` | 60.7754 ± 0.0944252 (W 0.294316) | 49.3125 ± 0.0812221 (W 0.0705549) | 🔴 tlinalg-pool 1.23× slower than `lapack-mkl` |  |
+| `eigh/n512/b1` | 23.6612 ± 0.10555 (W 0.110916) | 15.038 ± 0.0728209 (W 0.0355972) | 🔴 tlinalg-pool 1.57× slower than `lapack-mkl` |  |
+| `eigvalsh/n512/b1` | 18.5617 ± 0.0338739 (W 0.0346088) | 12.6663 ± 0.0200189 (W 0.0127108) | 🔴 tlinalg-pool 1.47× slower than `lapack-mkl` |  |
+| `householder_apply/n512/b1` | 2.73573 ± 0.0321844 (W 0.0524102) | 3.1582 ± 0.0766923 (W 0.0272867) | 🔵 tlinalg-pool 1.15× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `householder_factor/n512/b1` | 2.66062 ± 0.0242662 (W 0.0329361) | 2.1333 ± 0.00375801 (W 0.00374449) | 🔴 tlinalg-pool 1.25× slower than `lapack-mkl` |  |
+| `qr/n512/b1` | 7.84731 ± 0.0534165 (W 0.077981) | 8.74615 ± 0.0145672 (W 0.0249704) | 🔵 tlinalg-pool 1.11× faster than `lapack-mkl` |  |
+| `rank_revealing_qr/n512/b1` | 9.6927 ± 0.14648 (W 0.144917) | 24.6562 ± 0.211599 (W 0.0746781) | 🔵 tlinalg-pool 2.54× faster than `lapack-mkl` |  |
+| `svd_thin/n512/b1` | 60.7376 ± 0.197726 (W 0.135853) | 49.131 ± 0.0549404 (W 0.170158) | 🔴 tlinalg-pool 1.24× slower than `lapack-mkl` |  |
 
 ## canary-decompose, c64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `eigh/n512/b1` | 38.6224 ± 0.491602 (W 0.529941) | 65.8509 ± 0.0897618 (W 0.145206) | 🔵 tlinalg-pool 1.70× faster than `lapack-mkl` |  |
-| `eigvalsh/n512/b1` | 28.843 ± 0.061146 (W 0.0687579) | 28.9146 ± 0.302296 (W 0.0289377) | · |  |
-| `householder_apply/n512/b1` | 7.01812 ± 0.00880437 (W 0.072888) | 8.11008 ± 0.0183848 (W 0.0170916) | 🔵 tlinalg-pool 1.16× faster than `lapack-mkl` |  |
-| `householder_factor/n512/b1` | 6.94187 ± 0.0542775 (W 0.109774) | 5.43366 ± 0.0159201 (W 0.00420319) | 🔴 tlinalg-pool 1.28× slower than `lapack-mkl` |  |
-| `qr/n512/b1` | 16.681 ± 0.138353 (W 0.265948) | 15.2492 ± 0.0397784 (W 0.0189847) | 🔴 tlinalg-pool 1.09× slower than `lapack-mkl` |  |
-| `rank_revealing_qr/n512/b1` | 18.7744 ± 0.0502486 (W 0.0965308) | 59.6268 ± 0.12872 (W 0.223446) | 🔵 tlinalg-pool 3.18× faster than `lapack-mkl` |  |
-| `svd_thin/n512/b1` | 99.408 ± 0.317422 (W 0.617953) | 87.0164 ± 1.08536 (W 0.0953476) | 🔴 tlinalg-pool 1.14× slower than `lapack-mkl` |  |
+| `eigh/n512/b1` | 39.1729 ± 0.531057 (W 0.490657) | 65.8481 ± 0.086262 (W 0.118165) | 🔵 tlinalg-pool 1.68× faster than `lapack-mkl` |  |
+| `eigvalsh/n512/b1` | 28.8647 ± 0.0685283 (W 0.0615579) | 28.9568 ± 0.806039 (W 0.109505) | · | `!` between-start range over 5% |
+| `householder_apply/n512/b1` | 7.06691 ± 0.033475 (W 0.103459) | 8.12216 ± 0.0128529 (W 0.0148617) | 🔵 tlinalg-pool 1.15× faster than `lapack-mkl` |  |
+| `householder_factor/n512/b1` | 6.94726 ± 0.0697756 (W 0.120228) | 5.45011 ± 0.0443646 (W 0.00953294) | 🔴 tlinalg-pool 1.27× slower than `lapack-mkl` |  |
+| `qr/n512/b1` | 16.7766 ± 0.0802107 (W 0.168827) | 15.2289 ± 0.0573613 (W 0.0281039) | 🔴 tlinalg-pool 1.10× slower than `lapack-mkl` |  |
+| `rank_revealing_qr/n512/b1` | 18.8542 ± 0.120696 (W 0.130801) | 59.6579 ± 0.390596 (W 0.141225) | 🔵 tlinalg-pool 3.16× faster than `lapack-mkl` |  |
+| `svd_thin/n512/b1` | 100.861 ± 0.432426 (W 0.600913) | 86.5714 ± 0.1206 (W 0.216242) | 🔴 tlinalg-pool 1.17× slower than `lapack-mkl` |  |
 
 ## canary-rectangular, f64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `householder_factor/4096x256/b1` | 7.81069 ± 0.012311 (W 0.0284708) | 6.16374 ± 0.0240462 (W 0.0436942) | 🔴 tlinalg-pool 1.27× slower than `lapack-mkl` |  |
-| `qr/4096x256/b1` | 22.3651 ± 0.405485 (W 0.479765) | 18.0558 ± 0.101029 (W 0.0450266) | 🔴 tlinalg-pool 1.24× slower than `lapack-mkl` |  |
-| `rank_revealing_qr/4096x256/b1` | 23.7242 ± 0.402032 (W 0.306258) | 59.9477 ± 2.70573 (W 0.724423) | 🔵 tlinalg-pool 2.53× faster than `lapack-mkl` | `!` between-start range over 5% |
-| `svd_thin/4096x256/b1` | 39.3039 ± 0.0564223 (W 0.335985) | 34.6609 ± 0.423364 (W 0.0815068) | 🔴 tlinalg-pool 1.13× slower than `lapack-mkl` |  |
+| `householder_factor/4096x256/b1` | 7.84882 ± 0.982383 (W 0.0352985) | 6.14661 ± 0.28496 (W 0.0351048) | 🔴 tlinalg-pool 1.28× slower than `lapack-mkl` | `!` between-start range over 5% |
+| `qr/4096x256/b1` | 22.5045 ± 1.47175 (W 0.565956) | 18.9593 ± 2.43203 (W 0.0872895) | 🔴 tlinalg-pool 1.19× slower than `lapack-mkl` | `!` between-start range over 5% |
+| `rank_revealing_qr/4096x256/b1` | 24.3732 ± 3.98711 (W 0.467811) | 63.204 ± 18.767 (W 1.12433) | 🔵 tlinalg-pool 2.59× faster than `lapack-mkl` | `!` between-start range over 5% |
+| `svd_thin/4096x256/b1` | 39.6408 ± 1.9777 (W 0.399292) | 34.6223 ± 3.91767 (W 0.153239) | 🔴 tlinalg-pool 1.14× slower than `lapack-mkl` | `!` between-start range over 5% |
 
 ## canary-rectangular, c64, 8T (CPU 4-11)
 
 | case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
-| `householder_factor/4096x256/b1` | 19.9645 ± 0.218413 (W 0.0472) | 16.9134 ± 0.0549062 (W 0.0786859) | 🔴 tlinalg-pool 1.18× slower than `lapack-mkl` |  |
-| `qr/4096x256/b1` | 53.698 ± 0.0737052 (W 0.0957099) | 40.7248 ± 0.269237 (W 0.262735) | 🔴 tlinalg-pool 1.32× slower than `lapack-mkl` |  |
-| `rank_revealing_qr/4096x256/b1` | 60.6148 ± 0.156586 (W 0.358105) | 161.895 ± 1.1027 (W 0.380694) | 🔵 tlinalg-pool 2.67× faster than `lapack-mkl` |  |
-| `svd_thin/4096x256/b1` | 111.258 ± 0.240914 (W 0.253296) | 75.8289 ± 0.367724 (W 0.365188) | 🔴 tlinalg-pool 1.47× slower than `lapack-mkl` |  |
+| `householder_factor/4096x256/b1` | 19.9705 ± 1.13992 (W 0.0807203) | 16.889 ± 2.42121 (W 0.0951264) | 🔴 tlinalg-pool 1.18× slower than `lapack-mkl` | `!` between-start range over 5% |
+| `qr/4096x256/b1` | 53.5904 ± 1.62775 (W 0.122476) | 40.8881 ± 4.13948 (W 0.120474) | 🔴 tlinalg-pool 1.31× slower than `lapack-mkl` | `!` between-start range over 5% |
+| `rank_revealing_qr/4096x256/b1` | 60.7077 ± 14.6941 (W 0.3409) | 162.302 ± 14.7213 (W 0.772922) | 🔵 tlinalg-pool 2.67× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
+| `svd_thin/4096x256/b1` | 115.649 ± 5.50524 (W 0.483385) | 76.0307 ± 4.37265 (W 0.505635) | 🔴 tlinalg-pool 1.52× slower than `lapack-mkl` | `!` between-start range over 5% |
 
 Repeated process sets describe observed repeatability under the recorded order schedule; they are not a paired baseline/candidate experiment and do not establish equal performance between engines.
