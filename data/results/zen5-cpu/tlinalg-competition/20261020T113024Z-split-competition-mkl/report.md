@@ -52,8 +52,9 @@ within-process sample SD. All values are milliseconds. These are descriptive spr
 not confidence intervals. The between-process spread includes the rotating-order schedule.
 Each process retains 5 chronological calls; 4 complete process sets are recorded.
 Spread guide (computed from this run's own rows): per-engine between-start range median 1.05%, worst 40.74% among cells of 1 us or more (a sub-microsecond row is timer and scheduler jitter, not kernel time); 30 of 396 engine cells exceed 5% and carry `!`; median within-process relative SD 0.32%. A cell whose `±`, `!` or `p` is as large as the difference you are reading is not evidence of a regression.
-The `vs faer-pool` column is the rotation-averaged ratio exp(mean over starts of
-log(engine median / faer-pool median)), with the per-start ratios beside it: `R > 1`
+The `vs tlinalg-pool` column is the rotation-averaged ratio
+exp(mean over starts of log(engine median / tlinalg-pool median)),
+with the per-start ratios beside it: `R > 1`
 means the engine was slower than that first-declared row in that start. It removes a
 row-position
 effect only under one position effect shared by the engines and stable across starts,
@@ -64,7 +65,7 @@ position-effect ratio exceeds 1.05. Flagged cells are retained, not discarded; t
 between-start variation can exceed the difference being compared.
 The `vs` columns mark only differences larger than the spread this run recorded for those
 two rows (combined between-start SD, floored at 5%), always with the measured library as the subject:
-`🔵 fork X faster than <row>` / `🔴 fork X slower than <row>` (the compared row is named in
+`🔵 tlinalg X faster than <row>` / `🔴 tlinalg X slower than <row>` (the compared row is named in
 the cell, not only in the column header), `·` inside the band, `-` that row is not
 measured in this arm. `notes` carries the cell warnings (`*` a declared row has no measurement,
 `!` between-start range over 5%, `p` position effect over 5%, dispatch-dominated means the
@@ -74,7 +75,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## batch-small, f64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `cholesky/n16/b1024` | 0.909638 ± 0.0209445 (W 0.00580284) | 1.06446 ± 0.00876258 (W 0.00206916) | 🔵 tlinalg 1.17× faster than `lapack-mkl` | `!` between-start range over 5% |
 | `cholesky/n32/b1024` | 3.49387 ± 0.135961 (W 0.0124661) | 3.71123 ± 0.0235686 (W 0.0119374) | 🔵 tlinalg 1.06× faster than `lapack-mkl` | `!` between-start range over 5% |
@@ -159,7 +160,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## batch-small, c64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `cholesky/n16/b1024` | 1.35644 ± 0.0128451 (W 0.0080624) | 1.83319 ± 0.0254096 (W 0.0105165) | 🔵 tlinalg 1.35× faster than `lapack-mkl` |  |
 | `cholesky/n32/b1024` | 5.97961 ± 0.0283468 (W 0.0174748) | 8.91064 ± 0.0288241 (W 0.0209607) | 🔵 tlinalg 1.49× faster than `lapack-mkl` |  |
@@ -244,7 +245,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-factor, f64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `cholesky/n128/b1` | 0.066651 ± 0.000280879 (W 0.00112134) | 0.093322 ± 0.000619085 (W 0.000374871) | 🔵 tlinalg 1.40× faster than `lapack-mkl` |  |
 | `lu/n128/b1` | 0.166768 ± 0.0034059 (W 0.00168092) | 0.136419 ± 0.0006675 (W 0.00158204) | 🔴 tlinalg 1.22× slower than `lapack-mkl` |  |
@@ -257,7 +258,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-factor, c64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `cholesky/n128/b1` | 0.21601 ± 0.00392165 (W 0.00148823) | 0.408357 ± 0.00177213 (W 0.00441043) | 🔵 tlinalg 1.89× faster than `lapack-mkl` |  |
 | `lu/n128/b1` | 0.347062 ± 0.00564207 (W 0.00213023) | 0.454178 ± 0.00323922 (W 0.00284074) | 🔵 tlinalg 1.31× faster than `lapack-mkl` |  |
@@ -270,7 +271,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-decompose, f64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `eigh/n512/b1` | 72.9288 ± 3.50888 (W 4.4456) | 99.7885 ± 0.860601 (W 0.0988056) | 🔵 tlinalg 1.37× faster than `lapack-mkl` | `!` between-start range over 5% |
 | `eigvalsh/n512/b1` | 24.6384 ± 0.110851 (W 0.0344298) | 62.398 ± 0.330106 (W 0.0986596) | 🔵 tlinalg 2.53× faster than `lapack-mkl` |  |
@@ -282,7 +283,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-decompose, c64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `eigh/n512/b1` | 159.663 ± 3.13498 (W 7.40925) | 306.793 ± 0.439393 (W 0.495927) | 🔵 tlinalg 1.92× faster than `lapack-mkl` |  |
 | `eigvalsh/n512/b1` | 50.2761 ± 0.0357322 (W 0.0429167) | 125.142 ± 0.184927 (W 0.134161) | 🔵 tlinalg 2.49× faster than `lapack-mkl` |  |
@@ -294,7 +295,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-rectangular, f64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `householder_factor/4096x256/b1` | 39.5335 ± 0.471575 (W 6.53776) | 3628.68 ± 3.43689 (W 14.1613) | 🔵 tlinalg 91.79× faster than `lapack-mkl` |  |
 | `qr/4096x256/b1` | 161.633 ± 10.6676 (W 49.3342) | 3658.7 ± 9.61908 (W 22.0156) | 🔵 tlinalg 22.64× faster than `lapack-mkl` | `!` between-start range over 5%; `p` position effect over 5% |
@@ -303,7 +304,7 @@ These describe the recorded revisions; they are not a regression claim.
 
 ## canary-rectangular, c64, 8T (CPU 4)
 
-| case | faer-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
+| case | tlinalg-pool (ms) | lapack-mkl (ms) | vs `lapack-mkl` | notes |
 |---|---|---|---|---|
 | `householder_factor/4096x256/b1` | 139.369 ± 4.1198 (W 4.29046) | 3706.43 ± 17.5941 (W 24.9997) | 🔵 tlinalg 26.59× faster than `lapack-mkl` | `!` between-start range over 5% |
 | `qr/4096x256/b1` | 387.809 ± 7.2987 (W 16.2937) | 3816.96 ± 10.0739 (W 26.7252) | 🔵 tlinalg 9.84× faster than `lapack-mkl` |  |

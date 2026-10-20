@@ -1,0 +1,42 @@
+{
+  "pin": {
+    "TLINALG_REV": "4dcd35f080a6b4fd6b1423871af66a33fd398482",
+    "TLINALG_DIRTY": "false",
+    "TLINALG_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs",
+    "BIN_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/4dcd35f080a6-openblas/release",
+    "BUILD_FEATURES": "tlinalg-bench/link-openblas-static",
+    "BUILD_ENV": "OPENBLAS_DYNAMIC_ARCH=1",
+    "BUILD_VENDOR": "openblas"
+  },
+  "admission": {
+    "harness": {
+      "commit": "f7f0996f8e64e5d57d85266f4a9e989e6a7ed3bc",
+      "dirty": false
+    },
+    "toolkit": {
+      "commit": "d4385102914b6db32c0a0a25a2362c83ad2e7f45",
+      "dirty": false,
+      "measured_path": "/home/shinaoka/projects/tensor4all/campaign-toolkit"
+    },
+    "argv": [
+      "scripts/record_run.py",
+      "zen5-cpu",
+      "tlinalg-scaling",
+      "--aa",
+      "4",
+      "--reps",
+      "5",
+      "--prime-ms",
+      "250",
+      "--label",
+      "split-scaling"
+    ]
+  },
+  "binary": {
+    "path": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/4dcd35f080a6-openblas/release/tlbench",
+    "sha256": "dce21ac38e7150502f3291d58bb393080b1e1f363df08a2caf08052ff5e09987"
+  },
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "env": {}
+}
