@@ -78,6 +78,10 @@ workloads:
     Inputs are seeded from the case, so `verify` and `run` measure the same
     matrices and a rerun is reproducible.
   known_blind_spots:
+    - "The scaling table declares 8T only. The pool has nothing to parallelise at 1T (it is one
+      lane with extra machinery), and a 1T verify pass is the slowest single thing this host
+      runs: measured 2026-10-20, one 1T population took over twenty minutes. The baseline the
+      table needs is the one lane *on the same budget*."
     - "The batched regime stops at n=32: at batch 1024 the harness's verify recomputes every case with its residual checks, and n=64 pushed one verify pass past 45 minutes on this host (measured 2026-10-20). n=64 returns when verify can run on a declared grid of its own (campaign-toolkit#28), not as part of the timing run."
     - "Only the kernel entry points are measured. Tensor construction, dtype dispatch, session entry and pool checkout are tenferro's and are out of scope."
     - "The 2026-10-17 trim narrowed the suite to the batched small regime plus three single-shape canaries (factor at 128, decompose at 512, rectangular at 4096x256, each at batch 1). The medium, large and tall grids are no longer measured here: faer-benchmark measures that geometry directly with the same backends these rows wrap, so a cost that appears only at those sizes has to be read from that campaign's page."
@@ -144,8 +148,8 @@ engines_doc:
 # thread axis keeps the serial baseline and the largest budget (1T, 8T): the middle budget told
 # neither the per-item cost nor the batch-parallel story.
 runs:
-  - threads: [1, 8]
-    cpu_sets: ["4", "4-11"]
+  - threads: [8]
+    cpu_sets: ["4-11"]
     dtypes: [f64, c64]
     engines: [faer-1lane, faer-pool]
     populations:
