@@ -49,6 +49,34 @@ and the validator refuses a manifest whose vendor is not the one its engines nam
 dispatched-kernel name and no processor count; its manifest leaves both empty rather than infer
 them, and the page says so.
 
+## What the `openblas` arm actually is on this campaign's host
+
+Four properties of the arm change how its rows read, and none of them is visible in a page. Each
+was found by reading what a recorded build did, not by assuming; re-check them when the arm or
+the machine moves.
+
+- **It is not a Fortran LAPACK build.** `openblas-build` falls back to BLAS plus the
+  f2c-converted LAPACK when it finds no Fortran compiler, and says so:
+  `cargo:warning=OpenBLAS: Detecting fortran compiler failed. Only BLAS and f2c-converted LAPACK
+  are compiled.` The development host has no `gfortran`, so every `lapack-openblas` row recorded
+  so far was measured against that fallback. Installing a Fortran compiler changes which LAPACK
+  the row measures — a library change with its own A/A, not a build detail. Read it from
+  `target/tlinalg-rev/<rev>-openblas/*/build/openblas-src-*/output`.
+- **`DYNAMIC_ARCH=1` dispatches to `Cooperlake`** on the Zen 5 development host, an Intel AVX-512
+  target, because the OpenBLAS in use names no Zen 5 kernel. The manifest records the kernel it
+  dispatched to (`vendor.corename`); a row from this machine is a Cooperlake row, and the page
+  must not let a reader infer a Zen-tuned library.
+- **The OpenBLAS version is a constant in the build crate, not a property of the host.**
+  `openblas-src` pulls `openblas-build`, whose `OPENBLAS_VERSION` is `0.3.32` for the revision in
+  `Cargo.lock`; it has no environment override and the tarball is fetched without a checksum.
+  Moving the arm to a newer OpenBLAS is a dependency bump in `tlinalg-rs`, recorded by the usual
+  pin — not something the machine or an image can choose.
+- **The build is wrapped by `kache` on the development host.** `~/.cargo/config.toml` sets
+  `rustc-wrapper = "kache"` and `CC = "kache cc"`; `build_for_tlinalg_rev.sh` clears
+  `RUSTC_WRAPPER` but not `CC`, and no manifest field records either. A cache wrapper should not
+  change the object it passes through, but a reader of a page cannot tell from the page which
+  compiler invocation produced the binary.
+
 ## Timing discipline
 
 One measurement at a time, and **no build while a measurement is running**. `scripts/record_run.py`
