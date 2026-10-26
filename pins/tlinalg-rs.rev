@@ -1,5 +1,4 @@
 
-# main (4dcd35f) from 2026-10-19: the newest revision, seven commits past the previous
-# pin. The last release tag v0.2.0 (58ad340) is sixteen commits *behind* the previous
-# pin, so pinning the tag would have been a downgrade.
-4dcd35f080a6b4fd6b1423871af66a33fd398482
+# v0.6.0 (88a2ffe) from 2026-10-27: the release on crates.io deps (tcontract-exec 0.6, threadteam 0.1,
+# strided 0.8, t4a-faer 0.25).
+88a2ffeea4c5ef514dac91b2ea65d43c52b121e9
