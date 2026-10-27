@@ -18,4 +18,3 @@ done
 # The scaling suite declares no vendor row, so it takes no --vendor.
 $TASKSET python3 scripts/record_run.py zen5-cpu tlinalg-scaling \
     --aa 4 --reps 5 --prime-ms 250 --label "$LABEL-scaling"
-python3 scripts/gen_site.py
