@@ -113,7 +113,7 @@ also what the perf work on `tlinalg-rs#16`-`#25` follows:
    /tmp/tlinalg-base <before-commit>` (and one for the change), and no edits in either while it is
    measured.
 2. The same populations, thread counts and dtypes on both sides, into the *same* suite declaration,
-   so the two runs are the same cells: `scripts/record_run.py zen5-cpu tlinalg-kernels --regimes
+   so the two runs are the same cells: `scripts/record_run.py zen5-cpu <suite> --regimes
    ... --threads ... --checkout <worktree>`.
 3. **At least two complete sets** (`--aa 2`) for anything that will be claimed as a performance
    change, because the timing policy's measured noise floor makes a single set insufficient for the
