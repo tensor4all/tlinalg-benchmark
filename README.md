@@ -28,8 +28,8 @@ against; building it in place makes the recorded commit describe both.
 
 # record one cell: for one vendor arm, build, verify, measure, validate, publish, reindex.
 # One binary links one vendor library, so an arm is a run of its own.
-python3 scripts/record_run.py zen5-cpu tlinalg-kernels --vendor openblas
-python3 scripts/record_run.py zen5-cpu tlinalg-kernels --vendor mkl
+python3 scripts/record_run.py zen5-cpu tlinalg-competition --vendor openblas
+python3 scripts/record_run.py zen5-cpu tlinalg-competition --vendor mkl
 ```
 
 The comparison is between the two providers of the interface — the faer-backed

@@ -18,8 +18,6 @@ rather than being implied by the other arm's page.
 |---|---|---|---|---|---|---|---|---|
 | `tlinalg-competition` | `zen5-cpu` | `openblas` | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-competition/88a2ffeea4c5-openblas-timing-v2.md](zen5-cpu/tlinalg-competition/88a2ffeea4c5-openblas-timing-v2.md) |
 | `tlinalg-competition` | `zen5-cpu` | `mkl` | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-competition/88a2ffeea4c5-mkl-timing-v2.md](zen5-cpu/tlinalg-competition/88a2ffeea4c5-mkl-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `4dcd35f080a6` | - | 2026-10-20 | declaration-changed | 14 behind | [result/zen5-cpu/tlinalg-kernels/4dcd35f080a6-openblas-timing-v2.md](zen5-cpu/tlinalg-kernels/4dcd35f080a6-openblas-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `4dcd35f080a6` | - | 2026-10-20 | declaration-changed | 14 behind | [result/zen5-cpu/tlinalg-kernels/4dcd35f080a6-mkl-timing-v2.md](zen5-cpu/tlinalg-kernels/4dcd35f080a6-mkl-timing-v2.md) |
 | `tlinalg-scaling` | `zen5-cpu` | - | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-scaling/88a2ffeea4c5-timing-v2.md](zen5-cpu/tlinalg-scaling/88a2ffeea4c5-timing-v2.md) |
 
 `missing` is a normal cell, not an error: the campaign is not run on every
@@ -36,28 +34,6 @@ partial or declaration-changed page never displaces a full-coverage one.
 |---|---|---|---|---|---|---|---|---|
 | `tlinalg-scaling` | `zen5-cpu` | - | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-scaling/88a2ffeea4c5-timing-v2.md](zen5-cpu/tlinalg-scaling/88a2ffeea4c5-timing-v2.md) |
 | `tlinalg-scaling` | `zen5-cpu` | - | `4dcd35f080a6` | - | 2026-10-20 | full | 14 behind | [result/zen5-cpu/tlinalg-scaling/4dcd35f080a6-timing-v2.md](zen5-cpu/tlinalg-scaling/4dcd35f080a6-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `4dcd35f080a6` | - | 2026-10-20 | declaration-changed | 14 behind | [result/zen5-cpu/tlinalg-kernels/4dcd35f080a6-openblas-timing-v2.md](zen5-cpu/tlinalg-kernels/4dcd35f080a6-openblas-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `4dcd35f080a6` | - | 2026-10-20 | declaration-changed | 14 behind | [result/zen5-cpu/tlinalg-kernels/4dcd35f080a6-mkl-timing-v2.md](zen5-cpu/tlinalg-kernels/4dcd35f080a6-mkl-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `06466b166453` | - | 2026-10-17 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/06466b166453-openblas-timing-v2.md](zen5-cpu/tlinalg-kernels/06466b166453-openblas-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `06466b166453` | - | 2026-10-17 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/06466b166453-mkl-timing-v2.md](zen5-cpu/tlinalg-kernels/06466b166453-mkl-timing-v2.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `7fdba8a53ba3` | - | 2026-10-14 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/7fdba8a53ba3-mkl.md](zen5-cpu/tlinalg-kernels/7fdba8a53ba3-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `bf88c0a6e568` | - | 2026-10-14 | declaration-changed | diverged | [result/zen5-cpu/tlinalg-kernels/bf88c0a6e568-mkl.md](zen5-cpu/tlinalg-kernels/bf88c0a6e568-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `e6ee2d3304e0` | - | 2026-10-13 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/e6ee2d3304e0-mkl.md](zen5-cpu/tlinalg-kernels/e6ee2d3304e0-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `e6ee2d3304e0` | - | 2026-10-13 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/e6ee2d3304e0-openblas.md](zen5-cpu/tlinalg-kernels/e6ee2d3304e0-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `6180fb0da697` | - | 2026-10-13 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/6180fb0da697-mkl.md](zen5-cpu/tlinalg-kernels/6180fb0da697-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `6180fb0da697` | - | 2026-10-13 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/6180fb0da697-openblas.md](zen5-cpu/tlinalg-kernels/6180fb0da697-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `5cb243038a5b` | - | 2026-10-13 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/5cb243038a5b-mkl.md](zen5-cpu/tlinalg-kernels/5cb243038a5b-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `5cb243038a5b` | - | 2026-10-12 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/5cb243038a5b-openblas.md](zen5-cpu/tlinalg-kernels/5cb243038a5b-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `6a873e6168e5` | - | 2026-10-12 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/6a873e6168e5-mkl.md](zen5-cpu/tlinalg-kernels/6a873e6168e5-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `6a873e6168e5` | - | 2026-10-12 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/6a873e6168e5-openblas.md](zen5-cpu/tlinalg-kernels/6a873e6168e5-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `9e0796cacb99` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/9e0796cacb99-mkl.md](zen5-cpu/tlinalg-kernels/9e0796cacb99-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `9e0796cacb99` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/9e0796cacb99-openblas.md](zen5-cpu/tlinalg-kernels/9e0796cacb99-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `7dbed2f0a8fc` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/7dbed2f0a8fc-mkl.md](zen5-cpu/tlinalg-kernels/7dbed2f0a8fc-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `7dbed2f0a8fc` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/7dbed2f0a8fc-openblas.md](zen5-cpu/tlinalg-kernels/7dbed2f0a8fc-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `mkl` | `b135f0d7e666` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/b135f0d7e666-mkl.md](zen5-cpu/tlinalg-kernels/b135f0d7e666-mkl.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `b135f0d7e666` | - | 2026-10-11 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/b135f0d7e666-openblas.md](zen5-cpu/tlinalg-kernels/b135f0d7e666-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `8276e097c214` | - | 2026-10-09 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/8276e097c214-openblas.md](zen5-cpu/tlinalg-kernels/8276e097c214-openblas.md) |
-| `tlinalg-kernels` | `zen5-cpu` | `openblas` | `6d55cb6f68bd` | - | 2026-10-08 | declaration-changed | stale | [result/zen5-cpu/tlinalg-kernels/6d55cb6f68bd-openblas.md](zen5-cpu/tlinalg-kernels/6d55cb6f68bd-openblas.md) |
 | `tlinalg-competition` | `zen5-cpu` | `openblas` | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-competition/88a2ffeea4c5-openblas-timing-v2.md](zen5-cpu/tlinalg-competition/88a2ffeea4c5-openblas-timing-v2.md) |
 | `tlinalg-competition` | `zen5-cpu` | `mkl` | `88a2ffeea4c5` | - | 2026-10-27 | full | current | [result/zen5-cpu/tlinalg-competition/88a2ffeea4c5-mkl-timing-v2.md](zen5-cpu/tlinalg-competition/88a2ffeea4c5-mkl-timing-v2.md) |
 | `tlinalg-competition` | `zen5-cpu` | `mkl` | `4dcd35f080a6` | - | 2026-10-20 | full | 14 behind | [result/zen5-cpu/tlinalg-competition/4dcd35f080a6-mkl-timing-v2.md](zen5-cpu/tlinalg-competition/4dcd35f080a6-mkl-timing-v2.md) |
