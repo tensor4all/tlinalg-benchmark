@@ -7,7 +7,7 @@ name: pages
 on:
   push:
     branches: [main]
-    paths: ['result/**', 'pins/**', 'benchmarks/**', requirements.txt, 'scripts/gen_site.py', '.github/workflows/pages.yml']
+    paths: ['result/**', 'data/**', 'pins/**', 'benchmarks/**', requirements.txt, 'scripts/gen_site.py', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
