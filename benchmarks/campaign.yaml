@@ -115,3 +115,24 @@ report:
 # a validated median, which is what the published pages of this campaign now record.
 timing:
   version: 2
+
+# Charts the Pages site draws at deploy time from the runs behind the current pages (not committed;
+# campaign_toolkit.figures): one dot plot of every case per current page (cases x engines, log time).
+# A throughput-against-size chart waits for the toolkit to count the batch extent and accept a CSV
+# without an `order` column (tensor4all/campaign-toolkit#48).
+figures:
+  cases: [tlinalg-competition, tlinalg-scaling]
+
+# Representative cases followed across pins (tensor4all-meta#76 D4): one batched SVD and one
+# single-call eigh, both on the competition suite's MKL arm at 8T (the suite's only budget).
+trend:
+  - suite: tlinalg-competition
+    case: batch-small:svd_full/n16/b1024 f64
+    vendor: mkl
+    engines: [faer-pool, lapack-mkl]
+    threads: [8]
+  - suite: tlinalg-competition
+    case: canary-decompose:eigh/n512/b1 f64
+    vendor: mkl
+    engines: [faer-pool, lapack-mkl]
+    threads: [8]
