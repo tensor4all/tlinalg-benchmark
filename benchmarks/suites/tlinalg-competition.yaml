@@ -147,7 +147,7 @@ engines_doc:
 # neither the per-item cost nor the batch-parallel story.
 runs:
   - threads: [8]
-    cpu_sets: ["4-11"]
+    cpu_sets: {zen5-cpu: ["4-11"]}
     dtypes: [f64, c64]
     engines: [faer-pool, lapack-openblas, lapack-mkl]
     populations:
