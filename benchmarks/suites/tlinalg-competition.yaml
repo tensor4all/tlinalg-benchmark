@@ -30,7 +30,8 @@ stale_after: 20
 # error rather than an empty cell.
 required_profiles:
   - zen5-cpu
-optional_profiles: []
+optional_profiles:
+  - zen2-cpu
 
 # Family groups. A group is a set of families that are worth measuring on the
 # same shape grid; the runs below say which groups are measured per regime. The
