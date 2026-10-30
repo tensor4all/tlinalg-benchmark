@@ -1,4 +1,4 @@
 
-# v0.6.0 (88a2ffe) from 2026-10-27: the release on crates.io deps (tcontract-exec 0.6, threadteam 0.1,
-# strided 0.8, t4a-faer 0.25).
-88a2ffeea4c5ef514dac91b2ea65d43c52b121e9
+# v0.8.0 (53d1f0d) from 2026-10-30: t4a-faer 0.27, threadteam 0.2, tcontract-exec 0.9 (the `Exec`
+# bundle every entry point takes since 0.7).
+53d1f0d9f44378596c4f2bce932e45cc961b0d78
