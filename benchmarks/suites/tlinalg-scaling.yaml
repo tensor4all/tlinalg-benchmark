@@ -104,9 +104,10 @@ engines_doc:
   faer-pool:
     provider: tlinalg
     summary: >-
-      The same provider on a host-owned Rayon pool of the row's thread budget,
-      with the library choosing its batch lanes. The thread count is a column,
-      not part of the row name.
+      The same provider on a host-owned `threadteam::Team` of the row's thread
+      budget (`Exec::from_token(team.exec(threads), None, policy)` in
+      `tlinalg-bench`), with the library choosing its batch lanes. The thread
+      count is a column, not part of the row name.
     identity: tlinalg-rs (this repository's pinned revision)
     caveat: >-
       A faer count hint is not a hard active-thread limit; see the `Parallel`
