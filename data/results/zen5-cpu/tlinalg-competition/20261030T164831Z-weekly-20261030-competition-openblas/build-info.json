@@ -1,0 +1,51 @@
+{
+  "pin": {
+    "TLINALG_REV": "53d1f0d9f44378596c4f2bce932e45cc961b0d78",
+    "TLINALG_DIRTY": "false",
+    "TLINALG_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs",
+    "BIN_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/53d1f0d9f443-openblas/release",
+    "BUILD_FEATURES": "tlinalg-bench/link-openblas-static",
+    "BUILD_ENV": "OPENBLAS_DYNAMIC_ARCH=1",
+    "BUILD_VENDOR": "openblas"
+  },
+  "admission": {
+    "harness": {
+      "commit": "3957b5af620eff5da5d1435afd97a4a8619ba473",
+      "dirty": false,
+      "outputs_dirty": true,
+      "excluded_outputs": [
+        "data/results",
+        "result"
+      ],
+      "excluded_sibling_outputs": []
+    },
+    "toolkit": {
+      "commit": "b71624bef111ce941bddaedcce3fdb6eab40f9eb",
+      "dirty": false,
+      "measured_path": "/home/shinaoka/projects/tensor4all/.toolkit-b71624b"
+    },
+    "argv": [
+      "scripts/record_run.py",
+      "zen5-cpu",
+      "tlinalg-competition",
+      "--vendor",
+      "openblas",
+      "--aa",
+      "4",
+      "--reps",
+      "5",
+      "--prime-ms",
+      "250",
+      "--label",
+      "weekly-20261030-competition-openblas",
+      "--no-publish"
+    ]
+  },
+  "binary": {
+    "path": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/53d1f0d9f443-openblas/release/tlbench",
+    "sha256": "028b45886580e5353ddee46798f3d2cd7cf52f7521251264812b3a908590da86"
+  },
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "env": {}
+}

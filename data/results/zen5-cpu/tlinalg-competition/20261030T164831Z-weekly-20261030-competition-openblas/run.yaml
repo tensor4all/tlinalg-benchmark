@@ -1,0 +1,283 @@
+schema_version: 1
+target_profile: zen5-cpu
+suite_id: tlinalg-competition
+suite_file: benchmarks/suites/tlinalg-competition.yaml
+suite_sha256: f9496265424547b835497e18ac86b6623246bfcef569cbc203df09a57bf51931
+timestamp: '2026-10-30T17:09:11.542440Z'
+command: scripts/record_run.py zen5-cpu tlinalg-competition --vendor openblas --aa
+  4 --reps 5 --prime-ms 250 --label weekly-20261030-competition-openblas --no-publish
+library:
+  url: https://github.com/tensor4all/tlinalg-rs
+  commit: 53d1f0d9f44378596c4f2bce932e45cc961b0d78
+  dirty: false
+  features:
+  - tlinalg-bench/link-openblas-static
+  measured_path: /home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs
+  version: null
+vendor:
+  name: openblas
+  linkage: static
+  version: 0.3.32
+  config: OpenBLAS 0.3.32 DYNAMIC_ARCH NO_AFFINITY Cooperlake MAX_THREADS=24
+  corename: Cooperlake
+  parallel: pthread
+  procs: 8
+  build_env: OPENBLAS_DYNAMIC_ARCH=1
+harness:
+  commit: 3957b5af620eff5da5d1435afd97a4a8619ba473
+  dirty: false
+  outputs_dirty: true
+  excluded_outputs:
+  - data/results
+  - result
+  excluded_sibling_outputs: []
+toolkit:
+  commit: b71624bef111ce941bddaedcce3fdb6eab40f9eb
+  dirty: false
+  measured_path: /home/shinaoka/projects/tensor4all/.toolkit-b71624b
+verification_files:
+- verify-batch-small-8t.csv
+- verify-canary-factor-8t.csv
+- verify-canary-decompose-8t.csv
+- verify-canary-rectangular-8t.csv
+binary:
+  path: /home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/53d1f0d9f443-openblas/release/tlbench
+  sha256: 028b45886580e5353ddee46798f3d2cd7cf52f7521251264812b3a908590da86
+host:
+  power:
+    cpufreq_boost: '0'
+    amd_pstate_status: active
+    governor: performance
+    energy_performance_preference: performance
+    scaling_max_freq_khz: '2000000'
+    smt:
+      active: '1'
+      control: 'on'
+  numa:
+    nodes: 1
+    cpulists:
+      '0': 0-23
+  role: development
+  hostname: shinaoka-EVO-X1Pro
+  cpu: AMD Ryzen AI 9 HX 470
+  os: Linux 7.0.0-38-generic
+  arch: x86_64
+  logical_cpus: 24
+  l3: 24 MiB (2 instances)
+  l3_domains: '0-3: 16 MiB shared; 4-11: 8 MiB shared'
+  notes: 'AMD Ryzen AI 9 HX 470 (Zen5 mobile APU), 12 physical / 24 logical cores.
+    Heterogeneous L3: CPUs 0-3 share 16 MiB, CPUs 4-11 share 8 MiB, so a thread set
+    must be stated together with the domain it sits in. SMT siblings of CPUs 4-11
+    are 16-23; the idle gate checks them too, because a busy sibling contends with
+    the physical core being measured.'
+build:
+  toolchain:
+    rustc: 'rustc 1.99.0 (b940084d7 2026-09-28)
+
+      binary: rustc
+
+      commit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4
+
+      commit-date: 2026-09-28
+
+      host: x86_64-unknown-linux-gnu
+
+      release: 1.99.0
+
+      LLVM version: 23.1.1
+
+      '
+    rustc_release: 1.99.0
+    rustflags: null
+    target_cpu: null
+threads:
+  counts:
+  - 8
+  cpu_sets:
+    '8': 4-11
+  observer:
+    affinity: 0-3, 12-15
+    free_cpus: 0-3, 12-15
+    source: os.sched_getaffinity(0) in the recording process
+  env:
+    OPENBLAS_NUM_THREADS: null
+    MKL_NUM_THREADS: null
+    MKL_DOMAIN_NUM_THREADS: null
+    MKL_INTERFACE_LAYER: null
+    MKL_THREADING_LAYER: null
+    MKL_DYNAMIC: null
+    MKL_ENABLE_INSTRUCTIONS: null
+    MKL_CBWR: null
+    OMP_NUM_THREADS: null
+    OMP_THREAD_LIMIT: null
+    OMP_PROC_BIND: null
+    OMP_PLACES: null
+    KMP_AFFINITY: null
+    GOMP_CPU_AFFINITY: null
+    RAYON_NUM_THREADS: null
+  note: the vendor's budget is set by the harness from the row's thread count and
+    read back before each measurement; these variables were removed from the measured
+    process's environment so it cannot inherit a different one
+timing_policy:
+  version: 2
+  minimum_untimed_priming_ms: 250
+  statistic: median
+  row_rotation_step: 1
+  repetitions: 5
+  notes: descriptive process medians under a rotating engine-order schedule; raw samples
+    and the verification census are retained
+guards:
+  idle_window_seconds: 3
+  max_busy_percent: 5.0
+  attempts: 3
+  sibling_aware: true
+  logs:
+  - run0-batch-small-8t.guard
+  - run0-canary-decompose-8t.guard
+  - run0-canary-factor-8t.guard
+  - run0-canary-rectangular-8t.guard
+  - run1-batch-small-8t.guard
+  - run1-canary-decompose-8t.guard
+  - run1-canary-factor-8t.guard
+  - run1-canary-rectangular-8t.guard
+  - run2-batch-small-8t.guard
+  - run2-canary-decompose-8t.guard
+  - run2-canary-factor-8t.guard
+  - run2-canary-rectangular-8t.guard
+  - run3-batch-small-8t.guard
+  - run3-canary-decompose-8t.guard
+  - run3-canary-factor-8t.guard
+  - run3-canary-rectangular-8t.guard
+  - verify-batch-small-8t.guard
+  - verify-canary-decompose-8t.guard
+  - verify-canary-factor-8t.guard
+  - verify-canary-rectangular-8t.guard
+providers:
+- name: tlinalg
+  version: null
+  commit: null
+  path: null
+  note: the provider in the measured revision; see library above
+- name: t4a-faer
+  version: 0.27.0
+  commit: null
+  path: null
+  note: linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index
+- name: t4a-faer-traits
+  version: 0.24.2
+  commit: null
+  path: null
+  note: linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index
+- name: openblas
+  version: 0.3.32
+  commit: null
+  path: null
+  note: linked static, kernel dispatched to Cooperlake, config OpenBLAS 0.3.32 DYNAMIC_ARCH
+    NO_AFFINITY Cooperlake MAX_THREADS=24
+verification:
+  grid:
+    n:
+    - '4'
+    - '8'
+    - '16'
+invalidated_by:
+- crates/tlinalg/**
+- crates/tlinalg-blas/**
+- crates/tlinalg-bench/**
+- crates/tlinalg-testkit/**
+- benchmarks/scripts/**
+- Cargo.toml
+- Cargo.lock
+result_files:
+- run0-batch-small-8t.csv
+- run0-canary-factor-8t.csv
+- run0-canary-decompose-8t.csv
+- run0-canary-rectangular-8t.csv
+- run1-batch-small-8t.csv
+- run1-canary-factor-8t.csv
+- run1-canary-decompose-8t.csv
+- run1-canary-rectangular-8t.csv
+- run2-batch-small-8t.csv
+- run2-canary-factor-8t.csv
+- run2-canary-decompose-8t.csv
+- run2-canary-rectangular-8t.csv
+- run3-batch-small-8t.csv
+- run3-canary-factor-8t.csv
+- run3-canary-decompose-8t.csv
+- run3-canary-rectangular-8t.csv
+run_spec:
+  populations:
+  - regime: batch-small
+    families:
+    - lu_factor
+    - lu_solve_prepared
+    - lu_factor_solve
+    - solve
+    - lu
+    - cholesky
+    - triangular_solve
+    - svd_values
+    - qr
+    - rank_revealing_qr
+    - svd_thin
+    - eigh
+    - eigvalsh
+    - householder_factor
+    - householder_apply
+    - svd_full
+    - eig
+    - eigvals
+    - full_piv_lu
+    - full_piv_lu_solve
+    n:
+    - '4'
+    - '8'
+    - '16'
+    - '32'
+    batch:
+    - 1024
+  - regime: canary-factor
+    families:
+    - lu_factor
+    - lu_solve_prepared
+    - lu_factor_solve
+    - solve
+    - lu
+    - cholesky
+    - triangular_solve
+    - svd_values
+    n:
+    - '128'
+    batch:
+    - 1
+  - regime: canary-decompose
+    families:
+    - qr
+    - rank_revealing_qr
+    - svd_thin
+    - eigh
+    - eigvalsh
+    - householder_factor
+    - householder_apply
+    n:
+    - '512'
+    batch:
+    - 1
+  - regime: canary-rectangular
+    families:
+    - svd_thin
+    - qr
+    - rank_revealing_qr
+    - householder_factor
+    n:
+    - 4096x256
+    batch:
+    - 1
+  dtypes:
+  - f64
+  - c64
+  engines:
+  - faer-pool
+  - lapack-openblas
+  aa: 4
+  covers_declared_suite: true
