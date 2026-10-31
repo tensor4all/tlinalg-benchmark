@@ -7,7 +7,7 @@ Every page not selected for the index's Cells table, newest first and grouped by
 revisions it measured. The current pages are in [INDEX.md](INDEX.md).
 
 - Reference revision (`pins/tlinalg-rs.rev`): `53d1f0d9f44378596c4f2bce932e45cc961b0d78`
-- Newest recorded run: `2026-10-27T05:40:26.333781Z`
+- Newest recorded run: `2026-10-31T13:33:34.104119Z`
 - Every page below is one `(suite, hardware profile, revision, vendor arm)` and carries
   its commit, its hardware and the vendor library it linked itself.
 

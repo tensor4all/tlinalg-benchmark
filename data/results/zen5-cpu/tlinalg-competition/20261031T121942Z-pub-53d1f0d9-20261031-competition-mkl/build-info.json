@@ -1,0 +1,50 @@
+{
+  "pin": {
+    "TLINALG_REV": "53d1f0d9f44378596c4f2bce932e45cc961b0d78",
+    "TLINALG_DIRTY": "false",
+    "TLINALG_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/extern/tlinalg-rs",
+    "BIN_DIR": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/53d1f0d9f443-mkl/release",
+    "BUILD_FEATURES": "tlinalg-bench/link-mkl",
+    "BUILD_ENV": "MKLROOT=/opt/intel/oneapi/mkl/2026.2 MKL_THREADING_LIB=/opt/intel/oneapi/compiler/2026.2/lib/libiomp5.so",
+    "BUILD_VENDOR": "mkl"
+  },
+  "admission": {
+    "harness": {
+      "commit": "f00d46158eeb5cacf198bceba6197d5eb2043afc",
+      "dirty": false,
+      "outputs_dirty": false,
+      "excluded_outputs": [
+        "data/results",
+        "result"
+      ],
+      "excluded_sibling_outputs": []
+    },
+    "toolkit": {
+      "commit": "b71624bef111ce941bddaedcce3fdb6eab40f9eb",
+      "dirty": false,
+      "measured_path": "/home/shinaoka/.local/state/toolkit-b71624be"
+    },
+    "argv": [
+      "scripts/record_run.py",
+      "zen5-cpu",
+      "tlinalg-competition",
+      "--vendor",
+      "mkl",
+      "--aa",
+      "4",
+      "--reps",
+      "5",
+      "--prime-ms",
+      "250",
+      "--label",
+      "pub-53d1f0d9-20261031-competition-mkl"
+    ]
+  },
+  "binary": {
+    "path": "/home/shinaoka/projects/tensor4all/tlinalg-benchmark/target/tlinalg-rev/53d1f0d9f443-mkl/release/tlbench",
+    "sha256": "f9de3c2ea11208f98dfddae328c2a2b5c15bdc311582ad4269a4c6dda4ca4673"
+  },
+  "rustc": "rustc 1.99.0 (b940084d7 2026-09-28)\nbinary: rustc\ncommit-hash: b940084d7eb6a299eb4bfeb8e34901bc051e7ac4\ncommit-date: 2026-09-28\nhost: x86_64-unknown-linux-gnu\nrelease: 1.99.0\nLLVM version: 23.1.1\n",
+  "cargo": "cargo 1.99.0 (5f94df478 2026-08-27)\nrelease: 1.99.0\ncommit-hash: 5f94df4789f005f9a352888e8355ffc645b7ed0e\ncommit-date: 2026-08-27\nhost: x86_64-unknown-linux-gnu\nlibgit2: 1.9.6 (sys:0.21.0 vendored)\nlibcurl: 8.21.0-DEV (sys:0.4.90+curl-8.21.0 vendored ssl:OpenSSL/3.6.3)\nssl: OpenSSL 3.6.3 9 Jun 2026\nos: Ubuntu 24.4.0 (noble) [64-bit]\n",
+  "env": {}
+}

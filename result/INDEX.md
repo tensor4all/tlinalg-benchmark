@@ -6,7 +6,7 @@ this file is what the generator produces.
 Older pages (6): [HISTORY.md](HISTORY.md).
 
 - Reference revision (`pins/tlinalg-rs.rev`): `53d1f0d9f44378596c4f2bce932e45cc961b0d78`
-- Newest recorded run: `2026-10-27T05:40:26.333781Z`
+- Newest recorded run: `2026-10-31T13:33:34.104119Z`
 - Every page below is one `(suite, hardware profile, revision, vendor arm)` and carries
   its commit, its hardware and the vendor library it linked itself.
 
@@ -18,11 +18,11 @@ rather than being implied by the other arm's page.
 
 | suite | profile | vendor | revision | version | date | coverage | status | page |
 |---|---|---|---|---|---|---|---|---|
-| `tlinalg-competition` | `zen5-cpu` | `openblas` | - | - | - | - | missing | - |
-| `tlinalg-competition` | `zen5-cpu` | `mkl` | - | - | - | - | missing | - |
+| `tlinalg-competition` | `zen5-cpu` | `openblas` | `53d1f0d9f443` | - | 2026-10-31 | full | current | [result/zen5-cpu/tlinalg-competition/53d1f0d9f443-openblas-timing-v2.md](zen5-cpu/tlinalg-competition/53d1f0d9f443-openblas-timing-v2.md) |
+| `tlinalg-competition` | `zen5-cpu` | `mkl` | `53d1f0d9f443` | - | 2026-10-31 | full | current | [result/zen5-cpu/tlinalg-competition/53d1f0d9f443-mkl-timing-v2.md](zen5-cpu/tlinalg-competition/53d1f0d9f443-mkl-timing-v2.md) |
 | `tlinalg-competition` | `zen2-cpu` (optional) | `openblas` | - | - | - | - | missing | - |
 | `tlinalg-competition` | `zen2-cpu` (optional) | `mkl` | - | - | - | - | missing | - |
-| `tlinalg-scaling` | `zen5-cpu` | - | - | - | - | - | missing | - |
+| `tlinalg-scaling` | `zen5-cpu` | - | `53d1f0d9f443` | - | 2026-10-31 | full | current | [result/zen5-cpu/tlinalg-scaling/53d1f0d9f443-timing-v2.md](zen5-cpu/tlinalg-scaling/53d1f0d9f443-timing-v2.md) |
 | `tlinalg-scaling` | `zen2-cpu` (optional) | - | - | - | - | - | missing | - |
 
 `missing` is a normal cell, not an error: the campaign is not run on every
