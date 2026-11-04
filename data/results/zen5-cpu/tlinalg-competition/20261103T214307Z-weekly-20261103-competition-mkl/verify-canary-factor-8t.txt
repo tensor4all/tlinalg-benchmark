@@ -1,0 +1,17 @@
+OK lu_factor f64 128x128xb1 residual=2.842e-14 provider_residual=9.948e-14
+OK lu_solve_prepared f64 128x128xb1 residual=8.882e-16 provider_residual=1.110e-16
+OK lu_factor_solve f64 128x128xb1 residual=8.882e-16 provider_residual=1.110e-16
+OK solve f64 128x128xb1 residual=8.882e-16 provider_residual=1.110e-16
+OK lu f64 128x128xb1 residual=2.842e-14 provider_residual=9.948e-14
+OK cholesky f64 128x128xb1 residual=1.819e-11 provider_residual=3.638e-12
+OK triangular_solve f64 128x128xb1 residual=8.882e-16 provider_residual=8.882e-16
+OK svd_values f64 128x128xb1 residual=0.000e0 provider_residual=3.268e-13
+OK lu_factor c64 128x128xb1 residual=5.684e-14 provider_residual=2.842e-14
+OK lu_solve_prepared c64 128x128xb1 residual=1.777e-15 provider_residual=8.951e-16
+OK lu_factor_solve c64 128x128xb1 residual=1.777e-15 provider_residual=8.951e-16
+OK solve c64 128x128xb1 residual=1.777e-15 provider_residual=8.951e-16
+OK lu c64 128x128xb1 residual=5.684e-14 provider_residual=2.842e-14
+OK cholesky c64 128x128xb1 residual=1.091e-11 provider_residual=3.638e-12
+OK triangular_solve c64 128x128xb1 residual=1.237e-15 provider_residual=1.047e-15
+OK svd_values c64 128x128xb1 residual=0.000e0 provider_residual=8.527e-13
+all comparisons within tolerance

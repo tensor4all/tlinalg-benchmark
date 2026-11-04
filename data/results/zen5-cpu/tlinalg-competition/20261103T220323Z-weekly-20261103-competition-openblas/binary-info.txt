@@ -1,0 +1,9 @@
+vendor.name=openblas
+vendor.linkage=static
+vendor.version=0.3.32
+vendor.config=OpenBLAS 0.3.32 DYNAMIC_ARCH NO_AFFINITY Cooperlake MAX_THREADS=24
+vendor.corename=Cooperlake
+vendor.parallel=pthread
+vendor.procs=8
+host.logical_cpus=8
+compiled.features=link-openblas-static
