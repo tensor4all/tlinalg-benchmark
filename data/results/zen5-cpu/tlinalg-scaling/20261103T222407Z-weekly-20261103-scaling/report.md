@@ -31,7 +31,7 @@
   - `faer-1lane` — The faer-backed provider on one sequential lane: the per-item cost plus the batch loop, with no threading at all. The overhead baseline.
     Identity: tlinalg-rs (this repository's pinned revision)
     As measured: `t4a-faer` 0.27.0 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `t4a-faer-traits` 0.24.2 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index)
-  - `faer-pool` — The same provider on a host-owned Rayon pool of the row's thread budget, with the library choosing its batch lanes. The thread count is a column, not part of the row name.
+  - `faer-pool` — The same provider on a host-owned `threadteam::Team` of the row's thread budget (`Exec::from_token(team.exec(threads), None, policy)` in `tlinalg-bench`), with the library choosing its batch lanes. The thread count is a column, not part of the row name.
     Identity: tlinalg-rs (this repository's pinned revision)
     Caveat: A faer count hint is not a hard active-thread limit; see the `Parallel` budget contract in tlinalg.
     As measured: `t4a-faer` 0.27.0 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `t4a-faer-traits` 0.24.2 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index)

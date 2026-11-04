@@ -27,7 +27,7 @@
   Known blind spot: A vendor arm records the vendor library, but only OpenBLAS reports the kernel its runtime dispatched to. MKL's manifest records its own version and the threading layer the harness pins; it names no kernel, because MKL exposes none to name.
   Known blind spot: The batched regime measures batch 1024 only: batch 1 has nothing to parallelise, so it measures dispatch rather than the library, and the canaries carry the single-call sizes. An intermediate batch is therefore not covered.
 - **Rows** — one row per engine in every table below:
-  - `faer-pool` — The same provider on a host-owned Rayon pool of the row's thread budget, with the library choosing its batch lanes. The thread count is a column, not part of the row name.
+  - `faer-pool` — The same provider on a host-owned `threadteam::Team` of the row's thread budget (`Exec::from_token(team.exec(threads), None, policy)` in `tlinalg-bench`), with the library choosing its batch lanes. The thread count is a column, not part of the row name.
     Identity: tlinalg-rs (this repository's pinned revision)
     Caveat: A faer count hint is not a hard active-thread limit; see the `Parallel` budget contract in tlinalg.
     As measured: `t4a-faer` 0.27.0 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index); `t4a-faer-traits` 0.24.2 (linked dependency of the measured provider; source registry+https://github.com/rust-lang/crates.io-index)
