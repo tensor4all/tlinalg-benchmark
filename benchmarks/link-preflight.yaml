@@ -1,0 +1,30 @@
+# The shared libraries this campaign's harness links, checked by campaign-toolkit's link preflight
+# (campaign-toolkit README, "The link preflight") before any build or timing: `record_run` runs the
+# arm of the vendor it records, and a periodic refresh runs every arm once per host at its start.
+#
+# Each arm mirrors one link line. Keep it in step with the files named in `source`: a library added
+# there and not here is a library the preflight does not check.
+#
+# The OpenBLAS arm (`tlinalg-bench/link-openblas-static`) builds OpenBLAS from source and links it
+# statically, so it loads no shared vendor library and has no arm here.
+arms:
+  mkl:
+    source: tlinalg-rs crates/tlinalg-bench/build.rs and tlinalg-blas (feature link-mkl); MKLROOT and MKL_THREADING_LIB as scripts/build_for_tlinalg_rev.sh resolves them
+    when: {vendor: mkl}
+    env:
+      MKLROOT: {required: true, default_glob: "/opt/intel/oneapi/mkl/*"}
+      MKL_THREADING_LIB: {required: true, default_glob: "/opt/intel/oneapi/compiler/*/lib/libiomp5.so"}
+    # tlinalg-blas finds libmkl_rt.so under $MKLROOT/lib (or lib/intel64); tlinalg-bench adds the
+    # directory of MKL_THREADING_LIB and links that exact file (`-l:libiomp5.so`).
+    search: ["$MKLROOT/lib", "$MKLROOT/lib/intel64", "dirname:$MKL_THREADING_LIB"]
+    # mkl_rt is what the build links; at run time it dlopens the LP64 interface, the Intel threading
+    # layer and the core, so those three are checked to link and load from the same directory.
+    libs: [mkl_rt, mkl_intel_lp64, mkl_intel_thread, mkl_core, ":libiomp5.so"]
+    # tlinalg-bench/build.rs records both directories as -rpath: the recorder runs the binary with no loader path.
+    rpath: true
+    fix:
+      mkl_rt: "export MKLROOT={prefix}"
+      mkl_intel_lp64: "export MKLROOT={prefix}"
+      mkl_intel_thread: "export MKLROOT={prefix}"
+      mkl_core: "export MKLROOT={prefix}"
+      ":libiomp5.so": "export MKL_THREADING_LIB={path}"
